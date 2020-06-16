@@ -16,11 +16,16 @@
 %http://www.se.rit.edu/~emad/teaching/slides/srs_template_sep14.pdf
 %http://karlwiegers.com
 \documentclass{scrreprt}
+\usepackage{graphicx}
+\graphicspath{ {./img/} }
+\usepackage[outdir=./]{epstopdf}
+
 \usepackage{listings}
 \usepackage{underscore}
 \usepackage[bookmarks=true]{hyperref}
 \usepackage[utf8]{inputenc}
 \usepackage[english]{babel}
+\usepackage{xcolor}
 \hypersetup{
     bookmarks=false,    % show bookmarks bar?
     pdftitle={Software Requirement Specification},    % title
@@ -53,7 +58,7 @@
         \vspace{1.9cm}
         \LARGE{Version \myversion}\\
         \vspace{1.9cm}
-        Prepared by Ethan Lew\\
+        %Prepared by Ethan Lew\\
         \vspace{1.9cm}
         %$<$Organization$>$\\
         \vspace{1.9cm}
@@ -80,9 +85,9 @@
 
 \input{./chapters/introduction.tex}
 
-%\input{./chapters/description.tex}
+\input{./chapters/description.tex}
 
-%\input{./chapters/requirements.tex}
+\input{./chapters/requirements.tex}
 
 %\input{./chapters/features.tex}
 

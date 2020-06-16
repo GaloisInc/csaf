@@ -1,10 +1,8 @@
 \chapter{Introduction}
 
 \section{Purpose}
-$<$Identify the product whose software requirements are specified in this 
-document, including the revision or release number. Describe the scope of the 
-product that is covered by this SRS, particularly if this SRS describes only 
-part of the system or a single subsystem.$>$
+For its beta release, CSAF is a middleware environment for describing, simulating, and analyzing closed loop dynamical systems. A CSAF component's primary interface is subscribe/publish to sockets, which represent input/output of a lump abstracted component. It offers common system representations, especially in the controller category. This architecture choice allows for systems to be simulated using diverse components, agnostic to the languages and platforms from which they were created.
+
 
 \section{Document Conventions}
 $<$Describe any standards or typographical conventions that were followed when 
@@ -14,22 +12,16 @@ to be inherited by detailed requirements, or whether every requirement statement
 is to have its own priority.$>$
 
 \section{Intended Audience and Reading Suggestions}
-$<$Describe the different types of reader that the document is intended for, 
-such as developers, project managers, marketing staff, users, testers, and 
-documentation writers. Describe what the rest of this SRS contains and how it is 
-organized. Suggest a sequence for reading the document, beginning with the 
-overview sections and proceeding through the sections that are most pertinent to 
-each reader type.$>$
+
+This document is designed for planning CSAF features and its use in the Assured Autonomy project. Relevant team members are intended to read, review, and request changes to the planned architecture and scope. The material is intended to benefit the CSAF contributors and control designers using the project for the Assured Autonomy project, providing interface descriptions and conveniences to design components following a needed representation. \\
 
 \section{Project Scope}
-$<$Provide a short description of the software being specified and its purpose, 
-including relevant benefits, objectives, and goals. Relate the software to 
-corporate goals or business strategies. If a separate vision and scope document 
-is available, refer to it rather than duplicating its contents here.$>$
+Its primary use is modeling systems that utilize shields with learning enable controllers (LECs). Parts of CSAF need to be aware of controller representation; for example, some analyses require explicit knowledge of the fuzzy inference being used. There is value in knowing whether a controller utilizes a linear control law, is predicted by a network architecture and so on.\\
+
+Another use of CSAF is in multi-loop systems, where the contol vector gets transformed for entering a plant. For the challenge problem being considered, this separates problems of maneuverability and attitude control. Because of this, exogenic and environmental description is pertinent. Path planning, collision avoidance and environmental sensing are all areas that CSAF will handle.\\
+
+Some of the system description might be done in the eDSL CoPilot, which outputs shared object library. As such, same of the components might be present only as binaries, which need to be utilized for monitoring/controlling. Further, the platform is required for projects where controllers are delivered by other entities, and so agnosticism to language/library/platform is desirable. 
 
 \section{References}
-$<$List any other documents or Web addresses to which this SRS refers. These may 
-include user interface style guides, contracts, standards, system requirements 
-specifications, use case documents, or a vision and scope document. Provide 
-enough information so that the reader could access a copy of each reference, 
-including title, author, version number, date, and source or location.$>$
+
+This document uses the IEEE 830 SRS standard, using a \href{https://github.com/jpeisenbarth/SRS-Tex}{\LaTeX{}s template} provided on GitHub.  \\
