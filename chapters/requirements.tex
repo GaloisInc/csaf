@@ -1,38 +1,68 @@
 \chapter{External Interface Requirements}
 
 \section{User Interfaces}
-$<$Describe the logical characteristics of each interface between the software 
-product and the users. This may include sample screen images, any GUI standards 
-or product family style guides that are to be followed, screen layout 
-constraints, standard buttons and functions (e.g., help) that will appear on 
-every screen, keyboard shortcuts, error message display standards, and so on.  
-Define the software components for which a user interface is needed. Details of 
-the user interface design should be documented in a separate user interface 
-specification.$>$
 
-\section{Hardware Interfaces}
-$<$Describe the logical and physical characteristics of each interface between 
-the software product and the hardware components of the system. This may include 
-the supported device types, the nature of the data and control interactions 
-between the software and the hardware, and communication protocols to be 
-used.$>$
+The CSAF package exists as middleware. It exists as a library, and no CLI or GUI tools are planned.
 
 \section{Software Interfaces}
-$<$Describe the connections between this product and other specific software 
-components (name and version), including databases, operating systems, tools, 
-libraries, and integrated commercial components. Identify the data items or 
-messages coming into the system and going out and describe the purpose of each.  
-Describe the services needed and the nature of communications. Refer to 
-documents that describe detailed application programming interface protocols.  
-Identify data that will be shared across software components. If the data 
-sharing mechanism must be implemented in a specific way (for example, use of a 
-global data area in a multitasking operating system), specify this as an 
-implementation constraint.$>$
+
+\subsection{Mathematical Interfaces}
+A component is required to be a dynamical system, a mathematical entity that has the ability to evolve in time. This means that a system assumes a function in a set $\left\{ f^t \right\}_{t \in \mathbb F}$, where $\mathbb F$ is some field for time. For continuous time systems, this field can be the real numbers $\mathbb R$; for discrete, the integers $\mathbb Z$ suffices. For systems that use both discrete and continuous time, a relation between the two fields is necessary. A sampling frequency and sampling phase is used if the discrete time system is uniform time step. This general form, a system as a set of functions, is not conducive towards using in a software system, and another representation is desired. \\
+
+Commonly, the set of functions can be shown as a solutions to a system of ordinary differential equations (ODEs) for continuous time or ordinary difference equations for discrete time. These systems of equations can be put into a form that permit a common programmatic representation. For continuous time,
+
+\begin{equation}
+\begin{cases}
+\dot x = g(t, x, u; p) \\
+f_{x_0}^t = h(., x(.), u; r) \\
+\end{cases}
+\end{equation}
+
+This form separates the solution into two steps with respect to an initial condition $x_0$. First, all variables where the ODEs involve rates of change are grouped in a vector $x \in \mathbb R^N$, where it assumes an element in a state space. $u \in \mathbb R^M$ is an additional time varying vector, representing control input to the system. $p$ and $r$ are time independent parameters involved with the two functions. Then, another function $h$ takes the space and returns the system configuration, evaluating one of the system functions. Similarly, a construction can be made for a discrete system,
+
+\begin{equation}
+\begin{cases}
+x_{n} = g(t, n-1, u; p)\\
+f^{n}_{x_0} = h(., x(.), u; r) \\
+\end{cases},
+\end{equation}
+
+for the discrete time system. The evolution of the state $x$ can be computed directly rather than integrating the system of equations defining the state differential. Further, time itself need not be directly expressed, an essential parameter for non-autonomous systems. The equivalence holds
+
+\begin{equation}
+\begin{bmatrix}
+\dot x \\
+t
+\end{bmatrix} = 
+\begin{bmatrix}
+g(t, x, u; p) \\
+1
+\end{bmatrix} \iff \dot x = g(t, x, u;p) .
+\end{equation}
+
+However, for the sake of implementation, it is advantageous to express the time parameter directly. To use this form, all CSAF components require two functions, 
+
+\begin{equation}
+\begin{aligned}
+g(.,.,.;p):& \mathbb F \times \mathbb R^N \times \mathbb R^M \rightarrow \mathbb R^N \\
+h(.,.,.;r):& \mathbb F \times \mathbb R^N \times \mathbb R^M \rightarrow \mathbb R^D
+\end{aligned}.
+\end{equation}
+
+For continuous time solution of a single component, the function $g(.,.,u(.);p)$ is of a form that common ODE solvers can evaluate. The parameters $r$ and $p$ don't necessarily need to be elements of a vector space, and can be described using a variety of data structures.
+
+\subsection{Component Interfaces}
+
+From the mathematical representations, a component can be described by three elements: its parameters, state evolution function and output function. Figure \ref{fig:cio} shows a component's IO contents, as well as a form that all systems must take. The incoming and outgoing data are in the form of a serial message, but contain the time and state information. The outgoing message contains the system output and parameters as well.
+
+\begin{figure}
+\centering
+\includegraphics[width=1.0\textwidth]{componentio.pdf}
+\caption{Contents of CSAF Component IO}
+\label{fig:cio}
+\end{figure}
 
 \section{Communications Interfaces}
-$<$Describe the requirements associated with any communications functions 
-required by this product, including e-mail, web browser, network server 
-communications protocols, electronic forms, and so on. Define any pertinent 
-message formatting. Identify any communication standards that will be used, such 
-as FTP or HTTP. Specify any communication security or encryption issues, data 
-transfer rates, and synchronization mechanisms.$>$
+
+Analyzers and simulators will interact with the system components via zeroMQ, using sockets. zeroMQ provides CSAF with a variety of levels to communicate with components, whether in-process, inter-process or across TCP and multi-cast. Because the component is stateless, one component can be used by several analyzers at once, without incurring object staleness.
+

@@ -25,6 +25,7 @@
 \usepackage[bookmarks=true]{hyperref}
 \usepackage[utf8]{inputenc}
 \usepackage[english]{babel}
+\usepackage{amsmath,amssymb,amsthm,amsfonts}
 \usepackage{xcolor}
 \usepackage[acronym, toc]{glossaries}
 \hypersetup{
@@ -47,31 +48,7 @@
 %}
 \usepackage{hyperref}
 
-
-\makenoidxglossaries
-
-\newglossaryentry{latex}
-{
-    name=latex,
-    description={Is a mark up language specially suited 
-    for scientific documents}
-}
-
-\newglossaryentry{maths}
-{
-    name=mathematics,
-    description={Mathematics is what mathematicians do}
-}
-
-\newacronym{api}{API}{Application Programming Interface}
-
-\newacronym{csaf}{CSAF}{Control System Analysis Framework}
-
-\newacronym{lec}{LEC}{Learning Enabled Controller}
-
-\newacronym{edsl}{eDSL}{Embedded Domain Specific Language}
-
-\newacronym{aa}{AA}{Assured Autonomy}
+\input{glossary.tex}
 
 \begin{document}
 
