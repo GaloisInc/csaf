@@ -26,6 +26,7 @@
 \usepackage[utf8]{inputenc}
 \usepackage[english]{babel}
 \usepackage{xcolor}
+\usepackage[acronym, toc]{glossaries}
 \hypersetup{
     bookmarks=false,    % show bookmarks bar?
     pdftitle={Software Requirement Specification},    % title
@@ -45,6 +46,33 @@
 
 %}
 \usepackage{hyperref}
+
+
+\makenoidxglossaries
+
+\newglossaryentry{latex}
+{
+    name=latex,
+    description={Is a mark up language specially suited 
+    for scientific documents}
+}
+
+\newglossaryentry{maths}
+{
+    name=mathematics,
+    description={Mathematics is what mathematicians do}
+}
+
+\newacronym{api}{API}{Application Programming Interface}
+
+\newacronym{csaf}{CSAF}{Control System Analysis Framework}
+
+\newacronym{lec}{LEC}{Learning Enabled Controller}
+
+\newacronym{edsl}{eDSL}{Embedded Domain Specific Language}
+
+\newacronym{aa}{AA}{Assured Autonomy}
+
 \begin{document}
 
 \begin{flushright}
@@ -90,5 +118,7 @@
 \input{./chapters/requirements.tex}
 
 %\input{./chapters/features.tex}
+
+\printnoidxglossary[type=\acronymtype]
 
 \end{document}
