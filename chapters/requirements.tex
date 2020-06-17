@@ -6,7 +6,7 @@ The CSAF package exists as middleware. It exists as a library, and no CLI or GUI
 
 \section{Software Interfaces}
 
-\subsection{Mathematical Interfaces}
+\subsection{Mathematical Representation}
 A component is required to be a dynamical system, a mathematical entity that has the ability to evolve in time. This means that a system assumes a function in a set $\left\{ f^t \right\}_{t \in \mathbb F}$, where $\mathbb F$ is some field for time. For continuous time systems, this field can be the real numbers $\mathbb R$; for discrete, the integers $\mathbb Z$ suffices. For systems that use both discrete and continuous time, a relation between the two fields is necessary. A sampling frequency and sampling phase is used if the discrete time system is uniform time step. This general form, a system as a set of functions, is not conducive towards using in a software system, and another representation is desired. \\
 
 Commonly, the set of functions can be shown as a solutions to a system of ordinary differential equations (ODEs) for continuous time or ordinary difference equations for discrete time. These systems of equations can be put into a form that permit a common programmatic representation. For continuous time,
