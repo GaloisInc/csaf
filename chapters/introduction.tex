@@ -5,11 +5,30 @@
 
 
 \section{Document Conventions}
-$<$Describe any standards or typographical conventions that were followed when 
-writing this SRS, such as fonts or highlighting that have special significance.  
-For example, state whether priorities  for higher-level requirements are assumed 
-to be inherited by detailed requirements, or whether every requirement statement 
-is to have its own priority.$>$
+
+Being middleware, the interfaces are described and focus is put on the serialization formats. The features relate to integration tasks that are likely to be employed by the user. \\
+
+Figures are linked in blue to their corresponding content. Acronyms are documented and linked to a glossary at the end of the document, labeled in blue. Hyperlinks are labeled in purple. \\
+
+Code snippets, pseudocode and message are written in fixed width font. See Figure \ref{code:example} for example.
+
+\begin{figure}[h]
+\centering
+\begin{lstlisting}[language=Python]
+"""Example Code Snippet
+"""
+def main():
+	return 0
+\end{lstlisting}
+\caption{Example Code Snippet}
+\label{code:example}
+\end{figure}
+
+Math expressions are used throughout the document. They float as equations, and can be referenced. See Equation \ref{equ:fourier} for example.
+
+\begin{equation} \label{equ:fourier}
+\mathcal{F}_t\{g\}(f) = \int_{-\infty}^{\infty} \exp\left({-2\pi f t}\right) g(t) dt \\
+\end{equation}
 
 
 \section{Intended Audience and Reading Suggestions}
