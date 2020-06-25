@@ -63,3 +63,11 @@ As \acrshort{csaf} users will need detailed knowledge of its architecture and \a
 \section{Assumptions and Dependencies}
 
 CSAF's middleware approach can add substantial overhead to processing a closed loop system, as the serialization, transportation and deserialization over sockets can be much slower than doing everything in one application. The target system is assumed to have relatively low frequency sampling rates or short time span. If a multi-timescale system is added, the time domain simulation approach can be inefficient. If such a system were of interest in the \acrshort{aa} project, new simulation methods may need to be investigated.\\
+
+\subsection{Limitations}
+
+No planned support for
+\begin{enumerate}
+\item   variable rate or multi sampling rate systems
+\item  closed loop continuous time controllers
+\end{enumerate}
