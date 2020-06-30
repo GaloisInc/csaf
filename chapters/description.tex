@@ -2,7 +2,7 @@
 
 \section{Product Perspective}
 
-CSAF serves the role of a middleware to create closed loop system simulations. A user starts with a model that they have for a dynamical system, with well-defined input, outputs and states. Shown in Figure \ref{fig:ccomp}, they will proceed to create a CSAF compatible component. The package comes with an \acrshort{api} to make common system descriptions easy to implement, and has a wrappers if the system is more of a black box. The outcome is a system that has a subscriber to collect input and a publisher to broadcast output. \\
+CSAF serves the role of a middleware to create closed loop system simulations. A user starts with a model that they have for a dynamical system, with well-defined inputs, outputs and states. Shown in Figure \ref{fig:ccomp}, they will proceed to create a CSAF compatible component. The package comes with an \acrshort{api} to make common system descriptions easy to implement, and has a wrappers if the system is a black box. The outcome is a system that has a subscriber to collect input and a publisher to broadcast output. \\
 
 \begin{figure}
 \centering
@@ -11,7 +11,7 @@ CSAF serves the role of a middleware to create closed loop system simulations. A
 \label{fig:ccomp}
 \end{figure}
 
-A CSAF component is intended to represent a plant or a controller, but not closed loop system. These components can be composed together to create a closed loop dynamical system. Figure \ref{fig:csys} shows the blocks composed under a system analyzer. In the scope of controls research, this is the benefit of CSAF. Analyses can be created and performed on the modular CSAF components. \\
+These CSAF components can be composed together to create a closed loop system. Figure \ref{fig:csys} shows the blocks composed under a system analyzer. In the scope of controls research, analyses can be created and performed on the modular CSAF components. \\
 
 \begin{figure}
 \centering
@@ -52,7 +52,7 @@ Figure \ref{fig:uworkflow} shows the user workflow for a systems analysis, from 
 
 \section{Design and Implementation Constraints}
 
-CSAF is requested to support integration with deliverables from other teams in the \acrshort{aa} project; it is required to create and accept ROS messages as a serialization method to be compatible with external systems. For visualization, the ability to communicate with FlightGear is requested to make visualization of aircraft systems possible. \\
+\acrshort{csaf} is requested to support integration with deliverables from other teams in the \acrshort{aa} project; it is required to create and accept \acrshort{ros} messages as a serialization method to be compatible with external systems. For visualization, the ability to communicate with FlightGear is requested to make visualization of aircraft systems possible. \\
 
 \section{User Documentation}
 
