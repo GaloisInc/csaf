@@ -59,58 +59,109 @@ The user
 \begin{enumerate}
 \item REQ-1 \quad the user can specify inner/outer loop systems
 \item REQ-2 \quad a checker ensures that the components are correct configured before further use
+\item REQ-3 \quad the user can concatenate, re-order and split signals
 \end{enumerate}
 
 \section{[\acrshort{csaf} -04] CoPilot Support}
-The user is able to add CoPilot monitors to their systems.
+The user is able to describe monitors in copilot, and translate them to CSAF components automatically.
 
 \subsection{Description and Priority}
 This is a high priority feature.
 
 \subsection{Stimulus/Response Sequences}
-
+The user
+\begin{enumerate}
+\item creates motions primitives in CoPilot
+\item describes a monitor policy 
+\item  invokes CSAF to wrap a component around the built monitor
+\item associates controllers with the monitor to make a shield
+\end{enumerate}
 
 \subsection{Functional Requirements}
+\begin{enumerate}
+\item REQ-1 \quad supports CoPilot 3
+\end{enumerate}
 
 \section{[\acrshort{csaf} -05] Controller Monitoring and Shields}
 
+CSAF's use case is to simulate and analyzes shields, where multiple controllers can be alternated via a monitoring policy. A monitor is a special controller component that is typically stateless and outputs a controller selection index. Also, the controllers generally accept the same input/output signatures, although that is not required. 
+
 \subsection{Description and Priority}
 This is a high priority feature.
 
 \subsection{Stimulus/Response Sequences}
-
+The user
+\begin{enumerate}
+\item has multiple valid controllers and monitor
+\item associates each controller with a position index for the monitor to select 
+\item  configures the inputs and outputs of the monitor and all controllers
+\end{enumerate}
 
 \subsection{Functional Requirements}
+\begin{enumerate}
+\item REQ-1 \quad permits the use of recovery shields
+\end{enumerate}
 
 \section{[\acrshort{csaf} -06] Fuzzy Controller Representation}
 
+The user can implement controllers in fuzzy logic easily, and in a form that allows specialized fuzzy controller analysis. 
+
 \subsection{Description and Priority}
 This is a medium priority feature.
 
 \subsection{Stimulus/Response Sequences}
-
+The user
+\begin{enumerate}
+\item specifies the fuzzy variables
+\item selects/implements a fuzzifier/defuzzifier
+\item provides a rules inference table
+\end{enumerate}
 
 \subsection{Functional Requirements}
+
+\begin{enumerate}
+\item REQ-1 \quad can represent rules inference from numpy array, loaded from .npy file
+\end{enumerate}
+
 
 \section{[\acrshort{csaf} -07] Neural Controller Representation}
+The user can conveniently create neural controllers from neural networks described in common formats.
 
 \subsection{Description and Priority}
 This is a medium priority feature.
 
 \subsection{Stimulus/Response Sequences}
-
+The user
+\begin{enumerate}
+\item trains a neural network
+\item relates network IO to controller IO
+\item the feedforward network is wrapped into a CSAF component
+\end{enumerate}
 
 \subsection{Functional Requirements}
+\begin{enumerate}
+\item REQ-1 \quad supports a network represented under TensorFlow 1.x
+\end{enumerate}
 
 \section{[\acrshort{csaf} -08] Time Traces}
 
+The can interact with a temporal data structure as output from a time domain simulation.
+
 \subsection{Description and Priority}
 This is a medium priority feature.
 
 \subsection{Stimulus/Response Sequences}
+The user
+\begin{enumerate}
+\item received a time trace from simulation output
+\item can check properties of the trace or collection of traces
+\item can visualized variables inside the trace or collection of traces
+\end{enumerate}
 
 
 \subsection{Functional Requirements}
+
+None
 
 
 %\section{System Feature 2 (and so on)}
