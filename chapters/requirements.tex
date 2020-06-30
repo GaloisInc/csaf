@@ -7,9 +7,17 @@ The \acrshort{csaf}  package exists as middleware. It exists as a library, and n
 \section{Software Interfaces}
 
 \subsection{Mathematical Representation}
-A component is required to be a dynamical system, a mathematical entity that has the ability to evolve in time. This means that a system assumes a function in a set $\left\{ f^t \right\}_{t \in \mathbb F}$, where $\mathbb F$ is some field for time. For continuous time systems, this field can be the real numbers $\mathbb R$; for discrete, the integers $\mathbb Z$ suffices. For systems that use both discrete and continuous time, a relation between the two fields is necessary. A sampling frequency and sampling phase is used if the discrete time system is uniform time step. This general form, a system as a set of functions, is not conducive towards using in a software system, and another representation is desired. \\
+A component is required to be a dynamical system, a mathematical entity that has the ability to evolve in time. 
+This means that a system assumes a function in a set $\left\{ f^t \right\}_{t \in \mathbb F}$, where $\mathbb F
+$ is some field for time. For continuous time systems, this field can be the real numbers $\mathbb R$; for 
+discrete, the integers $\mathbb Z$ suffices. For systems that use both discrete and continuous time, a 
+relation between the two fields is necessary. A sampling frequency and sampling phase is used if the discrete 
+time system is uniform time step. This general form, a system as a set of functions, is not conducive towards 
+using in a software system, and another representation is desired. \\
 
-Commonly, the set of functions can be shown as a solutions to a system of ordinary differential equations (ODEs) for continuous time or ordinary difference equations for discrete time. These systems of equations can be put into a form that permit a common programmatic representation. For continuous time,
+Commonly, the set of functions can be shown as a solutions to a system of ordinary differential equations 
+(ODEs) for continuous time or ordinary difference equations for discrete time. These systems of equations 
+can be put into a form that permit a common programmatic representation. For continuous time,
 
 \begin{equation}
 \begin{cases}
@@ -18,7 +26,12 @@ f_{x_0}^t = h(., x(.), u; r) \\
 \end{cases}
 \end{equation}
 
-This form separates the solution into two steps with respect to an initial condition $x_0$. First, all variables where the ODEs involve rates of change are grouped in a vector $x \in \mathbb R^N$, where it assumes an element in a state space. $u \in \mathbb R^M$ is an additional time varying vector, representing control input to the system. $p$ and $r$ are time independent parameters involved with the two functions. Then, another function $h$ takes the space and returns the system configuration, evaluating one of the system functions. Similarly, a construction can be made for a discrete system,
+This form separates the solution into two steps with respect to an initial condition $x_0$. First, all variables 
+where the ODEs involve rates of change are grouped in a vector $x \in \mathbb R^N$, where it assumes an 
+element in a state space. $u \in \mathbb R^M$ is an additional time varying vector, representing control input 
+to the system. $p$ and $r$ are time independent parameters involved with the two functions. Then, another 
+function $h$ takes the space and returns the system configuration, evaluating one of the system functions. 
+Similarly, a construction can be made for a discrete system,
 
 \begin{equation}
 \begin{cases}
@@ -27,7 +40,9 @@ f^{n}_{x_0} = h(., x(.), u; r) \\
 \end{cases},
 \end{equation}
 
-for the discrete time system. The evolution of the state $x$ can be computed directly rather than integrating the system of equations defining the state differential. Further, time itself need not be directly expressed, an essential parameter for non-autonomous systems. The equivalence holds
+for the discrete time system. The evolution of the state $x$ can be computed directly rather than integrating 
+the system of equations defining the state differential. Further, time itself need not be directly expressed, an 
+essential parameter for non-autonomous systems. The equivalence holds
 
 \begin{equation}
 \begin{bmatrix}
@@ -40,7 +55,8 @@ g(t, x, u; p) \\
 \end{bmatrix} \iff \dot x = g(t, x, u;p) .
 \end{equation}
 
-However, for the sake of implementation, it is advantageous to express the time parameter directly. To use this form, all \acrshort{csaf}  components require two functions, 
+However, for the sake of implementation, it is advantageous to express the time parameter directly. To use 
+this form, all \acrshort{csaf}  components require two functions, 
 
 \begin{equation}
 \begin{aligned}
@@ -49,11 +65,17 @@ h(.,.,.;r):& \mathbb F \times \mathbb R^N \times \mathbb R^M \rightarrow \mathbb
 \end{aligned}.
 \end{equation}
 
-For continuous time solution of a single component, the function $g(.,.,u(.);p)$ is of a form that common ODE solvers can evaluate. The parameters $r$ and $p$ don't necessarily need to be elements of a vector space, and can be described using a variety of data structures.
+For continuous time solution of a single component, the function $g(.,.,u(.);p)$ is of a form that common ODE 
+solvers can evaluate. The parameters $r$ and $p$ don't necessarily need to be elements of a vector space, 
+and can be described using a variety of data structures.
 
 \subsection{Component Interfaces}
 
-From the mathematical representations, a component can be described by three elements: its parameters, state evolution function and output function. Figure \ref{fig:cio} shows a component's IO contents, as well as a form that all systems must take. The incoming and outgoing data are in the form of a serial message, but contain the time and state information. The outgoing message contains the system output and parameters as well.
+From the mathematical representations, a component can be described by three elements: its parameters, 
+state evolution function and output function. Figure \ref{fig:cio} shows a component's IO contents, as well as 
+a form that all systems must take. The incoming and outgoing data are in the form of a serial message, but 
+contain the time and state information. The outgoing message contains the system output and parameters as 
+well.
 
 \begin{figure}
 \centering
@@ -64,11 +86,22 @@ From the mathematical representations, a component can be described by three ele
 
 \section{Communications Interfaces}
 
-Analyzers and simulators will interact with the system components via zeroMQ, using sockets. zeroMQ provides \acrshort{csaf}  with a variety of levels to communicate with components, whether in-process, inter-process or across TCP and multi-cast. Because the component is stateless, one component can be used by several analyzers at once, without incurring object staleness.
+Analyzers and simulators will interact with the system components via zeroMQ, using sockets. zeroMQ 
+provides \acrshort{csaf}  with a variety of levels to communicate with components, whether in-process, 
+inter-process or across TCP and multi-cast. Because the component is stateless, one component can be 
+used by several analyzers at once, without incurring object staleness.
 
 \subsection{Message Contents}
 
-The messages sent by every \acrshort{csaf}  component needs to have specific content to support simulation. The message type is derived from the ROS message serialization format. First, the the \acrshort{csaf}  version is transmitted to avoid incompatibility between components made with different versions. Seconds, an epoch is included to keep a record on how many publish events have been performed by a component. The system name is include, as well as the solver, is included as a string. Temporal information is included, being time and sampling frequency. Two booleans are used to determine if the system type---continuous, discrete or hybrid. Last is the input, output and state vectors. These vectors are enumerated under a header, rather than transmitted as a contiguous array. Figure \ref{fig:cmsg} shows an example message.
+The messages sent by every \acrshort{csaf}  component needs to have specific content to support 
+simulation. The message type is derived from the ROS message serialization format. First, the the 
+\acrshort{csaf}  version is transmitted to avoid incompatibility between components made with different 
+versions. Seconds, an epoch is included to keep a record on how many publish events have been performed 
+by a component. The system name is include, as well as the solver, is included as a string. Temporal 
+information is included, being time and sampling frequency. Two booleans are used to determine if the 
+system type---continuous, discrete or hybrid. Last is the input, output and state vectors. These vectors are 
+enumerated under a header, rather than transmitted as a contiguous array. Figure \ref{fig:cmsg} shows an 
+example message.
 
 \begin{figure}
 \begin{lstlisting}

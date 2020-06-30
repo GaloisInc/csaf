@@ -1,16 +1,23 @@
 \chapter{Introduction}
 
 \section{Purpose}
-\acrshort{csaf} is a middleware environment for describing, simulating, and analyzing closed loop dynamical systems. A \acrshort{csaf} component's primary interface is subscribe/publish to sockets, which represent input/output of a lump abstracted component. It offers common system representations, especially for specifying controllers. The architecture is supportive of systems to be simulated with diverse components, agnostic to the languages and platforms from which they were implemented.
+\acrshort{csaf} is a middleware environment for describing, simulating, and analyzing closed loop dynamical 
+systems. A \acrshort{csaf} component's primary interface is subscribe/publish to sockets, which represent 
+input/output of a lump abstracted component. It offers common system representations, especially for 
+specifying controllers. The architecture is supportive of systems to be simulated with diverse components, 
+agnostic to the languages and platforms from which they were implemented.
 
 
 \section{Document Conventions}
 
-Being middleware, the interfaces are described and focus is put on the serialization formats. The features relate to integration tasks that are likely to be employed by the user. \\
+Being middleware, the interfaces are described and focus is put on the serialization formats. The features 
+relate to integration tasks that are likely to be employed by the user. \\
 
-Figures are linked in blue to their corresponding content. Acronyms are documented and linked to a glossary at the end of the document, labeled in blue. Hyperlinks are labeled in purple. \\
+Figures are linked in blue to their corresponding content. Acronyms are documented and linked to a glossary 
+at the end of the document, labeled in blue. Hyperlinks are labeled in purple. \\
 
-Code snippets, pseudocode and message are written in fixed width font. See Figure \ref{code:example} for example.
+Code snippets, pseudocode and message are written in fixed width font. See Figure \ref{code:example} for 
+example.
 
 \begin{figure}[h]
 \centering
@@ -24,7 +31,8 @@ def main():
 \label{code:example}
 \end{figure}
 
-Math expressions are used throughout the document. They float as equations, and can be referenced. See Equation \ref{equ:fourier} for example.
+Math expressions are used throughout the document. They float as equations, and can be referenced. See 
+Equation \ref{equ:fourier} for example.
 
 \begin{equation} \label{equ:fourier}
 \mathcal{F}_t\{g\}(f) = \int_{-\infty}^{\infty} \exp\left({-i 2\pi f t}\right) g(t) dt \\
@@ -33,14 +41,27 @@ Math expressions are used throughout the document. They float as equations, and 
 
 \section{Intended Audience and Reading Suggestions}
 
-This document is designed for planning \acrshort{csaf} features and its use in the \acrlong{aa} project. Relevant team members are intended to read, review, and request changes to the planned architecture and scope. The material is intended to benefit the \acrshort{csaf} contributors and control designers using the project for the \acrlong{aa} project, providing interface descriptions and conveniences to design components following a needed representation.\\
+This document is designed for planning \acrshort{csaf} features and its use in the \acrlong{aa} project. 
+Relevant team members are intended to read, review, and request changes to the planned architecture and 
+scope. The material is intended to benefit the \acrshort{csaf} contributors and control designers using the 
+project for the \acrlong{aa} project, providing interface descriptions and conveniences to design components 
+following a needed representation.\\
 
 \section{Project Scope}
-Its primary use is modeling systems that utilize shields with learning enable controllers (\acrshort{lec}s). Parts of \acrshort{csaf} need to be aware of controller representation; for example, some analyses require explicit knowledge of the fuzzy inference being used. There is value in knowing whether a controller utilizes a linear control law, is predicted by a network architecture and so on.\\
+Its primary use is modeling systems that utilize shields with learning enable controllers (\acrshort{lec}s). Parts 
+of \acrshort{csaf} need to be aware of controller representation; for example, some analyses require explicit 
+knowledge of the fuzzy inference being used. There is value in knowing whether a controller utilizes a linear 
+control law, is predicted by a network architecture and so on.\\
 
-Another use of \acrshort{csaf} is in multi-loop systems, where the control vector gets transformed for entering a plant. For the challenge problem being considered, this separates problems of maneuverability and attitude control. Because of this, exogenic and environmental description is pertinent. Path planning, collision avoidance and environmental sensing are all areas that \acrshort{csaf} will handle.\\
+Another use of \acrshort{csaf} is in multi-loop systems, where the control vector gets transformed for 
+entering a plant. For the challenge problem being considered, this separates problems of maneuverability and 
+attitude control. Because of this, exogenic and environmental description is pertinent. Path planning, collision 
+avoidance and environmental sensing are all areas that \acrshort{csaf} will handle.\\
 
-Some of the system description might be done in the \acrshort{edsl} CoPilot, which outputs shared object library. As such, same of the components might be present only as binaries, which need to be utilized for monitoring/controlling. Further, the platform is required for projects where controllers are delivered by other entities, and so agnosticism to language/library/platform is desirable. 
+Some of the system description might be done in the \acrshort{edsl} CoPilot, which outputs shared object 
+library. As such, same of the components might be present only as binaries, which need to be utilized for 
+monitoring/controlling. Further, the platform is required for projects where controllers are delivered by other 
+entities, and so agnosticism to language/library/platform is desirable. 
 
 \section{References}
 

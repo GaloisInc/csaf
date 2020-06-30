@@ -48,21 +48,38 @@ Figure \ref{fig:uworkflow} shows the user workflow for a systems analysis, from 
 
 \section{Operating Environment}
 
-\acrshort{csaf} is implemented in modern python (3.5+), with specific packages for numerical/controls computing. Also, it has optional package requirements, like Tensorflow and RosPy needed for specific features. Its primary use is to operate inside a debian based docker container for its delivery in the \acrlong{aa} project. For full use, it will require a OS with CoPilot installed, needing Haskell and C toolchains.  
+\acrshort{csaf} is implemented in modern python (3.5+), with specific packages for numerical/controls 
+computing. Also, it has optional package requirements, like Tensorflow and RosPy needed for specific 
+features. Its primary use is to operate inside a debian based docker container for its delivery in the 
+\acrlong{aa} project. For full use, it will require a OS with CoPilot installed, needing Haskell and C toolchains.  
 
 \section{Design and Implementation Constraints}
 
-\acrshort{csaf} is requested to support integration with deliverables from other teams in the \acrshort{aa} project; it is required to create and accept \acrshort{ros} messages as a serialization method to be compatible with external systems. For visualization, the ability to communicate with FlightGear is requested to make visualization of aircraft systems possible. \\
+\acrshort{csaf} is requested to support integration with deliverables from other teams in the \acrshort{aa} 
+project; it is required to create and accept \acrshort{ros} messages as a serialization method to be 
+compatible with external systems. For visualization, the ability to communicate with FlightGear is requested 
+to make visualization of aircraft systems possible. \\
 
 \section{User Documentation}
 
-As \acrshort{csaf} users will need detailed knowledge of its architecture and \acrshort{api} to use it effectively, documentation is important. Its code repository contain a number of markdown files that outline the installation and setup. For object and function level documentation, the code uses an ample amount of Python docstrings, which can be used to autogenerate \acrshort{api} documentation if the code comments are suitably detailed. \\
+As \acrshort{csaf} users will need detailed knowledge of its architecture and \acrshort{api} to use it 
+effectively, documentation is important. Its code repository contain a number of markdown files that outline 
+the installation and setup. For object and function level documentation, the code uses an ample amount of 
+Python docstrings, which can be used to autogenerate \acrshort{api} documentation if the code comments 
+are suitably detailed. \\
 
-\acrshort{api} level documentation is not enough, and  a user manual is available. This manual is conscience of task oriented documentation; the workflow is discussed and examples are provided for intended implementation use. Further, the use cases are also described in Jupyter notebooks, which provide an interactive platform to experiment with code.
+\acrshort{api} level documentation is not enough, and  a user manual is available. This manual is conscience 
+of task oriented documentation; the workflow is discussed and examples are provided for intended 
+implementation use. Further, the use cases are also described in Jupyter notebooks, which provide an 
+interactive platform to experiment with code.
 
 \section{Assumptions and Dependencies}
 
-CSAF's middleware approach can add substantial overhead to processing a closed loop system, as the serialization, transportation and deserialization over sockets can be much slower than doing everything in one application. The target system is assumed to have relatively low frequency sampling rates or short time span. If a multi-timescale system is added, the time domain simulation approach can be inefficient. If such a system were of interest in the \acrshort{aa} project, new simulation methods may need to be investigated.\\
+CSAF's middleware approach can add substantial overhead to processing a closed loop system, as the 
+serialization, transportation and deserialization over sockets can be much slower than doing everything in one 
+application. The target system is assumed to have relatively low frequency sampling rates or short time span. 
+If a multi-timescale system is added, the time domain simulation approach can be inefficient. If such a system 
+were of interest in the \acrshort{aa} project, new simulation methods may need to be investigated.\\
 
 \subsection{Limitations}
 
