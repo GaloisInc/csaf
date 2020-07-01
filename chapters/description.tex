@@ -2,7 +2,7 @@
 
 \section{Product Perspective}
 
-CSAF serves the role of a middleware to create closed loop system simulations. A user starts with a model that they have for a dynamical system, with well-defined inputs, outputs and states. Shown in Figure \ref{fig:ccomp}, they will proceed to create a CSAF compatible component. The package comes with an \acrshort{api} to make common system descriptions easy to implement, and has a wrappers if the system is a black box. The outcome is a system that has a subscriber to collect input and a publisher to broadcast output. \\
+\acrshort{csaf} serves the role of a middleware for closed loop system simulations. A user starts with a model that they have for a system, with well-defined inputs, outputs and states. Shown in Figure \ref{fig:ccomp}, they will proceed to create a \acrshort{csaf} pub/sub component. The package comes with an \acrshort{api} to make common system descriptions easy to implement, and has a wrappers if the system is a black box. The component can be interacted with using subscribers and publishers. One pub/sub pair is for temporal input and output---input can be specified at a given time in order to receive output at the specified time. Another pub/sub pair exists for getting and setting component information. This pathways allows model parameters, system representation and initial state to be received/configured prior to analysis.\\
 
 \begin{figure}
 \centering
@@ -43,7 +43,7 @@ Figure \ref{fig:uworkflow} shows the user workflow for a systems analysis, from 
 
 \section{User Classes and Characteristics}
 
-\acrshort{csaf}'s user workflow is restricted to software developers, systems engineers and researchers. The users implementing components are required to have substantial knowledge of programming and system theory. The workflow output is to provide results for a controls research project. As such, secondary users are project managers and reviewers. 
+\acrshort{csaf}'s user workflow is restricted to software developers, systems engineers and researchers. The users implementing components are required to have knowledge of programming and system theory. The workflow output is to provide results for a controls research project. As such, secondary users are project managers and reviewers. 
 
 
 \section{Operating Environment}
@@ -51,7 +51,8 @@ Figure \ref{fig:uworkflow} shows the user workflow for a systems analysis, from 
 \acrshort{csaf} is implemented in modern python (3.5+), with specific packages for numerical/controls 
 computing. Also, it has optional package requirements, like Tensorflow and RosPy needed for specific 
 features. Its primary use is to operate inside a debian based docker container for its delivery in the 
-\acrlong{aa} project. For full use, it will require a OS with CoPilot installed, needing Haskell and C toolchains.  
+\acrlong{aa} project, as well be shipped inside of a virtual machine. For full use, it will require a OS with 
+CoPilot installed, needing Haskell and C toolchains.  
 
 \section{Design and Implementation Constraints}
 
@@ -65,27 +66,27 @@ to make visualization of aircraft systems possible. \\
 As \acrshort{csaf} users will need detailed knowledge of its architecture and \acrshort{api} to use it 
 effectively, documentation is important. Its code repository contain a number of markdown files that outline 
 the installation and setup. For object and function level documentation, the code uses an ample amount of 
-Python docstrings, which can be used to autogenerate \acrshort{api} documentation if the code comments 
-are suitably detailed. \\
+Python docstrings, which can be used to autogenerate \acrshort{api} documentation provided the code 
+comments are suitably detailed. \\
 
-\acrshort{api} level documentation is not enough, and  a user manual is available. This manual is conscience 
+\acrshort{api} level documentation is not enough, and a user manual is available. This manual is conscience 
 of task oriented documentation; the workflow is discussed and examples are provided for intended 
 implementation use. Further, the use cases are also described in Jupyter notebooks, which provide an 
 interactive platform to experiment with code.
 
 \section{Assumptions and Dependencies}
 
-CSAF's middleware approach can add substantial overhead to processing a closed loop system, as the 
-serialization, transportation and deserialization over sockets can be much slower than doing everything in one 
-application. The target system is assumed to have relatively low frequency sampling rates or short time span. 
-If a multi-timescale system is added, the time domain simulation approach can be inefficient. If such a system 
-were of interest in the \acrshort{aa} project, new simulation methods may need to be investigated.\\
+\acrshort{csaf}'s middleware approach can add substantial overhead to processing a closed loop system, as 
+the serialization, transportation and deserialization over sockets can be much slower than doing everything in 
+one application. The target system is assumed to have relatively low frequency sampling rates or short time 
+span. If a multi-timescale system is added, the time domain simulation approach can be inefficient. If such a 
+system were of interest in the \acrshort{aa} project, new simulation methods may need to be investigated.\\
 
 \subsection{Limitations}
 
 No planned support for
 \begin{enumerate}
-\item   variable rate or multi sampling rate systems
-\item  closed loop continuous time controllers
+\item  variable rate or multi sampling rate systems
+\item closed loop continuous time controllers
 \item interaction with fast/time critical systems
 \end{enumerate}

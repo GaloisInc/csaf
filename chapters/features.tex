@@ -3,11 +3,10 @@ This section organizes the functional requirements for \acrshort{csaf} . As the 
 middleware, it is organized by tasks commonly needed for system analysis.
 
 \section{[\acrshort{csaf} -01] Component Creation}
-The user is able to take common model description and put them into the \acrshort{csaf}  environment.
+The user is able to take common model description and put them into the \acrshort{csaf} environment.
 
 \subsection{Description and Priority}
-This is a high priority feature. For now, emphasis is put on the integration of a F16 model and possibly other 
-aerodynamic models. Also, a variety of controllers need to be converted to this middleware.
+This is a high priority feature. For now, emphasis is put on the integration of a F-16 model. Also, a variety of controllers need to be converted to this middleware.
 
 \subsection{Stimulus/Response Sequences}
 The user
@@ -62,10 +61,11 @@ The user
 \item REQ-1 \quad the user can specify inner/outer loop systems
 \item REQ-2 \quad a checker ensures that the components are correct configured before further use
 \item REQ-3 \quad the user can concatenate, re-order and split signals
+\item REQ-4 \quad the user can utilize \acrshort{ros} messages between components
 \end{enumerate}
 
 \section{[\acrshort{csaf} -04] CoPilot Support}
-The user is able to describe monitors in copilot, and translate them to CSAF components automatically.
+The user is able to describe monitors in copilot, and translate them to \acrshort{csaf}  components automatically.
 
 \subsection{Description and Priority}
 This is a high priority feature.
@@ -75,7 +75,7 @@ The user
 \begin{enumerate}
 \item creates motions primitives in CoPilot
 \item describes a monitor policy 
-\item  invokes CSAF to wrap a component around the built monitor
+\item  invokes \acrshort{csaf}  to wrap a component around the built monitor
 \item associates controllers with the monitor to make a shield
 \end{enumerate}
 
@@ -86,8 +86,8 @@ The user
 
 \section{[\acrshort{csaf} -05] Controller Monitoring and Shields}
 
-CSAF's use case is to simulate and analyzes shields, where multiple controllers can be alternated via a 
-monitoring policy. A monitor is a special controller component that is typically stateless and outputs a 
+\acrshort{csaf} 's use case is to simulate and analyzes shields, where multiple controllers can be alternated 
+via a monitoring policy. A monitor is a special controller component that is typically stateless and outputs a 
 controller selection index. Also, the controllers generally accept the same input/output signatures, although 
 that is not required. 
 
@@ -140,7 +140,7 @@ The user
 \begin{enumerate}
 \item trains a neural network
 \item relates network IO to controller IO
-\item the feedforward network is wrapped into a CSAF component
+\item the feedforward network is wrapped into a \acrshort{csaf}  component
 \end{enumerate}
 
 \subsection{Functional Requirements}
@@ -148,9 +148,9 @@ The user
 \item REQ-1 \quad supports a network represented under TensorFlow 1.x
 \end{enumerate}
 
-\section{[\acrshort{csaf} -08] Time Traces}
+\section{[\acrshort{csaf} -08] Time Trace Validation}
 
-The can interact with a temporal data structure as output from a time domain simulation.
+The user can interact with a temporal data structure as output from a time domain simulation, checking properties.
 
 \subsection{Description and Priority}
 This is a medium priority feature.
