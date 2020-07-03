@@ -6,7 +6,7 @@ The \acrshort{csaf}  package exists as middleware. It exists as a library, and n
 
 \section{Software Interfaces}
 
-\subsection{Mathematical Representation}
+\subsection{Mathematical Representations}
 A component is required to be a dynamical system in some form, a mathematical entity that has the ability to 
 evolve in time. This means that a system assumes a function in a set $\left\{ f^t \right\}_{t \in \mathbb F}$, 
 where $\mathbb F$ is some field for time. For continuous time systems, this field can be the real numbers $
@@ -69,6 +69,48 @@ For continuous time solution of a single component, the function $g(.,.,u(.);p)$
 \acrshort{ode} solvers can evaluate. The parameters $r$ and $p$ don't necessarily need to be elements of a 
 vector space, and can be described using other structures.
 
+\subsubsection{Linear System Representation}
+
+A linear system can take the form,
+
+\begin{equation} \label{equ:linsys}
+\begin{cases}
+\dot{x} = A x + B u \\
+y =C x + D u \\
+\end{cases},
+\end{equation}
+
+where $x$ is in the state space and $u$ is in the input space. $A$, $B$, $C$, and $D$ are matrices 
+representing linear transformations.   \\
+
+For a controlled system, the forcing input $u$ can be the result of a control policy. A control policy itself can
+be dependent of the state vector $x$, as is the case for a state space controller. A linear controller follows a
+linear control policy,
+
+\begin{equation}
+u = K (x_d -x ) = -Ke,
+\end{equation}
+
+where $K$ is some linear operator and $e=x -x_d$ represents an error signal from a desired state $x_d$. This 
+representation is commonly used, and controller design methods like \acrshort{lqr} and \acrshort{hinf} 
+methods, produce an operator $K$ that optimizes some notion of cost. From this view, it is clear that the 
+controller is itself a linear system, possessing no state and an input vector $e$. To match the linear 
+representation in Equation \ref{equ:linsys},
+
+\begin{equation}
+\begin{cases}
+\dot{w} = \mathbf{0} w + e \\
+u = -K e + G w \\
+\end{cases}
+\end{equation}
+
+The effect of $w$ is to integrate $e$ with respect to time. This system can represent controllers with tracking
+properties, like a \acrshort{pid} controller.
+
+\subsubsection{Neural Controller Representation}
+
+\subsubsection{Fuzzy Logic Controller Representation}
+
 \subsection{Component Interfaces}
 
 From the mathematical representations, a component can be described by three elements: its parameters, 
@@ -86,7 +128,7 @@ well.
 
 \section{Communications Interfaces}
 
-Analyzers and simulators will interact with the system components via zeroMQ, using sockets. zeroMQ 
+Analyzers and simulators will interact with the system components via \acrshort{0mq}, using sockets. \acrshort{0mq} 
 provides \acrshort{csaf}  with a variety of levels to communicate with components, whether in-process, 
 inter-process or across TCP and multi-cast. The component does hold state, and the system needs to be 
 properly initialized to avoid staleness.
@@ -94,7 +136,7 @@ properly initialized to avoid staleness.
 \subsection{Message Contents}
 
 The temporal messages sent by every \acrshort{csaf}  component needs to have specific content to support 
-simulation. The message type is derived from the \acrshort{ros} message serialization format. First, the the 
+simulation. The message type is derived from the \acrshort{ros}msgs serialization format. First, the the 
 \acrshort{csaf}  version is transmitted to avoid incompatibility between components made with different 
 versions. Second, an epoch is included to keep a record on how many publish events have been performed 
 by a component. Temporal information is included, being time and sampling frequency. Next is the input, 
@@ -136,7 +178,7 @@ Header Differential
 	float64 stated1
 	float64 stated2
 \end{lstlisting}
-\caption{Required \acrshort{csaf}  Component Temporal Message Contents (Other Fields are Permitted)}
+\caption{Required \acrshort{ros}msg \acrshort{csaf}  Component Temporal Message Contents (Other Fields are Permitted)}
 \label{fig:cmsg}
 \end{figure}
 
@@ -174,7 +216,7 @@ Header StateNames
 	string sname1
 	string sname2
 \end{lstlisting}
-\caption{Required \acrshort{csaf}  Component Information Message Contents (Other Fields are Permitted)}
+\caption{Required \acrshort{ros}msg \acrshort{csaf}  Component Information Message Contents (Other Fields are Permitted)}
 \label{fig:cmsg}
 \end{figure}
 

@@ -2,9 +2,11 @@
 
 \section{Purpose}
 \acrshort{csaf} is a middleware environment for describing, simulating, and analyzing closed loop dynamical 
-systems. A \acrshort{csaf} component's primary interface is subscribe/publish to sockets, which represent 
-input/output of a lump abstracted component. It allows component creation using common system 
-representations, especially for specifying controllers. The architecture is supportive of systems to be simulated with diverse components, agnostic to the languages and platforms from which they were implemented.
+systems. A \acrshort{csaf} component's primary interface is \acrlong{0mq} subscribe and publish system 
+components, which communicate input/output of a lump abstracted component as \acrshort{ros}msgs. It 
+allows component creation using common system representations, especially for specifying controllers. The 
+architecture is supportive of systems to be simulated with diverse components, agnostic to the languages 
+and platforms from which they were implemented.
 
 
 \section{Document Conventions}
@@ -57,7 +59,7 @@ entering a plant. For the \acrlong{gcas} challenge problem being considered, thi
 maneuverability and attitude control. Because of this, exogenic and environmental description is pertinent. 
 Path planning, collision avoidance and environmental sensing are all areas that \acrshort{csaf} will handle.\\
 
-Some of the system description might be done in the \acrshort{edsl} CoPilot, which outputs a monitor 
+Some of the system description might be done in the \acrshort{edsl} CoPilot 3, which outputs a monitor 
 existing as a shared object library. As such, some of the components might be present only as binaries, which 
 are utilized for monitoring/controlling. Further, the platform is for projects where controllers are 
 delivered by other projects, and so agnosticism to language/library/platform exists. 

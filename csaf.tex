@@ -21,6 +21,7 @@
 \usepackage[outdir=./]{epstopdf}
 
 \usepackage{listings}
+\usepackage[english]{babel}
 \usepackage{underscore}
 \usepackage[bookmarks=true]{hyperref}
 \usepackage[utf8]{inputenc}
@@ -30,10 +31,10 @@
 \usepackage[acronym, toc]{glossaries}
 \hypersetup{
     bookmarks=false,    % show bookmarks bar?
-    pdftitle={Software Requirement Specification},    % title
-    pdfauthor={Jean-Philippe Eisenbarth},                     % author
-    pdfsubject={TeX and LaTeX},                        % subject of the document
-    pdfkeywords={TeX, LaTeX, graphics, images}, % list of keywords
+    pdftitle={CSAF Software Requirement Specification},    % title
+    pdfauthor={Ethan Lew},                     % author
+    pdfsubject={Control System Analysis Framework},                        % subject of the document
+    pdfkeywords={CSAF, Requirements, Controls, Specification, Systems}, % list of keywords
     colorlinks=true,       % false: boxed links; true: colored links
     linkcolor=blue,       % color of internal links
     citecolor=black,       % color of links to bibliography
@@ -99,6 +100,9 @@ DISCLAIMER: This is a rough draft. The document contains many errors, and the ar
 \input{./chapters/features.tex}
 
 \input{./chapters/applications.tex}
+
+\bibliographystyle{IEEEtran}
+\bibliography{bibliography}
 
 \printnoidxglossary[type=\acronymtype]
 
