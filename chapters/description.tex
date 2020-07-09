@@ -2,7 +2,8 @@
 
 \section{Product Perspective}
 
-\acrshort{csaf} serves the role of a middleware for closed loop system simulations. A user starts with a model that they have for a system, with well-defined inputs, outputs and states. Shown in Figure \ref{fig:ccomp}, they will proceed to create a \acrshort{csaf} pub/sub component. The package comes with an \acrshort{api} to make common system descriptions easy to implement, and has a wrappers if the system is a black box. The component can be interacted with using subscribers and publishers. One pub/sub pair is for temporal input and output---input can be specified at a given time in order to receive output at the specified time. Another pub/sub pair exists for getting and setting component information. This pathways allows model parameters, system representation and initial state to be received/configured prior to analysis.\\
+\acrshort{csaf} serves the role of a middleware for closed loop system simulations. A user starts with a model that they have for a system, with well-defined inputs, outputs and states. Shown in Figure \ref{fig:ccomp}, they will proceed to create a \acrshort{csaf} pub/sub component. The package comes with an \acrshort{api} to make common system descriptions easy to implement, and has a wrappers if the system is a black box. 
+The component is described using a small configuration file, and can be interacted with using a subscriber and a publisher. The pub/sub pair is for temporal input and output---input can be specified at a given time in order to receive output at the specified time. \\
 
 \begin{figure}
 \centering

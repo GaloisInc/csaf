@@ -109,7 +109,21 @@ properties, like a \acrshort{pid} controller.
 
 \subsubsection{Neural Controller Representation}
 
+
 \subsubsection{Fuzzy Logic Controller Representation}
+
+A fuzzy logic controller is a controller that uses a \acrlong{fls} to determine its output. Generally, this involves 
+taking the input and transforming them to linguistic variables $(x_i, x_2, ..., x_{n_i}) \in \mathbb U^{n_i}$. Then, 
+an inference rule $\mathbb R^j$ can be applied from a rules base to produce a linguistic variable describing 
+the controller output, being a non-linear mapping between two fuzzy sets $\mathbb U \rightarrow \mathbb R$. 
+\begin{equation}
+\mathbb{R}^{(j)}:\text{ IF }x_{1}\text{ is }A_{1}^{j}\text{ and }\ldots\text{ and }x_{n i}\text{ is }A_{n i}^{j}\text{ THEN }y\text{ is }B^{j}, j=1, \ldots, n_{j},
+\end{equation}
+where $A_i^j$, $B^j$ are fuzzy sets in $\mathbb U$ and $\mathbb R$. This set can be ``defuzzified'' into a crisp value $y \in \mathbb R$ to produce a control signal. \\
+
+A controller adhering to this paradigm is stateless, and need only implement the output mapping $h$
+mentioned previously that performs the fuzzification, inference, and defuzzification. Besides this, the fuzzy 
+sets that the input and output assume, the fuzzication/defuzzification startegies, and the inference rules employed, are necessary for the fuzzy logic controller representation.
 
 \subsection{Component Interfaces}
 
@@ -124,6 +138,41 @@ well.
 \includegraphics[width=1.0\textwidth]{componentio.pdf}
 \caption{Contents of \acrshort{csaf}  Component IO}
 \label{fig:cio}
+\end{figure}
+
+\subsection{System Description/Initialization}
+
+\begin{figure}
+\begin{lstlisting}
+global_config = "..."
+
+[forwarder]
+
+  [forwarder.plant-out]
+  port = 5501
+
+  [forwarder.controller-out]
+  port = 5502
+
+[device]
+
+  [device.controller]
+    run_command = "/some/path/python"
+    process = "/usr/bin/my_controller.py"
+    config = "..."
+    local/external = "..."
+    sub = 5501
+    pub = 5502
+
+  [device.plant]
+    run_command = "python3"
+    process = "/usr/bin/my_controller.py"
+    local/external = "..."
+    sub = 5502
+    pub = 5501
+\end{lstlisting}
+\caption{Describing Components and System Compositions of Components}
+\label{fig:sysset}
 \end{figure}
 
 \section{Communications Interfaces}
@@ -143,15 +192,9 @@ by a component. Temporal information is included, being time and sampling freque
 output and state vectors. These vectors are enumerated under a header, rather than transmitted as a 
 contiguous array. Figure \ref{fig:cmsg} shows an example message. \\
 
-A component has another sub/pub pair that allows non-temporal aspects of the system to be configured. 
-Invariant parameters of the system can be named and be received and set. The system name, representation 
-identifier and solver name is included as a string. Two booleans are used to determine if the 
-system type---continuous, discrete or hybrid.  Fields specific to the representation of the system is 
-accessible. For example, if the system is a fuzzy controller, the inference table can be visible. As the 
-components have a varying degree of transparency (``black box''), no headers are required and parameters 
-are allowed to unchangeable. \\
+Non-temporal aspects of the system need to need to be accessed, which is described in a configuration file associated with a component. The system name, parameters, representation identifier and solver name is included. Two booleans are used to determine if the system type---continuous, discrete or hybrid.  Fields specific to the representation of the system is  accessible. For example, if the system is a fuzzy controller, the inference table can be visible. As the  components have a varying degree of transparency (``black box''), no headers are required and parameters are allowed to unchangeable. \\
 
-What is required from a component is dependent on its representation and its purpose. As such, much 
+A controller's representation and purpose influences its requirements. As such, much 
 variability can exist in what is contained in the message. New headers and variables are allowed to appear in a 
 component message, but the structure has to remain constant over time. \\
 
@@ -216,7 +259,7 @@ Header StateNames
 	string sname1
 	string sname2
 \end{lstlisting}
-\caption{Required \acrshort{ros}msg \acrshort{csaf}  Component Information Message Contents (Other Fields are Permitted)}
+\caption{ \acrshort{csaf}  Component Configuration Information)}
 \label{fig:cmsg}
 \end{figure}
 
