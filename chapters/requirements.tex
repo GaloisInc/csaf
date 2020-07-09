@@ -107,10 +107,12 @@ u = -K e + G w \\
 The effect of $w$ is to integrate $e$ with respect to time. This system can represent controllers with tracking
 properties, like a \acrshort{pid} controller.
 
-\subsubsection{Neural Controller Representation}
+\subsubsection{Neural Controller Representation}\label{sec:nnc}
 
+Neural networks can be used to produce the functions $g$ and $h$ of a controller system, being trained 
+beforehand and operating feedforward during use. In this, no distinction is made is made in the representation. \\
 
-\subsubsection{Fuzzy Logic Controller Representation}
+\subsubsection{Fuzzy Logic Controller Representation}\label{sec:flc}
 
 A fuzzy logic controller is a controller that uses a \acrlong{fls} to determine its output. Generally, this involves 
 taking the input and transforming them to linguistic variables $(x_i, x_2, ..., x_{n_i}) \in \mathbb U^{n_i}$. Then, 
