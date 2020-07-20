@@ -1,0 +1,30 @@
+global_config = "./global_config"
+
+evaluation_order = ["controller", "plant", "autopilot"]
+
+log_file = "f16run.log"
+log_level = "debug"
+
+[devices]
+  [devices.controller]
+    run_command = "python3"
+    process = "./components/f16llc.py"
+    config = "./components/f16llc.toml"
+    debug = true
+    sub = [["plant", "state"], ["plant", "output"], ["autopilot", "output"]]
+    pub = 5502
+
+  [devices.plant]
+    run_command = "python3"
+    process = "./components/f16plant.py"
+    config = "./components/f16plant.toml"
+    debug = true
+    sub = ["controller", "output"]
+    pub = 5501
+
+  [devices.autopilot]
+    run_command = "python3"
+    process = "./components/autopilot.py"
+    debug = false
+    sub = [["plant", "state"], ["plant", "output"]]
+    pub = 5503

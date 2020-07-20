@@ -1,0 +1,3 @@
+codec_dir = "./codec"
+output_dir = "./output"
+

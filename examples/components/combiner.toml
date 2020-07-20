@@ -1,0 +1,16 @@
+system_name = "State/Output Combiner"
+system_representation = "black box"
+system_solver = "None"
+
+sampling_frequency = 100
+
+is_discrete = true
+is_hybrid = false
+
+[inputs]
+    names = ['Nz', 'Ny']
+
+[topics]
+
+  [topics.outputs]
+      msg = "./msg/combiner_output.msg"

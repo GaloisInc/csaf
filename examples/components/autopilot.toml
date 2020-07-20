@@ -1,0 +1,30 @@
+system_name = "F16 Autopilot"
+system_representation = "black box"
+system_solver = "Euler"
+
+sampling_frequency = 100
+
+is_discrete = true
+is_hybrid = false
+
+[inputs]
+    names = [[   'vt',
+                'alpha',
+                'beta',
+                'phi',
+                'theta',
+                'psi',
+                'p',
+                'q',
+                'r',
+                'pn',
+                'pe',
+                'h',
+                'pow'],
+                ['Nz',
+                'Ny']]
+
+[topics]
+
+  [topics.outputs]
+      msg = "./msg/autopilot_output.msg"
