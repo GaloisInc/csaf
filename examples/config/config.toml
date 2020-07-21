@@ -1,4 +1,6 @@
-global_config = "./global_config"
+name = "f16-heidlauf"
+
+global_config = "./global_config.toml"
 
 evaluation_order = ["controller", "plant", "autopilot"]
 
@@ -8,23 +10,23 @@ log_level = "debug"
 [devices]
   [devices.controller]
     run_command = "python3"
-    process = "./components/f16llc.py"
-    config = "./components/f16llc.toml"
+    process = "../components/f16llc.py"
+    config = "../components/f16llc.toml"
     debug = true
-    sub = [["plant", "state"], ["plant", "output"], ["autopilot", "output"]]
+    sub = [["plant", "states"], ["plant", "outputs"], ["autopilot", "outputs"]]
     pub = 5502
 
   [devices.plant]
     run_command = "python3"
-    process = "./components/f16plant.py"
-    config = "./components/f16plant.toml"
+    process = "../components/f16plant.py"
+    config = "../components/f16plant.toml"
     debug = true
-    sub = ["controller", "output"]
+    sub = [["controller", "outputs"]]
     pub = 5501
 
   [devices.autopilot]
     run_command = "python3"
-    process = "./components/autopilot.py"
-    debug = false
-    sub = [["plant", "state"], ["plant", "output"]]
+    process = "../components/autopilot.py"
+    debug = true
+    sub = [["plant", "states"], ["plant", "outputs"]]
     pub = 5503

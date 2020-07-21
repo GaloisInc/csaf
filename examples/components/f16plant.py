@@ -16,17 +16,13 @@ def main():
 
     parameters = info["parameters"]
 
-    state_names = info["states"]["names"]
-    input_names = info["inputs"]["names"]
-    output_names = info["outputs"]["names"]
-
-    n_states = len(state_names)
-    n_outputs = len(output_names)
-    n_inputs = len(input_names)
+    n_states = 13
+    n_outputs = 2
+    n_inputs = 4
 
     fs = info["sampling_frequency"]
 
-    x = info["states"]["initial"]
+    x = info["topics"]["states"]["initial"]
     epoch = 0
 
     msg_writer = message.Message()

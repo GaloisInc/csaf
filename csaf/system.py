@@ -3,59 +3,48 @@
 Ethan Lew
 07/13/20
 """
-
-import pathlib
-import os
-
-import toml
-from .config import *
+from .config import SystemConfig
 from .dynamics import DynamicalSystem
-
 
 
 class System:
     @classmethod
     def from_toml(cls, config_file):
+        """produce a system from a toml file"""
+        config = SystemConfig.from_toml(config_file)
+        return cls.from_config(config)
 
-        check_config(config_file)
-        setup_logging(config_file)
-        config = attempt_parse_toml(config_file)
-
-        # TODO: sanitize the top level
-        device_configs = config["device"]
-        eval_order = config["evaluation_order"]
+    @classmethod
+    def from_config(cls, config):
+        """produce system from SystemConfig object"""
+        eval_order = config.config_dict["evaluation_order"]
         devices = []
         ports = []
         names = []
-        for dname, dconfig in device_configs.items():
-            # TODO: sanitize the config
-            pub_ports, sub_ports = get_from_base_string("pub", dconfig), get_from_base_string("sub", dconfig)
+        for dname, dconfig in config.config_dict["devices"].items():
+            command = ' '.join([dconfig["run_command"], dconfig["process"]])
 
-            process_path = pathlib.Path(dconfig["process"])
-            assert os.path.exists(process_path), f"component executable {process_path} could not be found for component"
+            name_inputs = dconfig["config"]["inputs"]["names"]
 
-            if 'config' not in dconfig:
-                config_path = process_path.with_suffix('.toml')
+            if config.has_topic(dname, "outputs"):
+                name_outputs = config.get_msg_setting(dname, "outputs", "msg").fields_no_header
             else:
-                config_path = dconfig["config"]
+                name_outputs = []
 
-            assert os.path.exists(config_path), f"config file {config_path} could not be found for component"
+            if config.has_topic(dname, "states"):
+                name_states = config.get_msg_setting(dname, "states", "msg").fields_no_header
+            else:
+                name_states = []
 
-            dev_config = attempt_parse_toml(config_path)
-
-            n_inputs =  dev_config["inputs"]["names"]
-            n_outputs = dev_config["outputs"]["names"]
-            n_states = dev_config["states"]["names"]
-
-            command = dconfig["run_command"] + " " + dconfig["process"]
-
-            comp = DynamicalSystem(command, n_inputs, n_outputs, n_states, name=dname)
-            comp.bind(sub_ports, pub_ports)
+            sub_ports = [[str(config.config_dict["devices"][l]["pub"]), l+"-"+t] for l, t in dconfig["sub"]]
+            pub_ports = [str(dconfig["pub"])]
+            comp = DynamicalSystem(command, name_inputs, name_outputs, name_states, name=dname)
             if dconfig["debug"]:
                 comp.debug_node = True
+            comp.bind(sub_ports, pub_ports)
             devices.append(comp)
             names.append(dname)
-            ports += [*pub_ports, *sub_ports]
+            ports += pub_ports
 
         system = cls()
         system.components = devices

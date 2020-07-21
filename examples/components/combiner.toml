@@ -8,7 +8,7 @@ is_discrete = true
 is_hybrid = false
 
 [inputs]
-    names = ['Nz', 'Ny']
+    names = [['Nz', 'Ny']]
 
 [topics]
 

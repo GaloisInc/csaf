@@ -1,9 +1,64 @@
+""" CSAF ROSMsg Support
+
+Ethan Lew
+07/21/20
+"""
 import os
 import pathlib
 import importlib.util
 
 import genpy.generator
 import genpy.genpy_main
+
+
+class CsafMsg:
+    @staticmethod
+    def required_fields():
+        """required fields for a CSAF ROSmsg"""
+        return ["version_major", "version_minor", "topic", "epoch"]
+
+    @staticmethod
+    def load(msg_fp):
+        """load from file pointer"""
+        msg_str = msg_fp.read()
+        return CsafMsg.loads(msg_str, filename=msg_fp.name)
+
+    @staticmethod
+    def loads(msg_str, filename=None):
+        """load from string"""
+        lines = msg_str.splitlines()
+        contents = []
+        for lidx, l in enumerate(lines):
+            ls = l.strip(' \n')
+            if len(ls) == 0:
+                continue
+            lc = ls.split()
+            assert len(lc) == 2, f"line number {lidx} fails <type, name> format" + \
+                                 ("" if filename is None else f"(filename '{filename}')")
+            contents.append(lc)
+        return contents
+
+    @classmethod
+    def from_msg_file(cls, fname):
+        with open(fname, 'r') as fp:
+            contents = CsafMsg.load(fp)
+        return cls(contents)
+
+    def __init__(self, contents):
+        self._contents = contents
+
+    @property
+    def fields(self):
+        return [l[1] for l in self.contents]
+
+    @property
+    def fields_no_header(self):
+        return [l[1] for l in self.contents if l[1] not in CsafMsg.required_fields()]
+
+    @property
+    def contents(self):
+        return self._contents
+
 
 
 def generate_serializer(msg_filepath, output_dir, package_name="csaf"):
@@ -39,10 +94,3 @@ def generate_serializer(msg_filepath, output_dir, package_name="csaf"):
     instance = class_()
     return instance
 
-
-
-if __name__ == '__main__':
-    s0 = generate_serializer("./components/msg/f16plant_state.msg", ".")
-    s1 = generate_serializer("./components/msg/f16plant_output.msg", ".")
-    print(s0)
-    print(s1)

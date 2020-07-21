@@ -18,16 +18,9 @@ def main():
 
     parameters = info["parameters"]
 
-    state_names = info["states"]["names"]
-    input_names = info["inputs"]["names"]
-    output_names = info["outputs"]["names"]
-
-    n_states = len(state_names)
-    n_outputs = len(output_names)
-    n_inputs = len(input_names)
-
     while True:
         ins = input(f"msg0 at [t={epoch/fs}]>")
+        ins_0 = input(f"msg1 at [t={epoch/fs}]>")
         try:
             msg = json.loads(ins)
         except json.decoder.JSONDecodeError as exc:

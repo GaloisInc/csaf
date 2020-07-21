@@ -91,26 +91,24 @@ def main():
 
     parameters = info["parameters"]
 
-    state_names = info["states"]["names"]
-    input_names = info["inputs"]["names"]
-    output_names = info["outputs"]["names"]
-
-    n_states = len(state_names)
-    n_outputs = len(output_names)
-    n_inputs, n_inputs_a = len(input_names[0]), len(input_names[1])
+    n_states = 3
+    n_outputs = 4
+    n_inputs, n_inputs_o, n_inputs_a = 13, 2, 4
 
     fs = info["sampling_frequency"]
 
-    x = info["states"]["initial"]
+    x = info['topics']["states"]["initial"]
     epoch = 0
 
     msg_writer = message.Message()
 
     while True:
-        ins = input(f"msg0 at [t={epoch/fs}]>")
-        ins_a = input(f"msg1 at [t={epoch/fs}]>")
+        ins = input(f"msg0 (state) at [t={epoch/fs}]>")
+        ins_o = input(f"msg1 (output) at [t={epoch/fs}]>")
+        ins_a = input(f"msg2 (autopilot) at [t={epoch/fs}]")
         try:
             msg = json.loads(ins)
+            msg_o = json.loads(ins_o)
             msg_a = json.loads(ins_a)
         except json.decoder.JSONDecodeError as exc:
             raise Exception(f"input <{ins}> couldn't be interpreted as json! {exc}")
@@ -120,11 +118,12 @@ def main():
         #assert in_epoch == epoch
 
         f = msg["Output"]
+        f_o =  msg_o["Output"]
         f_a = msg_a["Output"]
-        assert len(f) == n_inputs, f"Output length from publisher {len(f)} must match length of inputs {n_inputs}"
-        assert len(f_a) == n_inputs_a, f"Output length from publisher {len(f_a)} must match length of inputs {n_inputs_a}"
+        assert len(f) == 13, f"Output length from publisher {len(f)} must match length of inputs {n_inputs}"
+        assert len(f_a) == 4, f"Output length from publisher {len(f_a)} must match length of inputs {n_inputs_a}"
 
-        f_all = np.hstack((f, f_a))
+        f_all = np.hstack((f, f_o, f_a))
 
         xd = llcdf(epoch/fs, x, f_all, parameters)
         output = llcoutput(epoch/fs, x, f_all, parameters)

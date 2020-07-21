@@ -51,6 +51,13 @@ class Component:
 
         self.name = "system" if name is None else name
 
+    def debug_start(self):
+        return f"Component '{self.name}' {self.__class__.__name__}"
+
+    def print_if_debug(self, s):
+        if self.debug_node:
+            logging.debug(self.debug_start() + s)
+
     def bind(self, in_ports, out_ports):
         """bind subscribers/publishers to their respective ports"""
 
@@ -74,11 +81,15 @@ class Component:
 
         # setup subscribers over TCP network
         self.input_socks = []
+        self.input_topics = []
         for idx in range(self.num_input_socks):
             sock = self.zmq_context.socket(zmq.SUB)
-            sock.connect(f"tcp://127.0.0.1:{in_ports[idx]}")
-            sock.subscribe("")
+            sock.connect(f"tcp://127.0.0.1:{in_ports[idx][0]}")
+            topic = in_ports[idx][1]
+            self.print_if_debug(f"binding socket {in_ports[idx][0]} with topic {topic}")
+            sock.setsockopt_string(zmq.SUBSCRIBE, topic)
             self.input_socks.append(sock)
+            self.input_topics.append(topic)
 
         # TODO: needed for some reason -- better way to make sure subscribers are ready?
         time.sleep(0.2)
@@ -102,12 +113,16 @@ class Component:
         if self.zmq_context is not None:
             self.zmq_context.term()
 
-    def send_message(self, output_idx, message):
+    def send_message(self, output_idx, message, topic="unnamed"):
         """send a message over output number output_idx """
         if self.debug_node:
             logging.debug(f"Component '{self.name}' {self.__class__.__name__} Socket {output_idx} Sending "
-                  f"{self._n_publish[output_idx]} Message <{message}>")
-        self.output_socks[output_idx].send(self.serialize(message))
+                  f"{self._n_publish[output_idx]} Topic '{topic}' Message <{message}>")
+        if topic:
+            self.output_socks[output_idx].send_string(topic, zmq.SNDMORE)
+            self.output_socks[output_idx].send(self.serialize(message))
+        else:
+            self.output_socks[output_idx].send(self.serialize(message))
         self._n_publish[output_idx] += 1
 
     def subscriber_iteration(self, recv, sock_num):
@@ -119,24 +134,30 @@ class Component:
         def print_if_debug(s):
             if self.debug_node:
                 logging.debug(s)
-        print_if_debug(f"{debug_start()} Initialized")
+        self.print_if_debug(f"{debug_start()} Initialized")
         while (not stop_event.is_set()):
             recv = self.input_socks[sock_num].recv()
-            print_if_debug(f"{debug_start()} Received {self._n_subscribe[sock_num]} Message <{self.deserialize(recv)}>")
+            self.print_if_debug(f"{debug_start()} Received {self._n_subscribe[sock_num]} Message <{self.deserialize(recv)}>")
             self.subscriber_iteration(recv, sock_num)
             self._n_subscribe[sock_num] += 1
-        print_if_debug(f"{debug_start()} received kill event. Exiting...")
+        self.print_if_debug(f"{debug_start()} received kill event. Exiting...")
         sys.exit()
 
     def activate_subscribers(self):
         """launch all subscribers as threads"""
 
         # populate receivers as threads
+        # threads = []
+        # for tidx in range(self.num_input_socks):
+        #    threads.append(threading.Thread(target=self.subscriber_thread, kwargs={'stop_event': self.stop_threads, 'sock_num': tidx}))
+        #    threads[tidx].daemon = True
+        #    threads[tidx].start()
         threads = []
-        for tidx in range(self.num_input_socks):
-            threads.append(threading.Thread(target=self.subscriber_thread, kwargs={'stop_event': self.stop_threads, 'sock_num': tidx}))
-            threads[tidx].daemon = True
-            threads[tidx].start()
+        threads.append(threading.Thread(target=self.subscriber_thread, kwargs={'stop_event': self.stop_threads, 'sock_num': 0}))
+        threads[0].daemon = True
+        threads[0].start()
+
+
 
     @property
     def num_input_socks(self):

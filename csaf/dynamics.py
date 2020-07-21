@@ -53,13 +53,13 @@ class DynamicalSystem(Component):
     def subscriber_thread(self, stop_event=None, sock_num=None):
         """DynamicalSystem expects that component interfaces as an interactive prompt
         """
-        def debug_start():
-            return f"Component '{self.name}' {self.__class__.__name__} Socket {sock_num}"
+        def debug_start(sdx):
+            return f"Component '{self.name}' {self.__class__.__name__} Socket {sdx}"
 
         def print_if_debug(s):
             if self.debug_node:
                 logging.debug(s)
-        print_if_debug(f"{debug_start()} Initialized")
+        print_if_debug(f"{debug_start(str([i for i in range(self.num_input_socks)]))} Initialized", )
 
         # spawn a pexpect session to interact with middleware app
         self.comp_process = pexpect.spawn(self.command)
@@ -68,8 +68,9 @@ class DynamicalSystem(Component):
         while (not stop_event.is_set()):
             for sidx, sn in enumerate(self.input_socks):
                 # expect to receive one message per socker per epoch
+                topic = sn.recv().decode()
                 recv = sn.recv()
-                print_if_debug(f"{debug_start()} Received {self._n_subscribe[sock_num]} Message <{self.deserialize(recv)}>")
+                print_if_debug(f"{debug_start(sidx)} Received {self._n_subscribe[sock_num]} Topic '{topic}' Message <{self.deserialize(recv)}>")
                 mesg = self.deserialize(recv)
 
                 # check message contents
@@ -87,7 +88,15 @@ class DynamicalSystem(Component):
             self.comp_process.expect(self.prompt)
             recv = self.comp_process.before
             recv_msg = self.deserialize(recv)
-            self.send_message(0, recv_msg)
+
+            if 'State' in recv_msg:
+                recv_msg_state = recv_msg.copy()
+                recv_msg_state['Output'] = recv_msg_state['State']
+                del recv_msg_state['State']
+                self.send_message(0, recv_msg_state, topic=self.name + "-" +'states')
+                del recv_msg['State']
+            if 'Output' in recv_msg:
+                self.send_message(0, recv_msg, topic=self.name + "-" +'outputs')
 
         # quit
         print_if_debug(f"{debug_start()} received kill event. Exiting...")

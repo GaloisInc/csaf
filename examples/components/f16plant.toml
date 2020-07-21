@@ -29,7 +29,7 @@ is_hybrid = false
     equations = "morelli"
 
 [inputs]
-    names = ['throttle', 'elevator', 'aileron', 'rudder']
+    names = [['throttle', 'elevator', 'aileron', 'rudder']]
 
 [topics]
 
