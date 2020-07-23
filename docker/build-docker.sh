@@ -1,8 +1,8 @@
 #!/bin/bash
 
-IMAGE_NAME=galois/csaf
-IMAGE_TAG=latest
 PUBLISH=0
+
+source .common.sh
 
 # We are allowing 3 tag names
 #  - "stable" is for general use by customers
@@ -17,15 +17,6 @@ print_help() {
 	printf "\n"
 }
 
-show_error_and_exit() {
-	printf "ERROR: ${1}\n"
-	exit 1
-}
-
-show_info() {
-	printf "INFO: ${1}\n"
-}
-
 publish_img() {
 
 	show_info "Publishing image"
@@ -34,17 +25,6 @@ publish_img() {
 	if [[ $? -ne 0 ]]
 	then
 		show_error_and_exit "Unable to publish the image"
-	fi
-}
-
-build_img() {
-
-	show_info "Building image \"${IMAGE_NAME}:${IMAGE_TAG}\""
-	docker build -t ${IMAGE_NAME}:${IMAGE_TAG} .
-
-	if [[ $? -ne 0 ]]
-	then
-		show_error_and_exit "Unable to build image locally"
 	fi
 }
 
@@ -66,13 +46,7 @@ while getopts ":t:ph" opt; do
 	esac
 done
 
-
-if [ "${IMAGE_TAG}" != "stable" ] && \
-   [ "${IMAGE_TAG}" != "edge" ]  && \
-   [ "${IMAGE_TAG}" != "latest" ]
-then
-	show_error_and_exit "Image tag invalid"
-fi
+validate_tag "${IMAGE_TAG}"
 
 build_img
 
