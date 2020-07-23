@@ -17,7 +17,7 @@ build_img() {
 	show_info "Building image \"${IMAGE_NAME}:${IMAGE_TAG}\""
 	docker build -t ${IMAGE_NAME}:${IMAGE_TAG} .
 
-	if [[ $? -ne 0 ]]
+	if [[ ${?} -ne 0 ]]
 	then
 		show_error_and_exit "Unable to build image locally"
 	fi
@@ -25,9 +25,9 @@ build_img() {
 
 validate_tag() {
 
-	if [ "${1}" != "stable" ] && \
-	   [ "${1}" != "edge" ]  && \
-	   [ "${1}" != "latest" ]
+	if [ ${1} != "stable" ] && \
+	   [ ${1} != "edge" ]  && \
+	   [ ${1} != "latest" ]
 	then
 		show_error_and_exit "Image tag invalid"
 	fi

@@ -1,6 +1,19 @@
 #!/bin/bash
 
 PUBLISH=0
+SCRIPT_DIR="csaf_architecture"
+
+validate_dir() {
+
+	DIR=$(basename ${PWD})      
+	if [ ${DIR} != ${SCRIPT_DIR} ]
+	then
+		printf "ERROR: Script must be run from the \"${SCRIPT_DIR}\" directory\n"
+		exit 1
+	fi
+}
+
+validate_dir
 
 source .common.sh
 
@@ -22,7 +35,7 @@ publish_img() {
 	show_info "Publishing image"
 	docker push $IMAGE_NAME:$IMAGE_TAG
 
-	if [[ $? -ne 0 ]]
+	if [[ ${?} -ne 0 ]]
 	then
 		show_error_and_exit "Unable to publish the image"
 	fi
