@@ -3,7 +3,7 @@ uint32 version_minor
 
 string topic
 
-uint64 epoch
+float64 time
 
 float64 int1
 float64 int2

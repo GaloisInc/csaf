@@ -24,7 +24,7 @@ class CsafMsg:
         return CsafMsg.loads(msg_str, filename=msg_fp.name)
 
     @staticmethod
-    def loads(msg_str, filename=None):
+    def loads(msg_str: str, filename=None):
         """load from string"""
         lines = msg_str.splitlines()
         contents = []
@@ -39,7 +39,7 @@ class CsafMsg:
         return contents
 
     @classmethod
-    def from_msg_file(cls, fname):
+    def from_msg_file(cls, fname: str):
         with open(fname, 'r') as fp:
             contents = CsafMsg.load(fp)
         return cls(contents)
@@ -49,19 +49,18 @@ class CsafMsg:
 
     @property
     def fields(self):
-        return [l[1] for l in self.contents]
+        return [line[1] for line in self.contents]
 
     @property
     def fields_no_header(self):
-        return [l[1] for l in self.contents if l[1] not in CsafMsg.required_fields()]
+        return [line[1] for line in self.contents if line[1] not in CsafMsg.required_fields()]
 
     @property
     def contents(self):
         return self._contents
 
 
-
-def generate_serializer(msg_filepath, output_dir, package_name="csaf"):
+def generate_serializer(msg_filepath: str, output_dir: str, package_name="csaf"):
     """generate a rosmsg class serializer/deserializer given a rosmsg .msg file
     :param msg_filepath: path to .msg file
     :param output_dir: path to place serializer/deserializer
@@ -84,13 +83,11 @@ def generate_serializer(msg_filepath, output_dir, package_name="csaf"):
     output_python_file = os.path.join(output_dir, f"_{pathlib.Path(msg_filepath).stem}.py")
     assert os.path.exists(output_python_file)
     spec = importlib.util.spec_from_file_location(pathlib.Path(output_python_file).stem,
-                                                output_python_file)
+                                                  output_python_file)
     python_module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(python_module)
 
     # load an instance and return it
     class_name = pathlib.Path(msg_filepath).stem
     class_ = getattr(python_module, class_name)
-    instance = class_()
-    return instance
-
+    return class_

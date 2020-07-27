@@ -1,9 +1,35 @@
 import os
 import toml
-import json
 
 import numpy as np
-from csaf import message
+
+
+parameters = {}
+
+
+def main(time=0.0, state=(.1,)*3, input=(0,)*19, update=False, output=False):
+    global parameters
+    if len(parameters.keys()) == 0:
+        this_path = os.path.dirname(os.path.realpath(__file__))
+        info_file = os.path.join(this_path, "f16llc.toml")
+        with open(info_file, 'r') as ifp:
+            info = toml.load(ifp)
+        parameters = info["parameters"]
+
+    n_states = 3
+    n_outputs = 4
+
+    xd = llcdf(time, state, input, parameters)
+    xout = llcoutput(time, state, input, parameters)
+    assert len(xd) == n_states
+    assert len(xout) == n_outputs
+
+    if update:
+        return list(xd)
+    elif output:
+        return list(xout)
+    else:
+        return
 
 
 def llcoutput(t, cstate, u, parameters):
@@ -83,61 +109,6 @@ def clip_u(u_deg, parameters):
     return u_deg
 
 
-def main():
-    this_path = os.path.dirname(os.path.realpath(__file__))
-    info_file = os.path.join(this_path, "f16llc.toml")
-    with open(info_file, 'r') as ifp:
-        info = toml.load(ifp)
-
-    parameters = info["parameters"]
-
-    n_states = 3
-    n_outputs = 4
-    n_inputs, n_inputs_o, n_inputs_a = 13, 2, 4
-
-    fs = info["sampling_frequency"]
-
-    x = info['topics']["states"]["initial"]
-    epoch = 0
-
-    msg_writer = message.Message()
-
-    while True:
-        ins = input(f"msg0 (state) at [t={epoch/fs}]>")
-        ins_o = input(f"msg1 (output) at [t={epoch/fs}]>")
-        ins_a = input(f"msg2 (autopilot) at [t={epoch/fs}]")
-        try:
-            msg = json.loads(ins)
-            msg_o = json.loads(ins_o)
-            msg_a = json.loads(ins_a)
-        except json.decoder.JSONDecodeError as exc:
-            raise Exception(f"input <{ins}> couldn't be interpreted as json! {exc}")
-
-        in_epoch = msg["epoch"]
-        epoch = in_epoch
-        #assert in_epoch == epoch
-
-        f = msg["Output"]
-        f_o =  msg_o["Output"]
-        f_a = msg_a["Output"]
-        assert len(f) == 13, f"Output length from publisher {len(f)} must match length of inputs {n_inputs}"
-        assert len(f_a) == 4, f"Output length from publisher {len(f_a)} must match length of inputs {n_inputs_a}"
-
-        f_all = np.hstack((f, f_o, f_a))
-
-        xd = llcdf(epoch/fs, x, f_all, parameters)
-        output = llcoutput(epoch/fs, x, f_all, parameters)
-        assert len(xd) == n_states
-        assert len(output) == n_outputs
-
-        msg = msg_writer.write_message(epoch/fs, output=output, state=x, differential=xd)
-
-        # TODO: for now do bad integration
-        x += 1/fs * xd
-        epoch += 1
-
-        print(msg)
-
-
 if __name__ == "__main__":
-    main()
+    import fire
+    fire.Fire(main)

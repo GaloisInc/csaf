@@ -8,7 +8,6 @@ component models a simple class that contains multiple subscribers/publishers to
 
 import time
 import json
-import sys
 import threading
 import logging
 
@@ -49,7 +48,7 @@ class Component:
         self._n_publish = [0] * num_outputs
         self._n_subscribe = [0] * num_inputs
 
-        self.name = "system" if name is None else name
+        self._name = "system" if name is None else name
 
     def debug_start(self):
         return f"Component '{self.name}' {self.__class__.__name__}"
@@ -88,6 +87,7 @@ class Component:
             topic = in_ports[idx][1]
             self.print_if_debug(f"binding socket {in_ports[idx][0]} with topic {topic}")
             sock.setsockopt_string(zmq.SUBSCRIBE, topic)
+            sock.setsockopt(zmq.CONFLATE, 1)
             self.input_socks.append(sock)
             self.input_topics.append(topic)
 
@@ -117,47 +117,13 @@ class Component:
         """send a message over output number output_idx """
         if self.debug_node:
             logging.debug(f"Component '{self.name}' {self.__class__.__name__} Socket {output_idx} Sending "
-                  f"{self._n_publish[output_idx]} Topic '{topic}' Message <{message}>")
+                  f"{self._n_publish[output_idx]} Topic '{topic}'")
         if topic:
             self.output_socks[output_idx].send_string(topic, zmq.SNDMORE)
-            self.output_socks[output_idx].send(self.serialize(message))
+            self.output_socks[output_idx].send_pyobj(message)
         else:
             self.output_socks[output_idx].send(self.serialize(message))
         self._n_publish[output_idx] += 1
-
-    def subscriber_iteration(self, recv, sock_num):
-        pass
-
-    def subscriber_thread(self, stop_event=None, sock_num=None):
-        def debug_start():
-            return f"Component '{self.name}' {self.__class__.__name__} Socket {sock_num}"
-        def print_if_debug(s):
-            if self.debug_node:
-                logging.debug(s)
-        self.print_if_debug(f"{debug_start()} Initialized")
-        while (not stop_event.is_set()):
-            recv = self.input_socks[sock_num].recv()
-            self.print_if_debug(f"{debug_start()} Received {self._n_subscribe[sock_num]} Message <{self.deserialize(recv)}>")
-            self.subscriber_iteration(recv, sock_num)
-            self._n_subscribe[sock_num] += 1
-        self.print_if_debug(f"{debug_start()} received kill event. Exiting...")
-        sys.exit()
-
-    def activate_subscribers(self):
-        """launch all subscribers as threads"""
-
-        # populate receivers as threads
-        # threads = []
-        # for tidx in range(self.num_input_socks):
-        #    threads.append(threading.Thread(target=self.subscriber_thread, kwargs={'stop_event': self.stop_threads, 'sock_num': tidx}))
-        #    threads[tidx].daemon = True
-        #    threads[tidx].start()
-        threads = []
-        threads.append(threading.Thread(target=self.subscriber_thread, kwargs={'stop_event': self.stop_threads, 'sock_num': 0}))
-        threads[0].daemon = True
-        threads[0].start()
-
-
 
     @property
     def num_input_socks(self):
@@ -175,20 +141,3 @@ class Component:
     def debug_node(self, s):
         assert type(s) is bool, f"setting debug_node must be boolean type (got {type(s)})"
         self._debug = s
-
-
-if __name__ == "__main__":
-    # simple echo loopback test
-    compa = Component(0, 1)
-    compb = Component(2, 0)
-    compa.bind([], ['1234'])
-    compb.bind(['1234', '1234'], [])
-    compb.activate_subscribers()
-    while True:
-        mesg = input("Message to Send:")
-        compa.send_message(0, mesg)
-        # TODO ugh
-        time.sleep(0.2)
-    compa.unbind()
-    compb.unbind()
-

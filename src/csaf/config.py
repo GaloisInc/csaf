@@ -10,7 +10,7 @@ import logging
 import toml
 import pydot
 
-from .rosmsg import CsafMsg
+from .rosmsg import CsafMsg, generate_serializer
 
 
 def mkdir_if_not_exist(dirname):
@@ -54,8 +54,10 @@ class SystemConfig:
         return ["run_command", "process", "config", "debug", "sub", "pub"]
 
     @classmethod
-    def from_toml(cls, toml_file):
-        """from a toml file, ingest a system configuration and apply checks"""
+    def from_toml(cls, toml_file: str):
+        """from a toml file, ingest a system configuration and apply checks
+        TODO: restructure into smaller functions -- long
+        """
         assert os.path.exists(toml_file),  f"TOML file '{toml_file}' doesn't exist!"
         config = attempt_parse_toml(toml_file)
         base_dir = pathlib.Path(toml_file).parent
@@ -134,13 +136,14 @@ class SystemConfig:
                         assert os.path.exists(msg_path), f"message file '{msg_path}' in topic '{tname}' for " \
                                                          f"device '{dname}' must exist!"
                         config["devices"][dname]["config"]["topics"][tname]['msg'] = CsafMsg.from_msg_file(msg_path)
+                        config["devices"][dname]["config"]["topics"][tname]['serializer'] = generate_serializer(msg_path, config["codec_dir"])
 
         return cls(config)
 
-    def __init__(self, config):
+    def __init__(self, config: dict):
         self._config = config
 
-    def get_device_settings(self, dname):
+    def get_device_settings(self, dname: str):
         """get information about a device by its device name (dname)"""
         assert dname in self._config["devices"]
         return self._config["devices"][dname]
@@ -176,7 +179,7 @@ class SystemConfig:
 
         return nodes, edges, edge_labels
 
-    def get_msg_width(self, dname, tname):
+    def get_msg_width(self, dname: str, tname: str):
         """given device name and topic name, return the number of fields in a message
         """
         cmsg = self.get_msg_setting(dname, tname, "msg")
@@ -186,6 +189,10 @@ class SystemConfig:
         """whether a device with dname has topic name tname"""
         assert dname in self._config['devices']
         return tname in self._config['devices'][dname]['config']['topics']
+
+    def get_topics(self, dname):
+        assert dname in self._config['devices']
+        return list(self._config['devices'][dname]['config']['topics'].keys())
 
     def get_msg_setting(self, dname, tname, prop):
         """safer method to get topic property"""
@@ -231,7 +238,6 @@ class SystemConfig:
 
         graph_path = pathlib.Path(join_if_not_abs(self.config_dict['output_dir'], fname))
         graph.write_png(graph_path)
-
 
     @property
     def config_dict(self):
