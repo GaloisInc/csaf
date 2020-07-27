@@ -91,6 +91,5 @@ def generate_serializer(msg_filepath, output_dir, package_name="csaf"):
     # load an instance and return it
     class_name = pathlib.Path(msg_filepath).stem
     class_ = getattr(python_module, class_name)
-    instance = class_()
-    return instance
+    return class_
 

@@ -10,7 +10,7 @@ import logging
 import toml
 import pydot
 
-from .rosmsg import CsafMsg
+from .rosmsg import CsafMsg, generate_serializer
 
 
 def mkdir_if_not_exist(dirname):
@@ -134,6 +134,7 @@ class SystemConfig:
                         assert os.path.exists(msg_path), f"message file '{msg_path}' in topic '{tname}' for " \
                                                          f"device '{dname}' must exist!"
                         config["devices"][dname]["config"]["topics"][tname]['msg'] = CsafMsg.from_msg_file(msg_path)
+                        config["devices"][dname]["config"]["topics"][tname]['serializer'] = generate_serializer(msg_path, config["codec_dir"])
 
         return cls(config)
 

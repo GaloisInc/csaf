@@ -1,58 +1,31 @@
 import numpy as np
+import os
+import sys
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, HERE)
 
 import f16plant_helper as ph
-
-from csaf import message
+import fire
 
 import os
 import toml
-import json
 
-def main():
+def main(time=0.0, state=[.1]*13, input=[0]*4, update=False, output=False):
     this_path = os.path.dirname(os.path.realpath(__file__))
     info_file = os.path.join(this_path, "f16plant.toml")
     with open(info_file, 'r') as ifp:
         info = toml.load(ifp)
 
     parameters = info["parameters"]
+    xd, xout = subf16df(time, state, input, parameters)
 
-    n_states = 13
-    n_outputs = 2
-    n_inputs = 4
-
-    fs = info["sampling_frequency"]
-
-    x = info["topics"]["states"]["initial"]
-    epoch = 0
-
-    msg_writer = message.Message()
-
-    while True:
-        ins = input(f"msg at [t={epoch/fs}]>")
-        try:
-            msg = json.loads(ins)
-        except json.decoder.JSONDecodeError as exc:
-            raise Exception(f"input <{ins}> couldn't be interpreted as json! {exc}")
-
-        in_epoch = msg["epoch"]
-        epoch = in_epoch
-        #assert in_epoch == epoch
-
-        f = msg["Output"]
-        assert len(f) == n_inputs
-
-        xd, output = subf16df(epoch/fs, x, f, parameters)
-        assert len(xd) == n_states
-        assert len(output) == n_outputs
-
-        msg = msg_writer.write_message(epoch/fs, output=output, state=x, differential=xd)
-
-        # TODO: for now do bad integration
-        x += 1/fs * xd
-        epoch += 1
-
-        print(msg)
-
+    if update:
+        return list(xd)
+    elif output:
+        return list(xout)
+    else:
+        return
 
 def subf16df(t, x, f, parameters, mult=None):
     """ Calculate state space differential """
@@ -208,4 +181,4 @@ def subf16df(t, x, f, parameters, mult=None):
 
 
 if __name__ == "__main__":
-    main()
+    fire.Fire(main)

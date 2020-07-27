@@ -3,7 +3,7 @@ uint32 version_minor
 
 string topic
 
-uint64 epoch
+time time
 
 float64 vt
 float64 alpha

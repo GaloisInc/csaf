@@ -1,115 +1,139 @@
-"""
-Simple System Components
-
-Ethan Lew
-06/17/2020
-"""
-
-import sys
-import pexpect
 import numpy as np
-import logging
+import typing
 
-from csaf.component import Component
-
-
-def dict_to_vec(dict, names):
-    """convenience to infer vector from dictionary structure"""
-    return np.array([dict[n] for n in names])
+from .component import Component
+from .messenger import SerialMessenger
+from .model import Model
 
 
-def vec_to_dict(vec, names):
-    """convenience to infer dictionary from vector structure"""
-    assert len(vec) == len(names)
-    return {n:v for n,v in zip(names, vec)}
+class DynamicComponent(Component):
+    def __init__(self,
+                 model: Model,
+                 topics_input: list,
+                 messenger_out: SerialMessenger,
+                 messenger_in: SerialMessenger,
+                 sampling_frequency: float,
+                 name: str):
+        super().__init__(len(messenger_in.topics), 1)
+        self._model: Model = model
+        self._messenger_out: SerialMessenger = messenger_out
+        self._messenger_in: SerialMessenger = messenger_in
+        self._sampling_frequency: float = sampling_frequency
+        self._name: str = name
+        self._topics_input: list = topics_input
+        self._state: typing.Union[None, list] = ([0.0,] * self.num_states if self.num_states > 0 else None)
 
-
-class DynamicalSystem(Component):
-    def __init__(self, command, names_inputs, names_outputs, names_states, name=None):
-        def get_io_socket(s):
-            """get number of necessary sockets """
-            if len(s) > 0:
-                if type(s[0]) is not str:
-                    num_socks = len(names_inputs)
-                else:
-                    num_socks = 1
-            else:
-                num_socks = 0
-            return num_socks
-
-        num_in_socks, num_out_socks = get_io_socket(names_inputs), get_io_socket(names_outputs)
-        super().__init__(num_in_socks, num_out_socks, name=name)
-        self._names_inputs = names_inputs
-        self._names_outputs = names_outputs
-        self._names_states = names_states
-
-        self.command = command
-        self.comp_process = None
-        self.prompt = r'msg(.*)>'
-
-        # for the ROSmsg serializer
-        self.serializer = None
-
-    def subscriber_thread(self, stop_event=None, sock_num=None):
-        """DynamicalSystem expects that component interfaces as an interactive prompt
-        """
-        def debug_start(sdx):
-            return f"Component '{self.name}' {self.__class__.__name__} Socket {sdx}"
-
-        def print_if_debug(s):
-            if self.debug_node:
-                logging.debug(s)
-        print_if_debug(f"{debug_start(str([i for i in range(self.num_input_socks)]))} Initialized", )
-
-        # spawn a pexpect session to interact with middleware app
-        self.comp_process = pexpect.spawn(self.command)
-        self.comp_process.expect(self.prompt)
-
-        while (not stop_event.is_set()):
+    def receive_input(self):
+        """receive all necessary topics for a DynamicComponent"""
+        col = {}
+        topics_collect = self.topics.copy()
+        while len(topics_collect) > 0:
             for sidx, sn in enumerate(self.input_socks):
-                # expect to receive one message per socker per epoch
-                topic = sn.recv().decode()
-                recv = sn.recv()
-                print_if_debug(f"{debug_start(sidx)} Received {self._n_subscribe[sock_num]} Topic '{topic}' Message <{self.deserialize(recv)}>")
-                mesg = self.deserialize(recv)
+                topic = sn.recv_string()
+                recv = sn.recv_pyobj()
+                t, col[topic] = self._messenger_in.receive_message(recv, topic, 0.0)
+                assert topic in topics_collect
+                topics_collect.remove(topic)
+        col['time'] = t
+        return col
 
-                # check message contents
-                assert 'Output' in mesg
-                assert 'epoch' in mesg
+    def send_output(self, input):
+        """send {states, outputs} for DynamicComponent"""
+        t = input['time']
 
-                # send message and skip over output
-                self.comp_process.sendline(self.serialize(mesg))
-                self.comp_process.expect('\r\n')
+        if len(self._topics_input) > 0:
+            u = list(np.concatenate([input[f] for f in self._topics_input]))
+        else:
+            u = []
 
-                # update subscribe receives
-                self._n_subscribe[sidx] += 1
+        if self._state is not None:
+            xp = self._model.get_state_update(t, self._state, u)
+            assert len(xp) == self.num_states
+            if self._model.is_continuous:
+                xp = list(np.array(self._state) + (1/self._sampling_frequency) * np.array(xp))
+            self._state = xp
+            msg = self._messenger_out.send_message(xp, f'{self.name}-states', t)
+            self.send_message(0, msg, topic=f"{self.name}-states")
+        else:
+            xp = []
 
-            # now expect message output, and send it
-            self.comp_process.expect(self.prompt)
-            recv = self.comp_process.before
-            recv_msg = self.deserialize(recv)
+        if f'{self.name}-outputs' in self._messenger_out.topics:
+            out = self._model.get_output(t, xp, u)
+            msg = self._messenger_out.send_message(out, f'{self.name}-outputs', t)
+            self.send_message(0, msg, topic=f"{self.name}-outputs")
 
-            if 'State' in recv_msg:
-                recv_msg_state = recv_msg.copy()
-                recv_msg_state['Output'] = recv_msg_state['State']
-                del recv_msg_state['State']
-                self.send_message(0, recv_msg_state, topic=self.name + "-" +'states')
-                del recv_msg['State']
-            if 'Output' in recv_msg:
-                self.send_message(0, recv_msg, topic=self.name + "-" +'outputs')
+    def send_stimulus(self, t):
+        u = list(np.zeros((self.num_inputs)))
 
-        # quit
-        print_if_debug(f"{debug_start()} received kill event. Exiting...")
-        sys.exit()
+        if self._state is not None:
+            msg = self._messenger_out.send_message(self._state, f'{self.name}-states', t)
+            self.send_message(0, msg, topic=f"{self.name}-states")
+
+        if f'{self.name}-outputs' in self._messenger_out.topics:
+            out = self._model.get_output(t, self._state, u)
+            msg = self._messenger_out.send_message(out, f'{self.name}-outputs', t)
+            self.send_message(0, msg, topic=f"{self.name}-outputs")
+
+    def _names_topic(self, topic, messenger):
+        """generic names getter for messenger"""
+        if topic in messenger.topics:
+            return messenger.names_topic(topic)
+        else:
+            return []
+
+    def _num_topic(self, topic, messenger):
+        """generic lengths getter for messenger"""
+        return len(self._names_topic(topic, messenger))
+
+    @property
+    def names_states(self):
+        return self._names_topic(f'{self.name}-states', self._messenger_out)
+
+    @property
+    def names_input(self):
+        n = []
+        for t in self._topics_input:
+            n += self._messenger_in.names_topic(t)
+        return n
+
+    @property
+    def names_outputs(self):
+        return self._names_topic(f'{self.name}-outputs', self._messenger_out)
 
     @property
     def num_inputs(self):
-        return len(self._names_inputs)
+        return len(self.names_input)
 
     @property
     def num_states(self):
-        return len(self._names_states)
+        return self._num_topic(f'{self.name}-states', self._messenger_out)
 
     @property
     def num_outputs(self):
-        return len(self._names_outputs)
+        return self._num_topic(f'{self.name}-outputs', self._messenger_out)
+
+    @property
+    def topics(self):
+        return self._messenger_in.topics
+
+    @property
+    def sampling_frequency(self):
+        return self._sampling_frequency
+
+    @property
+    def sampling_phase(self):
+        return 0.0
+
+    @property
+    def name(self):
+        return self._name
+
+    @property
+    def state(self):
+        return self._state
+
+    @state.setter
+    def state(self, state):
+        assert len(state) == self.num_states
+        self._state = state
+

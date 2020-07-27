@@ -5,7 +5,7 @@ import json
 import numpy as np
 from csaf import message
 
-def main():
+def main(time=0.0, state=None, input=[0]*4, update=False, output=False):
 
     msg_writer = message.Message()
     epoch = 0
@@ -18,22 +18,14 @@ def main():
 
     parameters = info["parameters"]
 
-    while True:
-        ins = input(f"msg0 at [t={epoch/fs}]>")
-        ins_0 = input(f"msg1 at [t={epoch/fs}]>")
-        try:
-            msg = json.loads(ins)
-        except json.decoder.JSONDecodeError as exc:
-            raise Exception(f"input <{ins}> couldn't be interpreted as json! {exc}")
+    if output:
+        return [0.0] * 4
+    else:
+        return
 
-        in_epoch = msg["epoch"]
-        epoch = in_epoch
-        #assert in_epoch == epoch
 
-        output = np.zeros((4,))
-        msg = msg_writer.write_message(epoch/fs, output=output)
 
-        print(msg)
 
 if __name__ == '__main__':
-    main()
+    import fire
+    fire.Fire(main)

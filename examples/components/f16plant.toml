@@ -4,7 +4,7 @@ system_solver = "Euler"
 
 sampling_frequency = 100
 
-is_discrete = true
+is_discrete = false
 is_hybrid = false
 
 [parameters]
