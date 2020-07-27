@@ -2,9 +2,9 @@ system_name = "F16 Autopilot"
 system_representation = "black box"
 system_solver = "Euler"
 
-sampling_frequency = 100
+sampling_frequency = 10
 
-is_discrete = false
+is_discrete = true
 is_hybrid = false
 
 [inputs]

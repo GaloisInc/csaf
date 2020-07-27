@@ -1,17 +1,16 @@
-import numpy as np
 import os
 import sys
-
-HERE = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, HERE)
-
-import f16plant_helper as ph
-import fire
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 import os
 import toml
 
-def main(time=0.0, state=[.1]*13, input=[0]*4, update=False, output=False):
+import numpy as np
+import f16plant_helper as ph
+import fire
+
+
+def main(time=0.0, state=(.1,)*13, input=(0)*4, update=False, output=False):
     this_path = os.path.dirname(os.path.realpath(__file__))
     info_file = os.path.join(this_path, "f16plant.toml")
     with open(info_file, 'r') as ifp:
@@ -26,6 +25,7 @@ def main(time=0.0, state=[.1]*13, input=[0]*4, update=False, output=False):
         return list(xout)
     else:
         return
+
 
 def subf16df(t, x, f, parameters, mult=None):
     """ Calculate state space differential """

@@ -1,9 +1,31 @@
 import os
 import toml
-import json
 
 import numpy as np
-from csaf import message
+
+
+def main(time=0.0, state=(.1,)*3, input=(0,)*19, update=False, output=False):
+    this_path = os.path.dirname(os.path.realpath(__file__))
+    info_file = os.path.join(this_path, "f16llc.toml")
+    with open(info_file, 'r') as ifp:
+        info = toml.load(ifp)
+
+    parameters = info["parameters"]
+
+    n_states = 3
+    n_outputs = 4
+
+    xd = llcdf(time, state, input, parameters)
+    xout = llcoutput(time, state, input, parameters)
+    assert len(xd) == n_states
+    assert len(xout) == n_outputs
+
+    if update:
+        return list(xd)
+    elif output:
+        return list(xout)
+    else:
+        return
 
 
 def llcoutput(t, cstate, u, parameters):
@@ -82,29 +104,6 @@ def clip_u(u_deg, parameters):
     u_deg[3] = max(min(u_deg[3], parameters["rudder_min"]), parameters["rudder_max"])
     return u_deg
 
-
-def main(time=0.0, state=[.1]*3, input=[0]*19, update=False, output=False):
-    this_path = os.path.dirname(os.path.realpath(__file__))
-    info_file = os.path.join(this_path, "f16llc.toml")
-    with open(info_file, 'r') as ifp:
-        info = toml.load(ifp)
-
-    parameters = info["parameters"]
-
-    n_states = 3
-    n_outputs = 4
-
-    xd = llcdf(time, state, input, parameters)
-    xout = llcoutput(time, state, input, parameters)
-    assert len(xd) == n_states
-    assert len(xout) == n_outputs
-
-    if update:
-        return list(xd)
-    elif output:
-        return list(xout)
-    else:
-        return
 
 if __name__ == "__main__":
     import fire
