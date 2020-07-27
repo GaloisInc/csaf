@@ -8,8 +8,8 @@ is_discrete = false
 is_hybrid = false
 
 [parameters]
-    s = 300
-    b = 30
+    s = 300.0
+    b = 30.0
     cbar = 11.32
     rm = 1.57e-3
     xcgr = 0.35

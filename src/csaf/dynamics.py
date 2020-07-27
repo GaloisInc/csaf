@@ -1,6 +1,9 @@
 import numpy as np
+import time
 import typing
 import zmq
+
+import scipy.integrate
 
 from .component import Component
 from .messenger import SerialMessenger
@@ -38,6 +41,7 @@ class DynamicComponent(Component):
         self._topics_input: list = topics_input
         # input buffering for mixed rate components
         self._input_buffer: dict = {}
+        self.current_time = 0
         # initial state and consequent state buffer
         self._state_buffer: typing.Union[None, list] = ([0.0, ] * self.num_states if self.num_states > 0 else None)
 
@@ -48,20 +52,27 @@ class DynamicComponent(Component):
             topics = []
             recvs = []
             # poll zmq socket and see if message is available
-            while sn.poll(1) == zmq.POLLIN:
-                topics.append(sn.recv_string())
-                recvs.append(sn.recv_pyobj())
+            time.sleep(0.00001)
+            while sn.poll(0) == zmq.POLLIN:
+                topics.append(sn.recv_string(zmq.DONTWAIT))
+                recvs.append(sn.recv_pyobj(zmq.DONTWAIT))
             # is message received, update the input buffer
             if len(topics) > 0:
                 topic = topics[-1]
                 recv = recvs[-1]
                 t, self._input_buffer[topic] = self._messenger_in.deserialize_message(recv, topic, 0.0)
                 self._input_buffer['time'] = t
+        if len(self._input_buffer.keys()) == 0:
+            time.sleep(0.0001)
+            self.receive_input()
+        self.current_time += 1.0 / self.sampling_frequency
         return self._input_buffer
 
     def send_output(self):
         """send {states, outputs} for DynamicComponent"""
-        t = self._input_buffer['time']
+        t = self.current_time
+        dt = 1.0 / self.sampling_frequency
+        dout = {}
 
         if len(self._topics_input) > 0:
             u = list(np.concatenate([self._input_buffer[f] for f in self._topics_input]))
@@ -69,13 +80,17 @@ class DynamicComponent(Component):
             u = []
 
         if self._state_buffer is not None:
-            xp = self._model.get_state_update(t, self._state_buffer, u)
-            assert len(xp) == self.num_states
-            if self._model.is_continuous:
-                xp = list(np.array(self._state_buffer) + (1 / self._sampling_frequency) * np.array(xp))
+            if self._model.is_discrete:
+                xp = self._model.get_state_update(t, self._state_buffer, u)
+                assert len(xp) == self.num_states
+            else:
+                df = lambda y, t: self._model.get_state_update(t, y, u)
+                sol = scipy.integrate.odeint(df, self._state_buffer, [t, t+dt])
+                xp = sol[-1]
             self._state_buffer = xp
             msg = self._messenger_out.serialize_message(xp, f'{self.name}-states', t)
             self.send_message(0, msg, topic=f"{self.name}-states")
+            dout['states'] = xp
         else:
             xp = []
 
@@ -83,6 +98,9 @@ class DynamicComponent(Component):
             out = self._model.get_output(t, xp, u)
             msg = self._messenger_out.serialize_message(out, f'{self.name}-outputs', t)
             self.send_message(0, msg, topic=f"{self.name}-outputs")
+            dout['outputs'] = out
+        dout['times'] = t
+        return dout
 
     def send_stimulus(self, t: float):
         """send output of device and its current state"""

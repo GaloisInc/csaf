@@ -10,13 +10,18 @@ import f16plant_helper as ph
 import fire
 
 
-def main(time=0.0, state=(.1,)*13, input=(0)*4, update=False, output=False):
-    this_path = os.path.dirname(os.path.realpath(__file__))
-    info_file = os.path.join(this_path, "f16plant.toml")
-    with open(info_file, 'r') as ifp:
-        info = toml.load(ifp)
+parameters = {}
 
-    parameters = info["parameters"]
+
+def main(time=0.0, state=(.1,)*13, input=(0)*4, update=False, output=False):
+    global parameters
+    if len(parameters.keys()) == 0:
+        this_path = os.path.dirname(os.path.realpath(__file__))
+        info_file = os.path.join(this_path, "f16plant.toml")
+        with open(info_file, 'r') as ifp:
+            info = toml.load(ifp)
+        parameters = info["parameters"]
+
     xd, xout = subf16df(time, state, input, parameters)
 
     if update:

@@ -8,6 +8,8 @@ from .dynamics import DynamicComponent
 from .messenger import SerialMessenger
 from .scheduler import Scheduler
 from .model import ModelNative
+from.trace import TimeTrace
+
 
 
 class System:
@@ -76,7 +78,7 @@ class System:
         self.eval_order = eval_order
         self.config = config
 
-    def simulate_tspan(self, tspan):
+    def simulate_tspan(self, tspan, show_status=False):
         """over a given timespan tspan, simulate the system"""
         sched = Scheduler(self.components, self.eval_order)
         s = sched.get_schedule_tspan(tspan)
@@ -87,12 +89,25 @@ class System:
             idx = self.names.index(dname)
             self.components[idx].send_stimulus(tspan[0])
 
+        # get time trace fields
+        dnames = self.config.get_name_devices
+        dtraces = {}
+        for dname in dnames:
+            fields = (['times'] + [f"{topic}" for topic in self.config.get_topics(dname)])
+            dtraces[dname] = TimeTrace(fields)
+
+        if show_status:
+            import tqdm
+            s = tqdm.tqdm(s)
+
         # TODO collect updated topics only
         for cidx, time in s:
             idx = self.names.index(cidx)
-            inp = self.components[idx].receive_input()
-            inp['time'] = time
-            self.components[idx].send_output()
+            self.components[idx].receive_input()
+            out = self.components[idx].send_output()
+            dtraces[cidx].append(**out)
+
+        return dtraces
 
     @property
     def names(self):

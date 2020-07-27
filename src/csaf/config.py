@@ -190,6 +190,10 @@ class SystemConfig:
         assert dname in self._config['devices']
         return tname in self._config['devices'][dname]['config']['topics']
 
+    def get_topics(self, dname):
+        assert dname in self._config['devices']
+        return list(self._config['devices'][dname]['config']['topics'].keys())
+
     def get_msg_setting(self, dname, tname, prop):
         """safer method to get topic property"""
         assert dname in self._config['devices']
@@ -234,7 +238,6 @@ class SystemConfig:
 
         graph_path = pathlib.Path(join_if_not_abs(self.config_dict['output_dir'], fname))
         graph.write_png(graph_path)
-
 
     @property
     def config_dict(self):

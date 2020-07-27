@@ -4,13 +4,17 @@ import toml
 import numpy as np
 
 
-def main(time=0.0, state=(.1,)*3, input=(0,)*19, update=False, output=False):
-    this_path = os.path.dirname(os.path.realpath(__file__))
-    info_file = os.path.join(this_path, "f16llc.toml")
-    with open(info_file, 'r') as ifp:
-        info = toml.load(ifp)
+parameters = {}
 
-    parameters = info["parameters"]
+
+def main(time=0.0, state=(.1,)*3, input=(0,)*19, update=False, output=False):
+    global parameters
+    if len(parameters.keys()) == 0:
+        this_path = os.path.dirname(os.path.realpath(__file__))
+        info_file = os.path.join(this_path, "f16llc.toml")
+        with open(info_file, 'r') as ifp:
+            info = toml.load(ifp)
+        parameters = info["parameters"]
 
     n_states = 3
     n_outputs = 4
