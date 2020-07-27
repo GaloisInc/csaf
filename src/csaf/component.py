@@ -8,7 +8,6 @@ component models a simple class that contains multiple subscribers/publishers to
 
 import time
 import json
-import sys
 import threading
 import logging
 
@@ -142,4 +141,3 @@ class Component:
     def debug_node(self, s):
         assert type(s) is bool, f"setting debug_node must be boolean type (got {type(s)})"
         self._debug = s
-

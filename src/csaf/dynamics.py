@@ -8,6 +8,15 @@ from .model import Model
 
 
 class DynamicComponent(Component):
+    """  components that broadcast dynamic model information at a given sampling frequency
+
+    component broadcasts and accepts ROSmsg's, as genpy.Message objects
+
+    component is pub/sub architecture, so temporal model information is messaged unto a states and outputs topic. These
+    topics follow the naming convention "{component name}-{states|outputs}"
+
+    component has input and state buffers, so it must be run in order to be valid (Model object is stateless)
+    """
     def __init__(self,
                  model: Model,
                  topics_input: list,
@@ -15,24 +24,34 @@ class DynamicComponent(Component):
                  messenger_in: SerialMessenger,
                  sampling_frequency: float,
                  name: str):
+        # components can have only one output (but many topics)
         super().__init__(len(messenger_in.topics), 1)
+        # dynamic model
         self._model: Model = model
+        # input/output serializers
         self._messenger_out: SerialMessenger = messenger_out
         self._messenger_in: SerialMessenger = messenger_in
+        # component attributes
         self._sampling_frequency: float = sampling_frequency
         self._name: str = name
+        # topics order to input vector
         self._topics_input: list = topics_input
-        self._input_buffer = {}
-        self._state: typing.Union[None, list] = ([0.0,] * self.num_states if self.num_states > 0 else None)
+        # input buffering for mixed rate components
+        self._input_buffer: dict = {}
+        # initial state and consequent state buffer
+        self._state_buffer: typing.Union[None, list] = ([0.0, ] * self.num_states if self.num_states > 0 else None)
 
     def receive_input(self):
         """receive all necessary topics for a DynamicComponent"""
         for sidx, sn in enumerate(self.input_socks):
+            # message from publishers may or may not be ready (depends on frequency of devices)
             topics = []
             recvs = []
+            # poll zmq socket and see if message is available
             while sn.poll(1) == zmq.POLLIN:
                 topics.append(sn.recv_string())
                 recvs.append(sn.recv_pyobj())
+            # is message received, update the input buffer
             if len(topics) > 0:
                 topic = topics[-1]
                 recv = recvs[-1]
@@ -49,12 +68,12 @@ class DynamicComponent(Component):
         else:
             u = []
 
-        if self._state is not None:
-            xp = self._model.get_state_update(t, self._state, u)
+        if self._state_buffer is not None:
+            xp = self._model.get_state_update(t, self._state_buffer, u)
             assert len(xp) == self.num_states
             if self._model.is_continuous:
-                xp = list(np.array(self._state) + (1/self._sampling_frequency) * np.array(xp))
-            self._state = xp
+                xp = list(np.array(self._state_buffer) + (1 / self._sampling_frequency) * np.array(xp))
+            self._state_buffer = xp
             msg = self._messenger_out.serialize_message(xp, f'{self.name}-states', t)
             self.send_message(0, msg, topic=f"{self.name}-states")
         else:
@@ -65,27 +84,27 @@ class DynamicComponent(Component):
             msg = self._messenger_out.serialize_message(out, f'{self.name}-outputs', t)
             self.send_message(0, msg, topic=f"{self.name}-outputs")
 
-    def send_stimulus(self, t):
+    def send_stimulus(self, t: float):
         """send output of device and its current state"""
         u = list(np.zeros((self.num_inputs)))
 
-        if self._state is not None:
-            msg = self._messenger_out.serialize_message(self._state, f'{self.name}-states', t)
+        if self._state_buffer is not None:
+            msg = self._messenger_out.serialize_message(self._state_buffer, f'{self.name}-states', t)
             self.send_message(0, msg, topic=f"{self.name}-states")
 
         if f'{self.name}-outputs' in self._messenger_out.topics:
-            out = self._model.get_output(t, self._state, u)
+            out = self._model.get_output(t, self._state_buffer, u)
             msg = self._messenger_out.serialize_message(out, f'{self.name}-outputs', t)
             self.send_message(0, msg, topic=f"{self.name}-outputs")
 
-    def _names_topic(self, topic, messenger):
+    def _names_topic(self, topic: str, messenger: SerialMessenger) -> list:
         """generic names getter for messenger"""
         if topic in messenger.topics:
             return messenger.names_topic(topic)
         else:
             return []
 
-    def _num_topic(self, topic, messenger):
+    def _num_topic(self, topic: str, messenger: SerialMessenger) -> int:
         """generic lengths getter for messenger"""
         return len(self._names_topic(topic, messenger))
 
@@ -134,10 +153,11 @@ class DynamicComponent(Component):
 
     @property
     def state(self):
-        return self._state
+        return self._state_buffer
 
     @state.setter
-    def state(self, state):
-        assert len(state) == self.num_states
-        self._state = state
+    def state(self, state: list):
+        assert len(state) == self.num_states, f"state must be array with length {self.num_states} " \
+                                              f"(got length {len(state)} instead)"
+        self._state_buffer = state
 

@@ -10,16 +10,16 @@ class Scheduler:
     should send input/output to one another
     """
     @staticmethod
-    def get_uniform_events(ts, tp, tspan):
+    def get_uniform_events(ts: float, tp: float, tspan):
         """for a uniform time event device, get device events"""
         t0, tf = float(tspan[0]), float(tspan[1])
         t0p, tfp = 0.0, float(tf - t0)
-        n0 = np.ceil((t0p - tp) / (ts)) if not np.abs(ts * t0p) < sys.float_info.epsilon else 0.0
-        nf = np.floor((tfp - tp) / (ts)) if not np.abs(ts * tfp) < sys.float_info.epsilon else 0.0
+        n0 = np.ceil((t0p - tp) / ts)
+        nf = np.floor((tfp - tp) / ts)
         return list(np.arange(n0, nf + 1) * ts + tp + t0)
 
     @staticmethod
-    def get_next_event(ts, tp, t0):
+    def get_next_event(ts: float, tp: float, t0):
         """for uniform time event device, get next event time from time t0"""
         t0p = 0.0
         n0 = np.ceil((t0p - tp) / (ts * t0p)) if not np.abs(ts * t0p) < sys.float_info.epsilon else 0.0
@@ -43,9 +43,12 @@ class Scheduler:
         self._components = components
         self._priority = device_priority
 
-    def get_schedule_next(self, ct):
-        """from current time, get next event"""
-        sort_struct = [(c.name, self.get_next_event(1 / c.sampling_frequency, c.sampling_phase, ct)) for c in self._components]
+    def get_schedule_next(self, ct: float):
+        """from current time, get next event
+        TODO: switch to co-routine
+        """
+        sort_struct = [(c.name, self.get_next_event(1 / c.sampling_frequency, c.sampling_phase, ct))
+                       for c in self._components]
         sort_struct.sort(key=functools.cmp_to_key(lambda x, y: self.cmp_sort_priority(x, y, self._priority)))
         return sort_struct[0]
 
@@ -64,4 +67,3 @@ class Scheduler:
         # sort the parallel array structure and return it
         sort_struct.sort(key=functools.cmp_to_key(lambda x, y: self.cmp_sort_priority(x, y, self._priority)))
         return sort_struct
-

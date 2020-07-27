@@ -1,4 +1,4 @@
-""" Component Based System
+"""Component Based System
 
 Ethan Lew
 07/13/20
@@ -7,7 +7,7 @@ from .config import SystemConfig
 from .dynamics import DynamicComponent
 from .messenger import SerialMessenger
 from .scheduler import Scheduler
-from .model import ModelExecutable, ModelNative
+from .model import ModelNative
 
 
 class System:
@@ -16,13 +16,13 @@ class System:
     Has a scheduler to permit time simulations of the component system
     """
     @classmethod
-    def from_toml(cls, config_file):
+    def from_toml(cls, config_file: str):
         """produce a system from a toml file"""
         config = SystemConfig.from_toml(config_file)
         return cls.from_config(config)
 
     @classmethod
-    def from_config(cls, config):
+    def from_config(cls, config: SystemConfig):
         """produce system from SystemConfig object
         TODO: decompose long classmethod into functions (?)
         """
@@ -34,7 +34,7 @@ class System:
             # dynamic model
             # TODO: better Model class selection here
             is_discrete = dconfig["config"]["is_discrete"]
-            model = ModelNative.from_filename(dconfig["process"] , is_discrete=is_discrete)
+            model = ModelNative.from_filename(dconfig["process"], is_discrete=is_discrete)
 
             # pub/sub parameters
             sub_ports = [[str(config.config_dict["devices"][l]["pub"]), l+"-"+t] for l, t in dconfig["sub"]]
@@ -104,4 +104,3 @@ class System:
         for c in self.components:
             p += c.output_socks
         return p
-

@@ -7,7 +7,7 @@ import pathlib
 import importlib
 
 
-def subprocess_check_output(command=[]):
+def subprocess_check_output(command=()):
     """convenience to run command and return its output
     TODO: this is slow, reimplement to be fast and with better error handling
     """
@@ -22,15 +22,15 @@ class Model(abc.ABC):
     Introduces an interface to get output, get state update output,
     and whether the model operates in discrete or continuous time
     """
-    def __init__(self, is_discrete = True):
+    def __init__(self, is_discrete: bool = True):
         self._is_discrete = is_discrete
 
     @abc.abstractmethod
-    def get_output(self, t, x, u):
+    def get_output(self, t: float, x, u):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def get_state_update(self, t, x, u):
+    def get_state_update(self, t: float, x, u):
         raise NotImplementedError
 
     @property
@@ -54,7 +54,7 @@ class ModelNative(Model):
     state update: main(time=t, state=x, input=u, update=True)
     """
     @classmethod
-    def from_filename(cls, mname, fname="main", **kwargs):
+    def from_filename(cls, mname: str, fname: str = "main", **kwargs):
         """given a executable filename and run environment, produce a ModelExecutable"""
         assert os.path.exists(mname)
         spec = importlib.util.spec_from_file_location(pathlib.Path(mname).stem, mname)
@@ -67,14 +67,13 @@ class ModelNative(Model):
         super().__init__(**kwargs)
         self._func = func
 
-    def get_output(self, t, x, u):
+    def get_output(self, t: float, x, u):
         """executable output implementation"""
         return self._func(time=t, state=x, input=u, output=True)
 
-    def get_state_update(self, t, x, u):
+    def get_state_update(self, t: float, x, u):
         """state update implementation"""
         return self._func(time=t, state=x, input=u, update=True)
-
 
 
 class ModelExecutable(Model):
@@ -86,31 +85,31 @@ class ModelExecutable(Model):
     state update: env executable --time <t> --state <state> --input <in> --update
     """
     @classmethod
-    def from_filename(cls, fname, environment=None, **kwargs):
+    def from_filename(cls, fname: str, environment=None, **kwargs):
         """given a executable filename and run environment, produce a ModelExecutable"""
         os.path.exists(fname)
         command = ([environment] if environment else []) + [fname]
         return cls(command, **kwargs)
 
-    def __init__(self, command, **kwargs):
+    def __init__(self, command: list, **kwargs):
         super().__init__(**kwargs)
         self._command = command
 
-    def _run_command(self, t, x, u, trigger):
+    def _run_command(self, t: float, x, u, trigger):
         """run model command with a given output trigger"""
         x = [] if x is None else x
-        arguments = ["--time", str(t)] + (["--state", '[' +','.join([str(xi) for xi in x]) + ']'] if len(x) > 0 else []) + (["--input", '[' +','.join([str(ui) for ui in u])+']'] if len(u) > 0 else [])
+        arguments = ["--time", str(t)] + \
+                    (["--state", '[' + ','.join([str(xi) for xi in x]) + ']'] if len(x) > 0 else []) + \
+                    (["--input", '[' +','.join([str(ui) for ui in u])+']'] if len(u) > 0 else [])
         arguments += [trigger]
         run_command = self._command + arguments
         out = subprocess_check_output(run_command)
         return [float(s) for s in out.decode().splitlines()]
 
-    def get_output(self, t, x, u):
+    def get_output(self, t: float, x, u):
         """executable output implementation"""
         return self._run_command(t, x, u, "--output")
 
-    def get_state_update(self, t, x, u):
+    def get_state_update(self, t: float, x, u):
         """state update implementation"""
         return self._run_command(t, x, u, "--update")
-
-

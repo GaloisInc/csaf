@@ -54,7 +54,7 @@ class SystemConfig:
         return ["run_command", "process", "config", "debug", "sub", "pub"]
 
     @classmethod
-    def from_toml(cls, toml_file):
+    def from_toml(cls, toml_file: str):
         """from a toml file, ingest a system configuration and apply checks
         TODO: restructure into smaller functions -- long
         """
@@ -140,10 +140,10 @@ class SystemConfig:
 
         return cls(config)
 
-    def __init__(self, config):
+    def __init__(self, config: dict):
         self._config = config
 
-    def get_device_settings(self, dname):
+    def get_device_settings(self, dname: str):
         """get information about a device by its device name (dname)"""
         assert dname in self._config["devices"]
         return self._config["devices"][dname]
@@ -179,7 +179,7 @@ class SystemConfig:
 
         return nodes, edges, edge_labels
 
-    def get_msg_width(self, dname, tname):
+    def get_msg_width(self, dname: str, tname: str):
         """given device name and topic name, return the number of fields in a message
         """
         cmsg = self.get_msg_setting(dname, tname, "msg")
