@@ -1,0 +1,109 @@
+%Copyright 2014 Jean-Philippe Eisenbarth
+%This program is free software: you can 
+%redistribute it and/or modify it under the terms of the GNU General Public 
+%License as published by the Free Software Foundation, either version 3 of the 
+%License, or (at your option) any later version.
+%This program is distributed in the hope that it will be useful,but WITHOUT ANY 
+%WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+%PARTICULAR PURPOSE. See the GNU General Public License for more details.
+%You should have received a copy of the GNU General Public License along with 
+%this program.  If not, see <http://www.gnu.org/licenses/>.
+
+%Based on the code of Yiannis Lazarides
+%http://tex.stackexchange.com/questions/42602/software-requirements-specification-with-latex
+%http://tex.stackexchange.com/users/963/yiannis-lazarides
+%Also based on the template of Karl E. Wiegers
+%http://www.se.rit.edu/~emad/teaching/slides/srs_template_sep14.pdf
+%http://karlwiegers.com
+\documentclass{scrreprt}
+\usepackage{graphicx}
+\graphicspath{ {./img/} }
+\usepackage[outdir=./]{epstopdf}
+
+\usepackage{listings}
+\usepackage[english]{babel}
+\usepackage{underscore}
+\usepackage[bookmarks=true]{hyperref}
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage{amsmath,amssymb,amsthm,amsfonts}
+\usepackage{xcolor}
+\usepackage[acronym, toc]{glossaries}
+\hypersetup{
+    bookmarks=false,    % show bookmarks bar?
+    pdftitle={CSAF Software Requirement Specification},    % title
+    pdfauthor={Ethan Lew},                     % author
+    pdfsubject={Control System Analysis Framework},                        % subject of the document
+    pdfkeywords={CSAF, Requirements, Controls, Specification, Systems}, % list of keywords
+    colorlinks=true,       % false: boxed links; true: colored links
+    linkcolor=blue,       % color of internal links
+    citecolor=black,       % color of links to bibliography
+    filecolor=black,        % color of file links
+    urlcolor=purple,        % color of external links
+    linktoc=page            % only page is linked
+}%
+\def\myversion{1.0 }
+\date{}
+%\title{%
+
+%}
+\usepackage{hyperref}
+
+\input{glossary.tex}
+
+\begin{document}
+
+\begin{flushright}
+    \rule{16cm}{5pt}\vskip1cm
+    \begin{bfseries}
+        \Huge{SOFTWARE REQUIREMENTS\\ SPECIFICATION}\\
+        \vspace{1.9cm}
+        for\\
+        \vspace{1.9cm}
+        Control System Analysis Framework (CSAF)\\
+        \vspace{1.9cm}
+        \LARGE{Version \myversion}\\
+        \vspace{1.9cm}
+        %Prepared by Ethan Lew\\
+        \vspace{1.9cm}
+        %$<$Organization$>$\\
+        \vspace{1.9cm}
+        \today\\
+    \end{bfseries}
+\end{flushright}
+
+\tableofcontents
+
+
+\chapter*{Revision History}
+
+DISCLAIMER: This is a rough draft. The document contains many errors, and the architecture is subject to change.
+
+%\begin{center}
+%    \begin{tabular}{|c|c|c|c|}
+%        \hline
+%	    Name & Date & Reason For Changes & Version\\
+%        \hline
+%	    21 & 22 & 23 & 24\\
+%        \hline
+%	    31 & 32 & 33 & 34\\
+%        \hline
+%    \end{tabular}
+%\end{center}
+
+\input{./chapters/introduction.tex}
+
+\input{./chapters/description.tex}
+
+\input{./chapters/requirements.tex}
+
+\input{./chapters/features.tex}
+
+\input{./chapters/applications.tex}
+
+\bibliographystyle{IEEEtran}
+\bibliography{bibliography}
+
+\printnoidxglossary[type=\acronymtype]
+
+\end{document}

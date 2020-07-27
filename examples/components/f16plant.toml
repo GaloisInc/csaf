@@ -1,0 +1,56 @@
+system_name = "F16 Plant Model"
+system_representation = "black box"
+system_solver = "Euler"
+
+sampling_frequency = 100
+
+is_discrete = true
+is_hybrid = false
+
+[parameters]
+    s = 300
+    b = 30
+    cbar = 11.32
+    rm = 1.57e-3
+    xcgr = 0.35
+    xcg = 0.35
+    he = 160.0
+    c1 = -0.770
+    c2 = 0.02755
+    c3 = 1.055e-4
+    c4 = 1.642e-6
+    c5 = 0.9604
+    c6 = 1.759e-2
+    c7 = 1.792e-5
+    c8 = -0.7336
+    c9 = 1.587e-5
+    rtod = 57.29578
+    g = 32.17
+    equations = "morelli"
+
+[inputs]
+    names = [['throttle', 'elevator', 'aileron', 'rudder']]
+
+[topics]
+
+  [topics.outputs]
+      msg = "./msg/f16plant_output.msg"
+
+  [topics.states]
+      msg = "./msg/f16plant_state.msg"
+      initial = [   540.0,
+                    0.0370271601,
+                    0.0,
+                    0.785398,
+                    -1.256637,
+                    -0.785398,
+                     0.0,
+                     0.0,
+                     0.0,
+                     0.0,
+                     0.0,
+                     4800.0,
+                     9.0 ]
+
+
+

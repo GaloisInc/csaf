@@ -1,0 +1,171 @@
+\chapter{Application Examples}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=\linewidth]{./img/f16demoblock.pdf}
+\caption{Example Shield Configuration for a Controlled F-16 Model Used in Demo}
+\label{fig:f16demoblock}
+\end{figure}
+
+\section{F-16 Model}
+
+The flagship use of \acrshort{csaf} is a benchmark F16 fighting falcon model. It serves as an advanced model to develop 
+offline and online control assurance schemes. The hope is to provide a benchmark to motivate better 
+verification and analysis methods, working beyond models based on Dubins car dynamics, towards the sorts of 
+models used in aerospace engineering. Roughly speaking, the dynamics are nonlinear, have about 10-20 
+dimensions (continuous state variables), and hybrid in the sense of discontinuous \acrshort{ode}s, but not with jumps in 
+the state. \\
+
+A demonstration was created to show how the controllers can be swapped and recompose to alter flight 
+trajectories. Figure \ref{fig:f16demoblock} shows an example control system for a \acrlong{gcas} shield. The 
+model and \acrshort{gcas} problem is implemented \href{https://github.com/stanleybak/AeroBenchVVPython}
+{here} and a theoretical perspective is offered in a paper \cite{heidlauf2018verification}. Target maneuvers are shielded by ground collision avoidance and the inner loop is using the classical controller with this configuration. For the demo, the outer loop is stateless, while the inner loop has three states for tracking. All of the system blocks are directly transferable to \acrshort{csaf} components.
+
+\subsection{Example Messages}
+
+To show translation to components, the associated message with the pub/sub elements can be formulated. 
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.5\linewidth]{./img/plant}
+\caption{F-16 Plant}
+\label{fig:f16plant}
+\end{figure}
+
+\subsubsection*{Temporal Message}
+
+\begin{lstlisting}
+uint32 0
+uint32 1
+
+uint32 1
+
+Header Input
+	float64 0.6
+	float64 0.01
+	float64 0.0
+	float64 0.0
+	
+Header Output
+	float64 1.0
+	float64 2.0
+	
+Header State
+	float64 540
+	float64 0.4
+	float64 -0.2
+	float64 0.0
+	float64 0.0
+	float64 0.0
+	float64 -0.01
+	float64 0.0
+	float64 0.0
+	float64 0.0
+	float64 0.0
+	float64 3600.0
+	float64 1.2
+\end{lstlisting}
+
+\subsubsection*{Component Configuration}
+
+\begin{lstlisting}
+uint32 0
+uint32 1
+
+uint32 1
+
+Header Parameters
+    float64 300,
+    float64 30,
+    float64 11.32,
+    float64 1.57e-3,
+    float64 0.35,
+    float64 0.35,
+    float64 160.0,
+    float64 -.770,
+    float64 0.02755,
+    float64 1.055e-4,
+    float64 1.642e-6,
+    float64 .9604,
+    float64 1.759e-2,
+    float64 1.792e-5,
+    float64 -.7336,
+    float64 1.587e-5,
+    float64 57.29578,
+    float64 32.17,
+    string "morelli"
+   
+Header ParameterNames
+    string "s"
+    string "b"
+    string "cbar"
+    string "rm"
+    string "xcgr"
+    string "xcg"
+    string "he"
+    string "c1"
+    string "c2"
+    string "c3"
+    string "c4"
+    string "c5"
+    string "c6"
+    string "c7"
+    string "c8"
+    string "c9"
+    string "rtod"
+    string "g"
+    string  "equations"
+    
+Header InitialState
+	float64 500
+	float64 -0.6
+	float64 0.2
+	float64 12.0
+	float64 0.0
+	float64 0.0
+	float64 0.0
+	float64 0.0
+	float64 0.0
+	float64 0.0
+	float64 0.0
+	float64 5400.0
+	float64 0.0
+	
+Header StateNames
+	string "vt"
+	string "alpha"
+	string "beta"
+	string "phi"
+	string "theta"
+	string "psi"
+	string "p"
+	string "q"
+	string "r"
+	string "pn"
+	string "pe"
+	string "h"
+	string "pow"
+\end{lstlisting}
+%
+%
+%\begin{figure}[h]
+%\centering
+%\includegraphics[width=0.5\linewidth]{./img/llc}
+%\caption{F-16 Low Level Controller}
+%\label{fig:f16plant}
+%\end{figure}
+%
+%\begin{figure}[h]
+%\centering
+%\includegraphics[width=0.5\linewidth]{./img/gcas}
+%\caption{GCAS Maneuver Controller}
+%\label{fig:f16plant}
+%\end{figure}
+%
+%\begin{figure}[h]
+%\centering
+%\includegraphics[width=0.5\linewidth]{./img/monitor}
+%\caption{Outer Loop Monitor}
+%\label{fig:f16plant}
+%\end{figure}
+
