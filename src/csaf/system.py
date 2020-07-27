@@ -11,6 +11,10 @@ from .model import ModelExecutable, ModelNative
 
 
 class System:
+    """ System accepts a component configuration, and then configures and composes them into a controlled system
+
+    Has a scheduler to permit time simulations of the component system
+    """
     @classmethod
     def from_toml(cls, config_file):
         """produce a system from a toml file"""
@@ -19,13 +23,16 @@ class System:
 
     @classmethod
     def from_config(cls, config):
-        """produce system from SystemConfig object"""
+        """produce system from SystemConfig object
+        TODO: decompose long classmethod into functions (?)
+        """
         eval_order = config.config_dict["evaluation_order"]
         devices = []
         ports = []
         names = []
         for dname, dconfig in config.config_dict["devices"].items():
             # dynamic model
+            # TODO: better Model class selection here
             is_discrete = dconfig["config"]["is_discrete"]
             model = ModelNative.from_filename(dconfig["process"] , is_discrete=is_discrete)
 
@@ -85,7 +92,7 @@ class System:
             idx = self.names.index(cidx)
             inp = self.components[idx].receive_input()
             inp['time'] = time
-            self.components[idx].send_output(inp)
+            self.components[idx].send_output()
 
     @property
     def names(self):

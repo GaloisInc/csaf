@@ -1,5 +1,6 @@
 import numpy as np
 import typing
+import zmq
 
 from .component import Component
 from .messenger import SerialMessenger
@@ -21,28 +22,30 @@ class DynamicComponent(Component):
         self._sampling_frequency: float = sampling_frequency
         self._name: str = name
         self._topics_input: list = topics_input
+        self._input_buffer = {}
         self._state: typing.Union[None, list] = ([0.0,] * self.num_states if self.num_states > 0 else None)
 
     def receive_input(self):
         """receive all necessary topics for a DynamicComponent"""
-        col = {}
-        topics_collect = self.topics.copy()
-        while len(topics_collect) > 0:
-            for sidx, sn in enumerate(self.input_socks):
-                topic = sn.recv_string()
-                recv = sn.recv_pyobj()
-                t, col[topic] = self._messenger_in.receive_message(recv, topic, 0.0)
-                assert topic in topics_collect
-                topics_collect.remove(topic)
-        col['time'] = t
-        return col
+        for sidx, sn in enumerate(self.input_socks):
+            topics = []
+            recvs = []
+            while sn.poll(1) == zmq.POLLIN:
+                topics.append(sn.recv_string())
+                recvs.append(sn.recv_pyobj())
+            if len(topics) > 0:
+                topic = topics[-1]
+                recv = recvs[-1]
+                t, self._input_buffer[topic] = self._messenger_in.deserialize_message(recv, topic, 0.0)
+                self._input_buffer['time'] = t
+        return self._input_buffer
 
-    def send_output(self, input):
+    def send_output(self):
         """send {states, outputs} for DynamicComponent"""
-        t = input['time']
+        t = self._input_buffer['time']
 
         if len(self._topics_input) > 0:
-            u = list(np.concatenate([input[f] for f in self._topics_input]))
+            u = list(np.concatenate([self._input_buffer[f] for f in self._topics_input]))
         else:
             u = []
 
@@ -52,26 +55,27 @@ class DynamicComponent(Component):
             if self._model.is_continuous:
                 xp = list(np.array(self._state) + (1/self._sampling_frequency) * np.array(xp))
             self._state = xp
-            msg = self._messenger_out.send_message(xp, f'{self.name}-states', t)
+            msg = self._messenger_out.serialize_message(xp, f'{self.name}-states', t)
             self.send_message(0, msg, topic=f"{self.name}-states")
         else:
             xp = []
 
         if f'{self.name}-outputs' in self._messenger_out.topics:
             out = self._model.get_output(t, xp, u)
-            msg = self._messenger_out.send_message(out, f'{self.name}-outputs', t)
+            msg = self._messenger_out.serialize_message(out, f'{self.name}-outputs', t)
             self.send_message(0, msg, topic=f"{self.name}-outputs")
 
     def send_stimulus(self, t):
+        """send output of device and its current state"""
         u = list(np.zeros((self.num_inputs)))
 
         if self._state is not None:
-            msg = self._messenger_out.send_message(self._state, f'{self.name}-states', t)
+            msg = self._messenger_out.serialize_message(self._state, f'{self.name}-states', t)
             self.send_message(0, msg, topic=f"{self.name}-states")
 
         if f'{self.name}-outputs' in self._messenger_out.topics:
             out = self._model.get_output(t, self._state, u)
-            msg = self._messenger_out.send_message(out, f'{self.name}-outputs', t)
+            msg = self._messenger_out.serialize_message(out, f'{self.name}-outputs', t)
             self.send_message(0, msg, topic=f"{self.name}-outputs")
 
     def _names_topic(self, topic, messenger):

@@ -88,6 +88,7 @@ class Component:
             topic = in_ports[idx][1]
             self.print_if_debug(f"binding socket {in_ports[idx][0]} with topic {topic}")
             sock.setsockopt_string(zmq.SUBSCRIBE, topic)
+            sock.setsockopt(zmq.CONFLATE, 1)
             self.input_socks.append(sock)
             self.input_topics.append(topic)
 
@@ -117,7 +118,7 @@ class Component:
         """send a message over output number output_idx """
         if self.debug_node:
             logging.debug(f"Component '{self.name}' {self.__class__.__name__} Socket {output_idx} Sending "
-                  f"{self._n_publish[output_idx]} Topic '{topic}' Message <{message}>")
+                  f"{self._n_publish[output_idx]} Topic '{topic}'")
         if topic:
             self.output_socks[output_idx].send_string(topic, zmq.SNDMORE)
             self.output_socks[output_idx].send_pyobj(message)

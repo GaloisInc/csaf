@@ -55,7 +55,9 @@ class SystemConfig:
 
     @classmethod
     def from_toml(cls, toml_file):
-        """from a toml file, ingest a system configuration and apply checks"""
+        """from a toml file, ingest a system configuration and apply checks
+        TODO: restructure into smaller functions -- long
+        """
         assert os.path.exists(toml_file),  f"TOML file '{toml_file}' doesn't exist!"
         config = attempt_parse_toml(toml_file)
         base_dir = pathlib.Path(toml_file).parent

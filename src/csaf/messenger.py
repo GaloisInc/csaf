@@ -13,7 +13,7 @@ class SerialMessenger:
     def __init__(self, serializers):
         self._serializers = serializers
 
-    def receive_message(self, msg_str, topic, time):
+    def deserialize_message(self, msg_str, topic, time):
         """receive a message of a certain topic related to a time"""
         assert topic in self._serializers
         nslice = len(self.header(topic, time))
@@ -23,7 +23,7 @@ class SerialMessenger:
         sret = [getattr(serializer_state, name) for name in serializer_state.__slots__]
         return sret[nslice - 1], sret[nslice:]
 
-    def send_message(self, msg, topic, time):
+    def serialize_message(self, msg, topic, time):
         """send a message of a certain topic at a specific time"""
         assert topic in self._serializers
         ser = self._serializers[topic]
