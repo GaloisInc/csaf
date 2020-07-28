@@ -10,17 +10,31 @@ def plot_device(ax: plt.Axes, trajs: ctc.TimeTrace,
     """convenience method to plot one axis object"""
     import numpy as np
     t = trajs[dname].times
+    t_plant = np.array(trajs["plant"].times)
     x = np.array(getattr(trajs[dname], fieldname))[:, index]
-    ax.plot(t, x, label=label.split('(')[0])
+
+    # pretty plot for zero order hold (ZOH)
+    x_match = t_plant.copy()
+    idx_max = 0
+    for idx, ti in enumerate(t):
+        if idx < len(t) - 1:
+            idxs = np.logical_and(t_plant >= ti, t_plant <= t[idx+1])
+            x_match[idxs] = x[idx]
+            idx_max = max(np.where(idxs)[0])
+        else:
+            x_match[idx_max:] = x[-1]
+
+    ax.plot(t_plant, x_match, label=label.split('(')[0])
     ax.grid()
     ax.set_xlim([min(t), max(t)])
     if label:
         ax.set_ylabel(re.search(r'\((.*?)\)',label).group(1))
     ax.legend()
 
+
 ## build and simulate system
 my_system = csys.System.from_toml("../../examples/config/config.toml")
-trajs = my_system.simulate_tspan([0, 10.0], show_status=True)
+trajs = my_system.simulate_tspan([0, 3.0], show_status=True)
 
 ## Plot Results
 fig, ax = plt.subplots(figsize=(15, 15), nrows=4, ncols=3, sharex=True)
