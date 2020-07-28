@@ -10,7 +10,8 @@ is_hybrid = false
 [parameters]
 
 [inputs]
-  names = [['force']]
+  names = [['angular_rate', 'angular_acceleration', 'velocity', 'acceleration'],
+            ['setpoint']]
 
 [topics]
   [topics.outputs]

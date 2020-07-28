@@ -10,9 +10,6 @@ is_hybrid = false
 [parameters]
     maneuver_name = "step"
 
-[inputs]
-  names = []
-
 [topics]
   [topics.outputs]
     msg = "./msg/ipmaneuver_output.msg"

@@ -16,7 +16,7 @@ is_hybrid = false
   length = 0.3    # length of pendulum
 
 [inputs]
-  names = [['velocity', 'acceleration', 'velocity', 'acceleration']]
+  names = [['displacement']]
 
 [topics]
 

@@ -86,7 +86,10 @@ class DynamicComponent(Component):
             else:
                 df = lambda y, t: self._model.get_state_update(t, y, u)
                 sol = scipy.integrate.odeint(df, self._state_buffer, [t, t+dt])
-                xp = sol[-1]
+                xp = list(sol[-1])
+                #df = lambda t, y: self._model.get_state_update(t, y, u)
+                #sol = scipy.integrate.solve_ivp(df, [t, t+dt+1E-3], np.array(self._state_buffer), method='RK45', t_eval=[t+dt])
+                #xp = list(sol.y.flatten())
             self._state_buffer = xp
             msg = self._messenger_out.serialize_message(xp, f'{self.name}-states', t)
             self.send_message(0, msg, topic=f"{self.name}-states")

@@ -6,7 +6,8 @@ import matplotlib.pyplot as plt
 
 
 def plot_device(ax: plt.Axes, trajs: ctc.TimeTrace,
-                dname: str, fieldname: str, index: int, label=None):
+                dname: str, fieldname: str, index: int,
+                label=None, do_integrate=False):
     """convenience method to plot one axis object"""
     import numpy as np
     t = trajs[dname].times
@@ -21,10 +22,15 @@ def plot_device(ax: plt.Axes, trajs: ctc.TimeTrace,
         if idx < len(t) - 1:
             idxs = np.logical_and(t_plant >= ti, t_plant < t[idx+1])
             x_match[idxs] = x[idx+1]
-            idx_max = max(np.where(idxs)[0])
+            barr = np.where(idxs)[0]
+            if len(barr) > 0:
+                idx_max = max(barr)
         else:
             x_match[idx_max:] = x[-1]
-
+    if do_integrate:
+        import scipy.integrate
+        x_match = scipy.integrate.cumtrapz(x_match, t_plant)
+        t_plant = t_plant[:-1]
     ax.plot(t_plant, x_match, label=label.split('(')[0])
     ax.grid()
     ax.set_xlim([min(t_plant), max(t_plant)])
@@ -35,23 +41,26 @@ def plot_device(ax: plt.Axes, trajs: ctc.TimeTrace,
 
 ## build and simulate system
 config_filename = "../../examples/config/f16_simple_config.toml"
-config_filename = "../../examples/config/inv_pendulum_config.toml"
+#config_filename = "../../examples/config/inv_pendulum_config.toml"
 my_system = csys.System.from_toml(config_filename)
-trajs = my_system.simulate_tspan([0, 6.0], show_status=True)
+trajs = my_system.simulate_tspan([0, 15.0], show_status=True)
 
 if "pendulum" in config_filename:
-    fig, ax = plt.subplots(figsize=(12, 8), nrows=2, ncols=3, sharex=False)
+    fig, ax = plt.subplots(figsize=(12, 8), nrows=2, ncols=3, sharex=True)
     ax[0][0].set_title("Pendulum Plant")
-    plot_device(ax[0][0], trajs, "plant", "states", 0, "angular rate (rad/s)")
-    plot_device(ax[1][0], trajs, "plant", "states", 2, "velocity (m/s)")
+    plot_device(ax[0][0], trajs, "plant", "states", 0, "position (m)", do_integrate=True)
+    plot_device(ax[1][0], trajs, "plant", "states", 2, "angle (rad)", do_integrate=True)
+    ax[1][0].set_xlabel("Time (s)")
 
     ax[0][1].set_title("Controller")
     plot_device(ax[0][1], trajs, "controller", "outputs", 0, "Force (N)")
+    ax[0][1].set_xlabel("Time (s)")
     ax[1][1].axis('off')
 
     ax[0][2].set_title("Maneuver")
-    plot_device(ax[0][2], trajs, "maneuver", "outputs", 0, "Position (m)")
+    plot_device(ax[0][2], trajs, "maneuver", "outputs", 0, "Setpoint ()")
     ax[1][2].axis('off')
+    ax[0][2].set_xlabel("Time (s)")
     plt.show()
 
 if "f16" in config_filename:

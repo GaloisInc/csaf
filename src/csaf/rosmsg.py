@@ -15,7 +15,7 @@ class CsafMsg:
     @staticmethod
     def required_fields():
         """required fields for a CSAF ROSmsg"""
-        return ["version_major", "version_minor", "topic", "epoch"]
+        return ["version_major", "version_minor", "topic", "time"]
 
     @staticmethod
     def load(msg_fp):

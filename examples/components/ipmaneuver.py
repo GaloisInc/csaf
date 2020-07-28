@@ -15,8 +15,8 @@ def main(time=0.0, state=None, input=None, update=False, output=False):
 
     if output:
         if parameters["maneuver_name"] == "step":
-            if time > 3.0:
-                return [-0.1*(time - 3.0)**2 + 3.0]
+            if time > 0.0 and time < 6.0:
+                return [-0.1*(time - 3.1)**2 + 0.9]
             else:
                 return [0.0]
         elif parameters["maneuver_name"] == "const":

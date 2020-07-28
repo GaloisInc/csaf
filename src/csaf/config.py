@@ -175,7 +175,9 @@ class SystemConfig:
                 # update the edge labels
                 edge_labels['topic'].append(t[1])
                 edge_labels['width'].append(self.get_msg_width(*t))
-                edge_labels['name'].append(self.get_device_settings(dname)['config']['inputs']['names'][tidx])
+                ddconfig = self.get_device_settings(dname)['config']
+                if 'inputs' in ddconfig:
+                    edge_labels['name'].append(self.get_device_settings(dname)['config']['inputs']['names'][tidx])
 
         return nodes, edges, edge_labels
 
