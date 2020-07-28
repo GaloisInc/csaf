@@ -40,10 +40,11 @@ def plot_device(ax: plt.Axes, trajs: ctc.TimeTrace,
 
 
 ## build and simulate system
-config_filename = "../../examples/config/f16_simple_config.toml"
+config_filename = "../../examples/config/f16_shield_config.toml"
+#config_filename = "../../examples/config/f16_simple_config.toml"
 #config_filename = "../../examples/config/inv_pendulum_config.toml"
 my_system = csys.System.from_toml(config_filename)
-trajs = my_system.simulate_tspan([0, 15.0], show_status=True)
+trajs = my_system.simulate_tspan([0, 35.0], show_status=True)
 
 if "pendulum" in config_filename:
     fig, ax = plt.subplots(figsize=(12, 8), nrows=2, ncols=3, sharex=True)
@@ -63,9 +64,34 @@ if "pendulum" in config_filename:
     ax[0][2].set_xlabel("Time (s)")
     plt.show()
 
-if "f16" in config_filename:
+if "shield" in config_filename:
     ## Plot Results
-    fig, ax = plt.subplots(figsize=(15, 15), nrows=4, ncols=3, sharex=True)
+    fig, ax = plt.subplots(figsize=(25, 15), nrows=4, ncols=3, sharex=True)
+    ax[0][0].set_title("F16 Plant")
+    plot_device(ax[0][0], trajs, "plant", "states", 11, "height (ft)")
+    plot_device(ax[1][0], trajs, "plant", "states", 0, "airspeed (ft/s)")
+    plot_device(ax[2][0], trajs, "plant", "states", 3, "roll (degrees)")
+    plot_device(ax[2][0], trajs, "plant", "states", 4, "pitch (degrees)")
+    plot_device(ax[2][0], trajs, "plant", "states", 5, "yaw (degrees)")
+    plot_device(ax[3][0], trajs, "plant", "states", 12, "power (%)")
+
+    ax[0][1].set_title("Low Level Controller")
+    plot_device(ax[0][1], trajs, "controller", "outputs", 0, "s0 ()")
+    plot_device(ax[1][1], trajs, "controller", "outputs", 1, "s1 ()")
+    plot_device(ax[2][1], trajs, "controller", "outputs", 2, "s2 ()")
+    plot_device(ax[3][1], trajs, "controller", "outputs", 3, "s3 ()")
+
+    ax[0][2].set_title("Monitors")
+    plot_device(ax[0][2], trajs, "monitor", "outputs", 0, "a0 ()")
+    plot_device(ax[1][2], trajs, "switch", "outputs", 1, "a1 ()")
+    plot_device(ax[2][2], trajs, "switch", "outputs", 2, "a2 ()")
+    plot_device(ax[3][2], trajs, "switch", "outputs", 3, "a3 ()")
+
+    [ax[3][idx].set_xlabel('Time (s)') for idx in range(3)]
+    plt.show()
+elif "f16" in config_filename:
+    ## Plot Results
+    fig, ax = plt.subplots(figsize=(25, 15), nrows=4, ncols=3, sharex=True)
     ax[0][0].set_title("F16 Plant")
     plot_device(ax[0][0], trajs, "plant", "states", 11, "height (ft)")
     plot_device(ax[1][0], trajs, "plant", "states", 0, "airspeed (ft/s)")

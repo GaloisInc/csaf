@@ -1,0 +1,34 @@
+system_name = "F16 Fixed Airspeed Autopilot"
+system_representation = "black box"
+system_solver = "Euler"
+
+sampling_frequency = 10
+
+is_discrete = true
+is_hybrid = false
+
+[parameters]
+    setpoint = 540.0
+    p_gain = 0.01
+
+[inputs]
+    names = [[   'vt',
+                'alpha',
+                'beta',
+                'phi',
+                'theta',
+                'psi',
+                'p',
+                'q',
+                'r',
+                'pn',
+                'pe',
+                'h',
+                'pow'],
+                ['Nz',
+                'Ny']]
+
+[topics]
+
+  [topics.outputs]
+      msg = "./msg/autopilot_output.msg"

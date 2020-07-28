@@ -1,0 +1,19 @@
+system_name = "Autopilot Selector"
+system_representation = "black box"
+system_solver = "Euler"
+
+sampling_frequency = 30
+
+is_discrete = true
+is_hybrid = false
+
+[parameters]
+  setpoint = 6000.0
+  xequil = [502.0, 0.03887505597600522, 0.0, 0.0, 0.03887505597600522, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1000.0, 9.05666543872074]
+
+[inputs]
+    names = [['0', '1', '2', '3'], ['0', '1', '2', '3'], ['0', '1', '2', '3'] , ['selection']]
+
+[topics]
+  [topics.outputs]
+      msg = "./msg/autopilot_output.msg"
