@@ -1,0 +1,17 @@
+system_name = "Inverted Pendulum Controller"
+system_representation = "black box"
+system_solver = "Euler"
+
+sampling_frequency = 8
+
+is_discrete = true
+is_hybrid = false
+
+[parameters]
+
+[inputs]
+  names = [['force']]
+
+[topics]
+  [topics.outputs]
+    msg = "./msg/ipcontroller_output.msg"

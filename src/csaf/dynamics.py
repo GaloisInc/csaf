@@ -62,7 +62,7 @@ class DynamicComponent(Component):
                 recv = recvs[-1]
                 t, self._input_buffer[topic] = self._messenger_in.deserialize_message(recv, topic, 0.0)
                 self._input_buffer['time'] = t
-        if len(self._input_buffer.keys()) == 0:
+        if len(self._input_buffer.keys()) == 0 and len(self.input_socks) > 0:
             time.sleep(0.0001)
             self.receive_input()
         self.current_time += 1.0 / self.sampling_frequency
