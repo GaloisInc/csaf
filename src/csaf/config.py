@@ -32,6 +32,7 @@ def join_if_not_abs(*args):
 
 def attempt_parse_toml(fname):
     """ try to parse a TOML file
+    TODO: remove print and restructure how toml's are read from disk
     :param fname: filename
     :return: dict or None
     """
@@ -77,6 +78,7 @@ class SystemConfig:
         # setup logging
         log_filepath  = join_if_not_abs(base_dir, config["log_file"])
         config["log_file"] = str(pathlib.Path(log_filepath).resolve())
+
         # log is permissive -- will use filepath specified
         if os.path.exists(log_filepath):
             print(f"WARNING! log will output to file that already exists: '{log_filepath}'")
@@ -142,11 +144,7 @@ class SystemConfig:
 
     def __init__(self, config: dict):
         self._config = config
-
-    def get_device_settings(self, dname: str):
-        """get information about a device by its device name (dname)"""
-        assert dname in self._config["devices"]
-        return self._config["devices"][dname]
+        self.assert_io_widths()
 
     def build_device_graph(self):
         """build a graph representation of the system from the config"""
@@ -181,6 +179,11 @@ class SystemConfig:
 
         return nodes, edges, edge_labels
 
+    def get_device_settings(self, dname: str):
+        """get information about a device by its device name (dname)"""
+        assert dname in self._config["devices"]
+        return self._config["devices"][dname]
+
     def get_msg_width(self, dname: str, tname: str):
         """given device name and topic name, return the number of fields in a message
         """
@@ -193,6 +196,7 @@ class SystemConfig:
         return tname in self._config['devices'][dname]['config']['topics']
 
     def get_topics(self, dname):
+        """given a device with device name dname, """
         assert dname in self._config['devices']
         return list(self._config['devices'][dname]['config']['topics'].keys())
 
@@ -215,12 +219,12 @@ class SystemConfig:
 
     def plot_config(self, fname=None):
         """visualize the configuration file"""
-        fname = fname if fname is not None else self.config_dict["name"] + "-config.png"
+        fname = fname if fname is not None else self.config_dict["name"] + "-config.pdf"
 
         nodes, edges, edge_labels = self.build_device_graph()
         eorder = self.config_dict["evaluation_order"]
 
-        graph = pydot.Dot(graph_type='digraph', prog='LR')
+        graph = pydot.Dot(graph_type='digraph', prog='LR', concentrate=True)
         graph.set_node_defaults(shape='box',
                                 fontsize='10')
 
@@ -228,9 +232,11 @@ class SystemConfig:
         for nname, ninfo in nodes.items():
             devname = ninfo['config']["system_name"]
             dname = ninfo["dname"]
-            verts[nname] = pydot.Node(devname+f"\n({eorder.index(dname)})")
+            if ninfo["config"]["is_discrete"]:
+                verts[nname] = pydot.Node(devname+f"\n({eorder.index(dname)})", style="solid")
+            else:
+                verts[nname] = pydot.Node(devname+f"\n({eorder.index(dname)})", style="bold")
             graph.add_node(verts[nname])
-
 
         for eidx, e in enumerate(edges):
             topic = edge_labels["topic"][eidx]
@@ -239,16 +245,21 @@ class SystemConfig:
                                       label=topic + f" ({str(width)})\nport " + str(e[0])))
 
         graph_path = pathlib.Path(join_if_not_abs(self.config_dict['output_dir'], fname))
-        graph.write_png(graph_path)
+        graph.write_pdf(graph_path)
 
     @property
     def config_dict(self):
+        """exposed internal _config for read/copy
+        preferably, use the interface accessors instead to safely handle the config
+        """
         return self._config
 
     @property
     def get_name_devices(self):
+        """names of devices in the configuration (not the component name)"""
         return list(self._config["devices"].keys())
 
     @property
     def get_num_devices(self):
+        """number of devices in a configuration"""
         return len(self.get_name_devices)

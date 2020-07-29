@@ -13,6 +13,7 @@ import logging
 
 import zmq
 
+
 class Component:
     """ Represent a Pub/Sub Component
 

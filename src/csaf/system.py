@@ -8,7 +8,7 @@ from .dynamics import DynamicComponent
 from .messenger import SerialMessenger
 from .scheduler import Scheduler
 from .model import ModelNative
-from.trace import TimeTrace
+from .trace import TimeTrace
 
 
 
@@ -49,8 +49,7 @@ class System:
             mss_in ={}
             for sname, stopic in dconfig['sub']:
                 k = f"{sname}-{stopic}"
-                sconfig = config.get_device_settings(sname)
-                mss_in[k] = sconfig['config']['topics'][stopic]['serializer']
+                mss_in[k] = config.get_msg_setting(sname, stopic, 'serializer')
             mss_out = SerialMessenger(mss_out)
             mss_in = SerialMessenger(mss_in)
 
@@ -111,10 +110,12 @@ class System:
 
     @property
     def names(self):
+        """names of the components used in the system"""
         return [c.name for c in self.components]
 
     @property
     def ports(self):
+        """zmq ports being used by the system"""
         p = []
         for c in self.components:
             p += c.output_socks

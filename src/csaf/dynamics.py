@@ -45,6 +45,14 @@ class DynamicComponent(Component):
         # initial state and consequent state buffer
         self._state_buffer: typing.Union[None, list] = ([0.0, ] * self.num_states if self.num_states > 0 else None)
 
+    def reset(self):
+        """reset the time, state and input buffers of component"""
+        # input buffering for mixed rate components
+        self._input_buffer: dict = {}
+        self.current_time = 0
+        # initial state and consequent state buffer
+        self._state_buffer: typing.Union[None, list] = ([0.0, ] * self.num_states if self.num_states > 0 else None)
+
     def receive_input(self):
         """receive all necessary topics for a DynamicComponent"""
         for sidx, sn in enumerate(self.input_socks):
@@ -52,7 +60,7 @@ class DynamicComponent(Component):
             topics = []
             recvs = []
             # poll zmq socket and see if message is available
-            time.sleep(0.00001)
+            time.sleep(1e-5)
             while sn.poll(0) == zmq.POLLIN:
                 topics.append(sn.recv_string(zmq.DONTWAIT))
                 recvs.append(sn.recv_pyobj(zmq.DONTWAIT))
@@ -62,8 +70,9 @@ class DynamicComponent(Component):
                 recv = recvs[-1]
                 t, self._input_buffer[topic] = self._messenger_in.deserialize_message(recv, topic, 0.0)
                 self._input_buffer['time'] = t
+        # avoid infinite recursion by checking whether _input_buffer was initialized
         if len(self._input_buffer.keys()) == 0 and len(self.input_socks) > 0:
-            time.sleep(0.0001)
+            time.sleep(1e-4)
             self.receive_input()
         self.current_time += 1.0 / self.sampling_frequency
         return self._input_buffer
@@ -74,6 +83,7 @@ class DynamicComponent(Component):
         dt = 1.0 / self.sampling_frequency
         dout = {}
 
+        # obtain the input vector by concatenating the messages together
         if len(self._topics_input) > 0:
             u = list(np.concatenate([self._input_buffer[f] for f in self._topics_input]))
         else:
@@ -106,7 +116,7 @@ class DynamicComponent(Component):
         return dout
 
     def send_stimulus(self, t: float):
-        """send output of device and its current state"""
+        """send message of device at its current state at time t"""
         u = list(np.zeros((self.num_inputs)))
 
         if self._state_buffer is not None:
@@ -162,10 +172,12 @@ class DynamicComponent(Component):
 
     @property
     def sampling_frequency(self):
+        """device sampling and update rate"""
         return self._sampling_frequency
 
     @property
     def sampling_phase(self):
+        """time skew of device"""
         return 0.0
 
     @property
@@ -181,4 +193,3 @@ class DynamicComponent(Component):
         assert len(state) == self.num_states, f"state must be array with length {self.num_states} " \
                                               f"(got length {len(state)} instead)"
         self._state_buffer = state
-
