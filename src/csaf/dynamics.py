@@ -85,7 +85,9 @@ class DynamicComponent(Component):
 
         # obtain the input vector by concatenating the messages together
         if len(self._topics_input) > 0:
-            u = list(np.concatenate([self._input_buffer[f] for f in self._topics_input]))
+            u = []
+            for f in self._topics_input:
+                u += self._input_buffer[f]
         else:
             u = []
 

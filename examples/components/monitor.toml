@@ -24,7 +24,8 @@ is_hybrid = false
                 'h',
                 'pow'],
                 ['Nz',
-                'Ny']]
+                'Ny'],
+                ['gcas_state']]
 
 [topics]
   [topics.outputs]

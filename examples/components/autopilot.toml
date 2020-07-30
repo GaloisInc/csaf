@@ -31,5 +31,9 @@ is_hybrid = false
 
 [topics]
 
+  [topics.states]
+      msg = "./msg/autopilot_state.msg"
+      initial = ["Waiting"]
+
   [topics.outputs]
       msg = "./msg/autopilot_output.msg"

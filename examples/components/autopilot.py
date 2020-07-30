@@ -13,10 +13,10 @@ class GcasAutopilot():
 
 
 parameters = {}
-state = GcasAutopilot.STATE_START
+#state = GcasAutopilot.STATE_START
 
 
-def main(time=0.0, state=None, input=[0]*4, update=False, output=False):
+def main(time=0.0, state='Waiting', input=[0]*4, update=False, output=False):
     """TODO: actually implement the autopilot"""
     global parameters
     if len(parameters.keys()) == 0:
@@ -26,17 +26,20 @@ def main(time=0.0, state=None, input=[0]*4, update=False, output=False):
             info = toml.load(ifp)
         parameters = info["parameters"]
 
-    advance_discrete_state(time, state, input)
+    nstate = advance_discrete_state(time, state, input)
     uref = get_u_ref(time, state, input)
     if output:
         return list(uref)
     else:
-        return
+        return list([nstate])
 
 
 def advance_discrete_state(t, cstate, x_f16):
     """advance the discrete state based on the current aircraft state"""
-    global state
+    #global state
+    state = cstate[0]
+    #if state == "Finished":
+    #    return "Waiting"
     rv = False
 
     # Pull out important variables for ease of use
@@ -74,12 +77,14 @@ def advance_discrete_state(t, cstate, x_f16):
 
     #logger.info(f'State Tr: {old_state} -> {state}')
 
-    return rv
+    return state
 
 
 def get_u_ref(t, cstate, x_f16):
     """for the current discrete state, get the reference inputs signals"""
     global parameters
+
+    state = cstate[0]
 
     NzMax = parameters["NzMax"]
     xequil = parameters["xequil"]

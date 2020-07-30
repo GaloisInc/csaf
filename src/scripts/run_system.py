@@ -76,18 +76,22 @@ if "shield" in config_filename:
     plot_device(ax[3][0], trajs, "plant", "states", 12, "power (%)")
 
     ax[0][1].set_title("Low Level Controller")
-    plot_device(ax[0][1], trajs, "controller", "outputs", 0, "s0 ()")
-    plot_device(ax[1][1], trajs, "controller", "outputs", 1, "s1 ()")
-    plot_device(ax[2][1], trajs, "controller", "outputs", 2, "s2 ()")
-    plot_device(ax[3][1], trajs, "controller", "outputs", 3, "s3 ()")
+    plot_device(ax[0][1], trajs, "controller", "outputs", 0, "e ()")
+    plot_device(ax[1][1], trajs, "controller", "outputs", 1, "a ()")
+    plot_device(ax[2][1], trajs, "controller", "outputs", 2, "r ()")
+    plot_device(ax[3][1], trajs, "controller", "outputs", 3, "throttle ()")
 
     ax[0][2].set_title("Monitors")
-    plot_device(ax[0][2], trajs, "monitor", "outputs", 0, "a0 ()")
-    plot_device(ax[1][2], trajs, "switch", "outputs", 1, "a1 ()")
-    plot_device(ax[2][2], trajs, "switch", "outputs", 2, "a2 ()")
-    plot_device(ax[3][2], trajs, "switch", "outputs", 3, "a3 ()")
+    plot_device(ax[0][2], trajs, "monitor", "outputs", 0, "monitor selected ()")
+    #plot_device(ax[1][2], trajs, "switch", "outputs", 1, "a1 ()")
+    #plot_device(ax[2][2], trajs, "switch", "outputs", 2, "a2 ()")
+    #plot_device(ax[3][2], trajs, "switch", "outputs", 3, "a3 ()")
+    ax[1][2].axis('off')
+    ax[2][2].axis('off')
+    ax[3][2].axis('off')
+    ax[0][2].set_xlabel('Time (s)')
 
-    [ax[3][idx].set_xlabel('Time (s)') for idx in range(3)]
+    [ax[3][idx].set_xlabel('Time (s)') for idx in range(2)]
     plt.show()
 elif "f16" in config_filename:
     ## Plot Results

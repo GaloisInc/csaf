@@ -14,7 +14,7 @@ def main(time=0.0, state=None, input=[0]*4, update=False, output=False):
 
     uref = get_u_ref(time, state, input, parameters)
     if output:
-        return list(uref)
+        return uref
     else:
         return
 
@@ -35,12 +35,11 @@ def get_u_ref(t, cstate, x_f16, parameters):
 
     # (Psuedo) Derivative control using path angle
     k_gamma = 25
-    # k_gamma = self.p_gain
     Nz = Nz - k_gamma*gamma
 
     # try to maintain a fixed airspeed near trim point
     K_vt = 0.25
+    airspeed_setpoint = 540
     throttle = -K_vt * (airspeed - xequil[0])
 
-    return Nz, 0, 0, throttle
-
+    return [Nz, 0, 0, throttle]

@@ -202,9 +202,9 @@ class SystemConfig:
 
     def get_msg_setting(self, dname, tname, prop):
         """safer method to get topic property"""
-        assert dname in self._config['devices']
-        assert tname in self._config['devices'][dname]['config']['topics']
-        assert prop in self._config['devices'][dname]['config']['topics'][tname]
+        assert dname in self._config['devices'], f"Failed to get property {prop} for topic {tname} device {dname}"
+        assert tname in self._config['devices'][dname]['config']['topics'], f"Failed to get property {prop} for topic {tname} device {dname}"
+        assert prop in self._config['devices'][dname]['config']['topics'][tname], f"Failed to get property {prop} for topic {tname} device {dname}"
         return self._config['devices'][dname]['config']['topics'][tname][prop]
 
     def assert_io_widths(self):

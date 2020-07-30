@@ -8,7 +8,7 @@ is_discrete = true
 is_hybrid = false
 
 [parameters]
-    setpoint = 540.0
+    setpoint = 800.0
     p_gain = 0.01
 
 [inputs]

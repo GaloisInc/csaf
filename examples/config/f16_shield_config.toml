@@ -55,7 +55,9 @@ log_level = "debug"
     run_command = "python3"
     process = "../components/monitor.py"
     debug = false
-    sub = [["plant", "states"], ["plant", "outputs"]]
+    sub = [ ["plant", "states"],
+            ["plant", "outputs"],
+            ["autopilot", "states"]]
     pub = 5506
 
   [devices.switch]
@@ -63,7 +65,7 @@ log_level = "debug"
     process = "../components/switch.py"
     debug = false
     sub = [ ["autopilot", "outputs"],
-            ["autoaltitude", "outputs"],
-            ['autoairspeed', 'outputs'],
+            ["autoairspeed", "outputs"],
+            ['autoaltitude', 'outputs'],
             ['monitor', 'outputs']]
     pub = 5507

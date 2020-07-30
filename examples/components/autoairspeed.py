@@ -15,7 +15,7 @@ def main(time=0.0, state=None, input=[0]*4, update=False, output=False):
 
     uref = get_u_ref(time, state, input, parameters)
     if output:
-        return list(uref)
+        return uref
     else:
         return
 
@@ -24,5 +24,4 @@ def get_u_ref(t, cstate, x_f16, parameters):
     setpoint = parameters["setpoint"]
     p_gain = parameters["p_gain"]
     x_dif = setpoint - x_f16[0]
-    return 0, 0, 0, p_gain * x_dif
-
+    return [0, 0, 0, p_gain * x_dif]

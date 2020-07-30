@@ -17,6 +17,7 @@ def main(time=0.0, state=None, input=[0]*4, update=False, output=False):
     sidx = int(input[-1])
     assert len(input) == 13
     #sidx = 0
+    print(4*sidx, 4*sidx+4)
     if output:
-        return list(np.array(input)[sidx:sidx+4])
+        return input[4*sidx:4*sidx+4]
 
