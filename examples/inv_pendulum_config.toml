@@ -21,10 +21,10 @@ log_level = "debug"
     run_command = "python3"
 
     # path to model executable
-    process = "../components/ipcontroller.py"
+    process = "components/ipcontroller.py"
 
     # TOML with topics
-    config = "../components/ipcontroller.toml"
+    config = "components/ipcontroller.toml"
 
     # whether to print debug diagnostics
     debug = false
@@ -40,10 +40,10 @@ log_level = "debug"
     run_command = "python3"
 
     # path to model executable
-    process = "../components/ipplant.py"
+    process = "components/ipplant.py"
 
     # TOML with topics
-    config = "../components/ipplant.toml"
+    config = "components/ipplant.toml"
 
     # whether to print debug diagnostics
     debug = false
@@ -59,10 +59,10 @@ log_level = "debug"
     run_command = "python3"
 
     # path to model executable
-    process = "../components/ipmaneuver.py"
+    process = "components/ipmaneuver.py"
 
     # TOML with topics
-    config = "../components/ipmaneuver.toml"
+    config = "components/ipmaneuver.toml"
 
     # whether to print debug diagnostics
     debug = false

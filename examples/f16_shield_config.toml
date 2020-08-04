@@ -18,42 +18,42 @@ log_level = "debug"
 
   [devices.controller]
     run_command = "python3"
-    process = "../components/f16llc.py"
+    process = "components/f16llc.py"
     debug = false
     sub = [["plant", "states"], ["plant", "outputs"], ["switch", "outputs"]]
     pub = 5502
 
   [devices.plant]
     run_command = "python3"
-    process = "../components/f16plant.py"
+    process = "components/f16plant.py"
     debug = false
     sub = [["controller", "outputs"]]
     pub = 5501
 
   [devices.autopilot]
     run_command = "python3"
-    process = "../components/autopilot.py"
+    process = "components/autopilot.py"
     debug = false
     sub = [["plant", "states"], ["plant", "outputs"]]
     pub = 5503
 
   [devices.autoairspeed]
     run_command = "python3"
-    process = "../components/autoairspeed.py"
+    process = "components/autoairspeed.py"
     debug = false
     sub = [["plant", "states"], ["plant", "outputs"]]
     pub = 5504
 
   [devices.autoaltitude]
     run_command = "python3"
-    process = "../components/autoaltitude.py"
+    process = "components/autoaltitude.py"
     debug = false
     sub = [["plant", "states"], ["plant", "outputs"]]
     pub = 5505
 
   [devices.monitor]
     run_command = "python3"
-    process = "../components/monitor.py"
+    process = "components/monitor.py"
     debug = false
     sub = [ ["plant", "states"],
             ["plant", "outputs"],
@@ -62,7 +62,7 @@ log_level = "debug"
 
   [devices.switch]
     run_command = "python3"
-    process = "../components/switch.py"
+    process = "components/switch.py"
     debug = false
     sub = [ ["autopilot", "outputs"],
             ["autoairspeed", "outputs"],

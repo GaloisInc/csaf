@@ -42,10 +42,8 @@ def plot_device(ax: plt.Axes, trajs: ctc.TimeTrace,
 
 ## build and simulate system
 csaf_dir=sys.argv[1]
-config_filename = csaf_dir + "/" + "f16_shield_config.toml"
-
-#config_filename = "../../examples/config/f16_simple_config.toml"
-#config_filename = "../../examples/config/inv_pendulum_config.toml"
+csaf_config=sys.argv[2]
+config_filename = csaf_dir + "/" + csaf_config
 
 my_system = csys.System.from_toml(config_filename)
 trajs = my_system.simulate_tspan([0, 35.0], show_status=True)
@@ -122,4 +120,3 @@ elif "f16" in config_filename:
 
     [ax[3][idx].set_xlabel('Time (s)') for idx in range(3)]
     plt.show()
->>>>>>> 030e86ae1147a860700b4cebb61657dd0c9b36c9

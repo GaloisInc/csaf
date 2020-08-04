@@ -2,7 +2,8 @@
 
 LOCAL=0
 SCRIPT_DIR="csaf_architecture"
-CONFIG=""
+CSAF_LOC=""
+CONFIG_NAME=""
 
 validate_dir() {
 
@@ -20,17 +21,21 @@ source .common.sh
 
 print_help() {
 	printf "Usage: -t <tag_name>\n"
-	printf "   -c      fully qualified path to the directory defining the control system\n"
+	printf "   -c      the name of the config file\n"
+	printf "   -d      fully qualified path to the directory defining the control system\n"
 	printf "   -l      build the image locally\n"
 	printf "   -t      the tag of the image { stable, edge, latest }\n"
 	printf "   -h      prints the help menu\n"
 	printf "\n"
 }
 
-while getopts ":c:t:lh" opt; do
+while getopts ":c:d:t:lh" opt; do
 	case ${opt} in
         c )
-		CONFIG=$OPTARG
+		CONFIG_NAME=$OPTARG
+		;;
+        d )
+		CSAF_LOC=$OPTARG
 		;;
         l )
 		LOCAL=1
@@ -48,9 +53,14 @@ while getopts ":c:t:lh" opt; do
 	esac
 done
 
-if [ -z ${CONFIG} ]
+if [ -z ${CONFIG_NAME} ]
 then
-	show_error_and_exit "A CSAF system configurlation must be supplied"
+	show_error_and_exit "A CSAF config file must be supplied"
+fi
+
+if [ -z ${CSAF_LOC} ]
+then
+	show_error_and_exit "A CSAF directory must be supplied"
 fi
 
 if [[ ${LOCAL} -eq 1 ]] ; then
@@ -60,4 +70,6 @@ else
 	# TODO
 fi
 
-docker run -t -v ${CONFIG}:/csaf-system --network host ${IMAGE_NAME}:${IMAGE_TAG} python3 "/app/scripts/run_system.py" "/csaf-system"
+echo ${CSAF_LOC}
+
+docker run -it -v ${CSAF_LOC}:/csaf-system --network host ${IMAGE_NAME}:${IMAGE_TAG} python3 "/app/scripts/run_system.py" "/csaf-system" ${CONFIG_NAME}
