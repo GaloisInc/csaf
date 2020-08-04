@@ -1,4 +1,4 @@
-system_name = "F16 Autopilot"
+system_name = "F16 Fixed Airspeed Autopilot"
 system_representation = "black box"
 system_solver = "Euler"
 
@@ -8,9 +8,8 @@ is_discrete = true
 is_hybrid = false
 
 [parameters]
-  NzMax = 9.0
-  xequil = [502.0, 0.03887505597600522, 0.0, 0.0, 0.03887505597600522, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1000.0, 9.05666543872074]
-  uequil = [0.13946204864060271, -0.7495784725828754, 0.0, 0.0]
+    setpoint = 800.0
+    p_gain = 0.01
 
 [inputs]
     names = [[   'vt',
@@ -30,10 +29,6 @@ is_hybrid = false
                 'Ny']]
 
 [topics]
-
-  [topics.states]
-      msg = "./msg/autopilot_state.msg"
-      initial = ["Waiting"]
 
   [topics.outputs]
       msg = "./msg/autopilot_output.msg"

@@ -1,14 +1,14 @@
 # System Name
-name = "f16-heidlauf"
+name = "inverted-pendulum"
 
 # File to Global Defaults
 global_config = "./global_config.toml"
 
 # Order to Construct/Evaluate Devices
-evaluation_order = ["controller", "plant", "autopilot"]
+evaluation_order = ["maneuver", "controller", "plant"]
 
 # File to Log Results
-log_file = "f16run.log"
+log_file = "inv_pendulum.log"
 
 # Log Level (info/debug)
 log_level = "debug"
@@ -21,16 +21,16 @@ log_level = "debug"
     run_command = "python3"
 
     # path to model executable
-    process = "../components/f16llc.py"
+    process = "../components/ipcontroller.py"
 
     # TOML with topics
-    config = "../components/f16llc.toml"
+    config = "../components/ipcontroller.toml"
 
     # whether to print debug diagnostics
     debug = false
 
     # subscribe to topic of a component (device name, topic name)
-    sub = [["plant", "states"], ["plant", "outputs"], ["autopilot", "outputs"]]
+    sub = [["plant", "states"], ["maneuver", "outputs"]]
 
     # port to publish
     pub = 5502
@@ -40,13 +40,13 @@ log_level = "debug"
     run_command = "python3"
 
     # path to model executable
-    process = "../components/f16plant.py"
+    process = "../components/ipplant.py"
 
     # TOML with topics
-    config = "../components/f16plant.toml"
+    config = "../components/ipplant.toml"
 
     # whether to print debug diagnostics
-    debug = true
+    debug = false
 
     # subscribe to topic of a component (device name, topic name)
     sub = [["controller", "outputs"]]
@@ -54,18 +54,21 @@ log_level = "debug"
     # port to publish
     pub = 5501
 
-  [devices.autopilot]
+  [devices.maneuver]
     # environment to run under
     run_command = "python3"
 
     # path to model executable
-    process = "../components/autopilot.py"
+    process = "../components/ipmaneuver.py"
+
+    # TOML with topics
+    config = "../components/ipmaneuver.toml"
 
     # whether to print debug diagnostics
     debug = false
 
     # subscribe to topic of a component (device name, topic name)
-    sub = [["plant", "states"], ["plant", "outputs"]]
+    sub = []
 
     # port to publish
     pub = 5503

@@ -96,16 +96,16 @@ def clip_u(u_deg, parameters):
     u_deg[0:4] += uequil
 
     # Limit throttle from 0 to 1
-    u_deg[0] = max(min(u_deg[0], parameters["throttle_max"]), parameters["throttle_max"])
+    u_deg[0] = min(max(u_deg[0], parameters["throttle_min"]), parameters["throttle_max"])
 
     # Limit elevator from -25 to 25 deg
-    u_deg[1] = max(min(u_deg[1], parameters["elevator_min"]), parameters["elevator_max"])
+    u_deg[1] = min(max(u_deg[1], parameters["elevator_min"]), parameters["elevator_max"])
 
     # Limit aileron from -21.5 to 21.5 deg
-    u_deg[2] = max(min(u_deg[2], parameters["aileron_min"]), parameters["aileron_max"])
+    u_deg[2] = min(max(u_deg[2], parameters["aileron_min"]), parameters["aileron_max"])
 
     # Limit rudder from -30 to 30 deg
-    u_deg[3] = max(min(u_deg[3], parameters["rudder_min"]), parameters["rudder_max"])
+    u_deg[3] = min(max(u_deg[3], parameters["rudder_min"]), parameters["rudder_max"])
     return u_deg
 
 

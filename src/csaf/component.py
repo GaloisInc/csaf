@@ -13,6 +13,7 @@ import logging
 
 import zmq
 
+
 class Component:
     """ Represent a Pub/Sub Component
 
@@ -21,12 +22,12 @@ class Component:
     """
     @staticmethod
     def serialize(data_dict):
-        """component serialization implementation"""
+        """default component serialization implementation"""
         return str.encode(json.dumps(data_dict))
 
     @staticmethod
     def deserialize(data_string):
-        """component deserialization implementation"""
+        """default component deserialization implementation"""
         return json.loads(data_string.decode())
 
     def __init__(self, num_inputs, num_outputs, name=None):

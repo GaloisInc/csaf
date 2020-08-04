@@ -1,16 +1,13 @@
-system_name = "F16 Autopilot"
+system_name = "F16 Autopilot Monitor"
 system_representation = "black box"
 system_solver = "Euler"
 
-sampling_frequency = 10
+sampling_frequency = 30
 
 is_discrete = true
 is_hybrid = false
 
 [parameters]
-  NzMax = 9.0
-  xequil = [502.0, 0.03887505597600522, 0.0, 0.0, 0.03887505597600522, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1000.0, 9.05666543872074]
-  uequil = [0.13946204864060271, -0.7495784725828754, 0.0, 0.0]
 
 [inputs]
     names = [[   'vt',
@@ -27,13 +24,9 @@ is_hybrid = false
                 'h',
                 'pow'],
                 ['Nz',
-                'Ny']]
+                'Ny'],
+                ['gcas_state']]
 
 [topics]
-
-  [topics.states]
-      msg = "./msg/autopilot_state.msg"
-      initial = ["Waiting"]
-
   [topics.outputs]
-      msg = "./msg/autopilot_output.msg"
+      msg = "./msg/monitor_output.msg"

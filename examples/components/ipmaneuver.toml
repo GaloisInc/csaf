@@ -1,0 +1,15 @@
+system_name = "Inverted Pendulum Maneuver Control"
+system_representation = "black box"
+system_solver = "Euler"
+
+sampling_frequency = 2.5
+
+is_discrete = true
+is_hybrid = false
+
+[parameters]
+    maneuver_name = "step"
+
+[topics]
+  [topics.outputs]
+    msg = "./msg/ipmaneuver_output.msg"
