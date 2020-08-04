@@ -3,6 +3,7 @@ import re
 import csaf.system as csys
 import csaf.trace as ctc
 import matplotlib.pyplot as plt
+import sys
 
 
 def plot_device(ax: plt.Axes, trajs: ctc.TimeTrace,
@@ -19,7 +20,7 @@ def plot_device(ax: plt.Axes, trajs: ctc.TimeTrace,
     ax.legend()
 
 ## build and simulate system
-my_system = csys.System.from_toml("../../examples/config/config.toml")
+my_system = csys.System.from_toml(sys.argv[1] + "/config/config.toml")
 trajs = my_system.simulate_tspan([0, 10.0], show_status=True)
 
 ## Plot Results

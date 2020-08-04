@@ -2,6 +2,7 @@
 
 LOCAL=0
 SCRIPT_DIR="csaf_architecture"
+CONFIG=""
 
 validate_dir() {
 
@@ -19,14 +20,18 @@ source .common.sh
 
 print_help() {
 	printf "Usage: -t <tag_name>\n"
+	printf "   -c      fully qualified path to the directory defining the control system\n"
 	printf "   -l      build the image locally\n"
 	printf "   -t      the tag of the image { stable, edge, latest }\n"
 	printf "   -h      prints the help menu\n"
 	printf "\n"
 }
 
-while getopts ":t:lh" opt; do
+while getopts ":c:t:lh" opt; do
 	case ${opt} in
+        c )
+		CONFIG=$OPTARG
+		;;
         l )
 		LOCAL=1
 		;;
@@ -43,6 +48,11 @@ while getopts ":t:lh" opt; do
 	esac
 done
 
+if [ -z ${CONFIG} ]
+then
+	show_error_and_exit "A CSAF system configurlation must be supplied"
+fi
+
 if [[ ${LOCAL} -eq 1 ]] ; then
 	build_img
 else
@@ -50,7 +60,4 @@ else
 	# TODO
 fi
 
-docker run --network host ${IMAGE_NAME}:${IMAGE_TAG}
-
-# TODO
-#docker run --network host -it -v $PWD:/beat-pd-pdx -v $BEAT_PD_DIR:/datasets/beat-pd $IMAGE_NAME:$IMAGE_TAG
+docker run -t -v ${CONFIG}:/csaf-system --network host ${IMAGE_NAME}:${IMAGE_TAG} python3 "/app/scripts/run_system.py" "/csaf-system"

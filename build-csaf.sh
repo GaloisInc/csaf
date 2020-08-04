@@ -33,12 +33,13 @@ print_help() {
 publish_img() {
 
 	show_info "Publishing image"
-	docker push $IMAGE_NAME:$IMAGE_TAG
+	# TODO
+	#docker push $IMAGE_NAME:$IMAGE_TAG
 
-	if [[ ${?} -ne 0 ]]
-	then
-		show_error_and_exit "Unable to publish the image"
-	fi
+	#if [[ ${?} -ne 0 ]]
+	#then
+	#	show_error_and_exit "Unable to publish the image"
+	#fi
 }
 
 while getopts ":t:ph" opt; do
