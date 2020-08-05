@@ -1,0 +1,71 @@
+# System Name
+name = "f16-shield-heidlauf"
+
+# File to Global Defaults
+global_config = "./global_config.toml"
+
+# Order to Construct/Evaluate Devices
+evaluation_order = ["controller", "plant", "autopilot", "autoairspeed", "autoaltitude", "monitor", "switch"]
+
+# File to Log Results
+log_file = "f16run.log"
+
+# Log Level (info/debug)
+log_level = "debug"
+
+# device components
+[devices]
+
+  [devices.controller]
+    run_command = "python3"
+    process = "components/f16llc.py"
+    debug = false
+    sub = [["plant", "states"], ["plant", "outputs"], ["switch", "outputs"]]
+    pub = 5502
+
+  [devices.plant]
+    run_command = "python3"
+    process = "components/f16plant.py"
+    debug = false
+    sub = [["controller", "outputs"]]
+    pub = 5501
+
+  [devices.autopilot]
+    run_command = "python3"
+    process = "components/autopilot.py"
+    debug = false
+    sub = [["plant", "states"], ["plant", "outputs"]]
+    pub = 5503
+
+  [devices.autoairspeed]
+    run_command = "python3"
+    process = "components/autoairspeed.py"
+    debug = false
+    sub = [["plant", "states"], ["plant", "outputs"]]
+    pub = 5504
+
+  [devices.autoaltitude]
+    run_command = "python3"
+    process = "components/autoaltitude.py"
+    debug = false
+    sub = [["plant", "states"], ["plant", "outputs"]]
+    pub = 5505
+
+  [devices.monitor]
+    run_command = "python3"
+    process = "components/monitor.py"
+    debug = false
+    sub = [ ["plant", "states"],
+            ["plant", "outputs"],
+            ["autopilot", "states"]]
+    pub = 5506
+
+  [devices.switch]
+    run_command = "python3"
+    process = "components/switch.py"
+    debug = false
+    sub = [ ["autopilot", "outputs"],
+            ["autoairspeed", "outputs"],
+            ['autoaltitude', 'outputs'],
+            ['monitor', 'outputs']]
+    pub = 5507

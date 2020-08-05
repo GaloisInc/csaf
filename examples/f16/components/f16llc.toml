@@ -1,0 +1,53 @@
+system_name = "F16 Low Level Controller"
+system_representation = "black box"
+system_solver = "Euler"
+
+sampling_frequency = 100
+
+is_discrete = false
+is_hybrid = false
+
+[parameters]
+  K_lqr = [ [-156.88015067,  -31.03700807,  -38.72983346, 0.0, 0.0, 0.0, 0.0, 0.0],
+            [ 0.0, 0.0, 0.0, 30.51141106, -5.70540368, -9.31017874, -33.97951345, -10.65277731],
+            [0.0, 0.0, 0.0,-22.65901531,1.31937392,-14.20517518, 6.73740794, -53.72632814]]
+  xequil = [502.0, 0.03887505597600522, 0.0, 0.0, 0.03887505597600522, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1000.0, 9.05666543872074]
+  uequil = [0.13946204864060271, -0.7495784725828754, 0.0, 0.0]
+  throttle_max = 1
+  throttle_min = 0
+  elevator_max = 25
+  elevator_min = -25
+  aileron_max = 21.5
+  aileron_min = -21.5
+  rudder_max = 30.0
+  rudder_min = -30.0
+
+[inputs]
+    names = [  [ 'vt',
+                'alpha',
+                'beta',
+                'phi',
+                'theta',
+                'psi',
+                'p',
+                'q',
+                'r',
+                'pn',
+                'pe',
+                'h',
+                'pow'],
+                ['Nz',
+                'Ny'],
+                ['uNz',
+                'ups',
+                'uNy+R',
+                'uthrottle']]
+
+[topics]
+
+  [topics.outputs]
+    msg = "./msg/f16llc_output.msg"
+
+  [topics.states]
+    msg = "./msg/f16llc_state.msg"
+    initial = [ 0.0, 0.0, 0.0 ]

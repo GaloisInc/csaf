@@ -1,0 +1,33 @@
+system_name = "F16 Fixed Altitude Autopilot"
+system_representation = "black box"
+system_solver = "Euler"
+
+sampling_frequency = 10
+
+is_discrete = true
+is_hybrid = false
+
+[parameters]
+  setpoint = 2500.0
+  xequil = [502.0, 0.03887505597600522, 0.0, 0.0, 0.03887505597600522, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1000.0, 9.05666543872074]
+
+[inputs]
+    names = [[   'vt',
+                'alpha',
+                'beta',
+                'phi',
+                'theta',
+                'psi',
+                'p',
+                'q',
+                'r',
+                'pn',
+                'pe',
+                'h',
+                'pow'],
+                ['Nz',
+                'Ny']]
+
+[topics]
+  [topics.outputs]
+      msg = "./msg/autopilot_output.msg"

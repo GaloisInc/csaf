@@ -1,0 +1,71 @@
+# System Name
+name = "f16-heidlauf"
+
+# File to Global Defaults
+global_config = "./global_config.toml"
+
+# Order to Construct/Evaluate Devices
+evaluation_order = ["controller", "plant", "autopilot"]
+
+# File to Log Results
+log_file = "f16run.log"
+
+# Log Level (info/debug)
+log_level = "debug"
+
+# device components
+[devices]
+
+  [devices.controller]
+    # environment to run under
+    run_command = "python3"
+
+    # path to model executable
+    process = "components/f16llc.py"
+
+    # TOML with topics
+    config = "components/f16llc.toml"
+
+    # whether to print debug diagnostics
+    debug = false
+
+    # subscribe to topic of a component (device name, topic name)
+    sub = [["plant", "states"], ["plant", "outputs"], ["autopilot", "outputs"]]
+
+    # port to publish
+    pub = 5502
+
+  [devices.plant]
+    # environment to run under
+    run_command = "python3"
+
+    # path to model executable
+    process = "components/f16plant.py"
+
+    # TOML with topics
+    config = "components/f16plant.toml"
+
+    # whether to print debug diagnostics
+    debug = false
+
+    # subscribe to topic of a component (device name, topic name)
+    sub = [["controller", "outputs"]]
+
+    # port to publish
+    pub = 5501
+
+  [devices.autopilot]
+    # environment to run under
+    run_command = "python3"
+
+    # path to model executable
+    process = "components/autopilot.py"
+
+    # whether to print debug diagnostics
+    debug = false
+
+    # subscribe to topic of a component (device name, topic name)
+    sub = [["plant", "states"], ["plant", "outputs"]]
+
+    # port to publish
+    pub = 5503

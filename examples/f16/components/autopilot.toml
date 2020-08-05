@@ -1,0 +1,39 @@
+system_name = "F16 Autopilot"
+system_representation = "black box"
+system_solver = "Euler"
+
+sampling_frequency = 10
+
+is_discrete = true
+is_hybrid = false
+
+[parameters]
+  NzMax = 9.0
+  xequil = [502.0, 0.03887505597600522, 0.0, 0.0, 0.03887505597600522, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1000.0, 9.05666543872074]
+  uequil = [0.13946204864060271, -0.7495784725828754, 0.0, 0.0]
+
+[inputs]
+    names = [[   'vt',
+                'alpha',
+                'beta',
+                'phi',
+                'theta',
+                'psi',
+                'p',
+                'q',
+                'r',
+                'pn',
+                'pe',
+                'h',
+                'pow'],
+                ['Nz',
+                'Ny']]
+
+[topics]
+
+  [topics.states]
+      msg = "./msg/autopilot_state.msg"
+      initial = ["Waiting"]
+
+  [topics.outputs]
+      msg = "./msg/autopilot_output.msg"

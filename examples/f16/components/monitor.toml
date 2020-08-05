@@ -1,0 +1,32 @@
+system_name = "F16 Autopilot Monitor"
+system_representation = "black box"
+system_solver = "Euler"
+
+sampling_frequency = 30
+
+is_discrete = true
+is_hybrid = false
+
+[parameters]
+
+[inputs]
+    names = [[   'vt',
+                'alpha',
+                'beta',
+                'phi',
+                'theta',
+                'psi',
+                'p',
+                'q',
+                'r',
+                'pn',
+                'pe',
+                'h',
+                'pow'],
+                ['Nz',
+                'Ny'],
+                ['gcas_state']]
+
+[topics]
+  [topics.outputs]
+      msg = "./msg/monitor_output.msg"

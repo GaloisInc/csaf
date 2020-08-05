@@ -1,0 +1,6 @@
+codec_dir = "./codec"
+output_dir = "./output"
+
+log_level = "info"
+log_file = "log.log"
+

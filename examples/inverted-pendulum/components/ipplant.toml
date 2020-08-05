@@ -1,0 +1,25 @@
+system_name = "Inverted Pendulum Plant"
+system_representation = "black box"
+system_solver = "Euler"
+
+sampling_frequency = 100
+
+is_discrete = false
+is_hybrid = false
+
+[parameters]
+  mm = 0.5        # Mass of the cart
+  m = 0.2         # Mass of the pendulum
+  b = 0.1         # coefficient of friction on cart
+  ii = 0.006      # Mass Moment of Inertia on Pendulum
+  g = 9.8         # Gravitational acceleration
+  length = 0.3    # length of pendulum
+
+[inputs]
+  names = [['displacement']]
+
+[topics]
+
+  [topics.states]
+    msg = "./msg/ipplant_state.msg"
+    initial = [0.0, 0.01, 0.52 , -0.01]

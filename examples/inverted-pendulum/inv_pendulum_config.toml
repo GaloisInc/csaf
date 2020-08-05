@@ -1,0 +1,74 @@
+# System Name
+name = "inverted-pendulum"
+
+# File to Global Defaults
+global_config = "./global_config.toml"
+
+# Order to Construct/Evaluate Devices
+evaluation_order = ["maneuver", "controller", "plant"]
+
+# File to Log Results
+log_file = "inv_pendulum.log"
+
+# Log Level (info/debug)
+log_level = "debug"
+
+# device components
+[devices]
+
+  [devices.controller]
+    # environment to run under
+    run_command = "python3"
+
+    # path to model executable
+    process = "components/ipcontroller.py"
+
+    # TOML with topics
+    config = "components/ipcontroller.toml"
+
+    # whether to print debug diagnostics
+    debug = false
+
+    # subscribe to topic of a component (device name, topic name)
+    sub = [["plant", "states"], ["maneuver", "outputs"]]
+
+    # port to publish
+    pub = 5502
+
+  [devices.plant]
+    # environment to run under
+    run_command = "python3"
+
+    # path to model executable
+    process = "components/ipplant.py"
+
+    # TOML with topics
+    config = "components/ipplant.toml"
+
+    # whether to print debug diagnostics
+    debug = false
+
+    # subscribe to topic of a component (device name, topic name)
+    sub = [["controller", "outputs"]]
+
+    # port to publish
+    pub = 5501
+
+  [devices.maneuver]
+    # environment to run under
+    run_command = "python3"
+
+    # path to model executable
+    process = "components/ipmaneuver.py"
+
+    # TOML with topics
+    config = "components/ipmaneuver.toml"
+
+    # whether to print debug diagnostics
+    debug = false
+
+    # subscribe to topic of a component (device name, topic name)
+    sub = []
+
+    # port to publish
+    pub = 5503
