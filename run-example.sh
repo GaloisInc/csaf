@@ -25,20 +25,24 @@ request_example() {
 }
 
 CONF_NAME=""
+EXAMPLE_DIR=""
 
 case $EXAMPLE_NAME in
 	"f16-simple")
   		CONF_NAME="f16_simple_config.toml"
+		EXAMPLE_DIR="examples/f16"
   		;;
 	"f16-shield")
   		CONF_NAME="f16_shield_config.toml"
+		EXAMPLE_DIR="examples/f16"
   		;;
 	"inv-pendulum")
 		CONF_NAME="inv_pendulum_config.toml"
+		EXAMPLE_DIR="examples/inverted-pendulum"
 		;;
 	*)
 		request_example
 		;;
 esac
 
-./run-csaf.sh -l -d ${PWD}/examples -c ${CONF_NAME}
+./run-csaf.sh -l -d "${PWD}/${EXAMPLE_DIR}" -c ${CONF_NAME}
