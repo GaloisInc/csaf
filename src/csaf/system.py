@@ -77,6 +77,14 @@ class System:
         self.eval_order = eval_order
         self.config = config
 
+    def unbind(self):
+        """unbind components from ports, teardown system"""
+        for c in self.components:
+            c.unbind()
+        self.components = []
+        self.eval_order = []
+        self.config = None
+
     def simulate_tspan(self, tspan, show_status=False):
         """over a given timespan tspan, simulate the system"""
         sched = Scheduler(self.components, self.eval_order)

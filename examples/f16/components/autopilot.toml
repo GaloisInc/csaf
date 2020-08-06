@@ -1,4 +1,4 @@
-system_name = "F16 Autopilot"
+system_name = "F16 GCAS Autopilot"
 system_representation = "black box"
 system_solver = "Euler"
 
@@ -37,3 +37,6 @@ is_hybrid = false
 
   [topics.outputs]
       msg = "./msg/autopilot_output.msg"
+
+  [topics.fdas]
+      msg = "./msg/autopilot_state.msg"

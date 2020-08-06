@@ -109,11 +109,13 @@ class DynamicComponent(Component):
         else:
             xp = []
 
-        if f'{self.name}-outputs' in self._messenger_out.topics:
-            out = self._model.get_output(t, xp, u)
-            msg = self._messenger_out.serialize_message(out, f'{self.name}-outputs', t)
-            self.send_message(0, msg, topic=f"{self.name}-outputs")
-            dout['outputs'] = out
+        for ptopic in self._messenger_out.topics:
+            if ptopic != f"{self.name}-states":
+                _, field = ptopic.split('-')
+                out = self._model.get(t, xp, u, field[:-1])
+                msg = self._messenger_out.serialize_message(out, ptopic, t)
+                self.send_message(0, msg, topic=ptopic)
+                dout[field] = out
         dout['times'] = t
         return dout
 
@@ -125,10 +127,13 @@ class DynamicComponent(Component):
             msg = self._messenger_out.serialize_message(self._state_buffer, f'{self.name}-states', t)
             self.send_message(0, msg, topic=f"{self.name}-states")
 
-        if f'{self.name}-outputs' in self._messenger_out.topics:
-            out = self._model.get_output(t, self._state_buffer, u)
-            msg = self._messenger_out.serialize_message(out, f'{self.name}-outputs', t)
-            self.send_message(0, msg, topic=f"{self.name}-outputs")
+        for ptopic in self._messenger_out.topics:
+            if ptopic != f"{self.name}-states":
+                _, field = ptopic.split('-')
+                print(self.name, field)
+                out = self._model.get(t, self._state_buffer, u, field[:-1])
+                msg = self._messenger_out.serialize_message(out, ptopic, t)
+                self.send_message(0, msg, topic=ptopic)
 
     def _names_topic(self, topic: str, messenger: SerialMessenger) -> list:
         """generic names getter for messenger"""
@@ -170,7 +175,13 @@ class DynamicComponent(Component):
 
     @property
     def topics(self):
+        """topics that the component subscribes to"""
         return self._messenger_in.topics
+
+    @property
+    def publish_topics(self):
+        """topics that the component will publish"""
+        return self._messenger_out.topics
 
     @property
     def sampling_frequency(self):

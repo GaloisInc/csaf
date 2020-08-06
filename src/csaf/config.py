@@ -8,7 +8,6 @@ import os
 import logging
 
 import toml
-import pydot
 
 from .rosmsg import CsafMsg, generate_serializer
 
@@ -219,12 +218,13 @@ class SystemConfig:
 
     def plot_config(self, fname=None):
         """visualize the configuration file"""
+        import pydot
         fname = fname if fname is not None else self.config_dict["name"] + "-config.pdf"
 
         nodes, edges, edge_labels = self.build_device_graph()
         eorder = self.config_dict["evaluation_order"]
 
-        graph = pydot.Dot(graph_type='digraph', prog='LR', concentrate=True)
+        graph = pydot.Dot(graph_type='digraph', prog='UD', concentrate=True)
         graph.set_node_defaults(shape='box',
                                 fontsize='10')
 

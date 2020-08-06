@@ -5,7 +5,8 @@ name = "f16-shield-heidlauf"
 global_config = "./global_config.toml"
 
 # Order to Construct/Evaluate Devices
-evaluation_order = ["controller", "plant", "autopilot", "autoairspeed", "autoaltitude", "monitor", "switch"]
+#evaluation_order = ["plant", "autopilot", "autoairspeed", "autoaltitude", "monitor", "switch", "controller"]
+evaluation_order = ["autopilot", "autoairspeed", "autoaltitude", "monitor", "switch", "controller", "plant"]
 
 # File to Log Results
 log_file = "f16run.log"
@@ -57,7 +58,7 @@ log_level = "debug"
     debug = false
     sub = [ ["plant", "states"],
             ["plant", "outputs"],
-            ["autopilot", "states"]]
+            ["autopilot", "fdas"]]
     pub = 5506
 
   [devices.switch]

@@ -16,7 +16,7 @@ parameters = {}
 #state = GcasAutopilot.STATE_START
 
 
-def main(time=0.0, state='Waiting', input=[0]*4, update=False, output=False):
+def main(time=0.0, state='Waiting', input=[0]*4, update=False, output=False, fda=False):
     """TODO: actually implement the autopilot"""
     global parameters
     if len(parameters.keys()) == 0:
@@ -30,6 +30,8 @@ def main(time=0.0, state='Waiting', input=[0]*4, update=False, output=False):
     uref = get_u_ref(time, state, input)
     if output:
         return list(uref)
+    elif fda:
+        return list([nstate])
     else:
         return list([nstate])
 
