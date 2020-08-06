@@ -40,16 +40,12 @@ def plot_schedule(ax, t, x):
             if (width > 0.0 and xidx >= (len(xb) -1)):
                 # if at end of time, plot remaining
                 ax.barh(idx,width=width,left=t_start,color='C0')
-            if (xidx == 0 and xbi):
-                # if at beginning of time, and true, start
-                width += t[xidx] - t[xidx-1]
-                t_start = t[xidx]
             if xbi and last_xbi: # level high
                 # continue - increase width
-                width += t[xidx] - t[xidx-1]
+                width += t[xidx] - (t[xidx-1] if xidx > 0 else t_start)
             elif (xbi) and (not last_xbi): # rising edge
                 # start condition - start timer and increase width
-                width += t[xidx] - t[xidx-1]
+                width += t[xidx] - (t[xidx-1] if xidx > 0 else t_start)
                 t_start = t[xidx]
             elif ((not xbi) and last_xbi): # falling edge
                 # plot action
