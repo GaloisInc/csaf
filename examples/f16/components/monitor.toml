@@ -10,23 +10,8 @@ is_hybrid = false
 [parameters]
 
 [inputs]
-    names = [[   'vt',
-                'alpha',
-                'beta',
-                'phi',
-                'theta',
-                'psi',
-                'p',
-                'q',
-                'r',
-                'pn',
-                'pe',
-                'h',
-                'pow'],
-                ['Nz',
-                'Ny'],
-                ['gcas_state']]
+  msgs = ["f16plant_state.msg", "f16plant_output.msg", "autopilot_state.msg"]
 
 [topics]
   [topics.outputs]
-      msg = "./msg/monitor_output.msg"
+      msg = "monitor_output.msg"

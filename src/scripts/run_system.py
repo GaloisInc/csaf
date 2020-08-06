@@ -58,17 +58,17 @@ def plot_schedule(ax, t, x):
     ax.set_yticklabels([y.title() for y in y_labels])
 
 
-def plot_device(ax: plt.Axes, trajs: ctc.TimeTrace,
-                dname: str, fieldname: str, index: int,
-                label=None,
-                do_integrate=False,
-                do_schedule=False,
-                mult=1.0,
-                fix=False):
+def plot_component(ax: plt.Axes, trajs: ctc.TimeTrace,
+                   dname: str, fieldname: str, index: int,
+                   label=None,
+                   do_integrate=False,
+                   do_schedule=False,
+                   mult=1.0,
+                   fix=False):
     """convenience method to plot one axis object
     :param ax: plt.Axes to plot
     :param trajs: csaf simulation output
-    :param dname: device name to access
+    :param dname: component name to access
     :param fieldname: name of field to plot
     :param index: index in vector where field is located
     :param label: string containing "plot label (units)"
@@ -79,7 +79,7 @@ def plot_device(ax: plt.Axes, trajs: ctc.TimeTrace,
     """
     import numpy as np
 
-    # times devices
+    # times component
     t = trajs[dname].times
     # variable to plot
     x = np.array(getattr(trajs[dname], fieldname))[:, index]
@@ -132,17 +132,17 @@ my_system.unbind()
 if "pendulum" in config_filename:
     fig, ax = plt.subplots(figsize=(12, 8), nrows=2, ncols=3, sharex=True)
     ax[0][0].set_title("Pendulum Plant")
-    plot_device(ax[0][0], trajs, "plant", "states", 0, "position (m)", do_integrate=True)
-    plot_device(ax[1][0], trajs, "plant", "states", 2, "angle (rad)", do_integrate=True, fix=True)
+    plot_component(ax[0][0], trajs, "plant", "states", 0, "position (m)", do_integrate=True)
+    plot_component(ax[1][0], trajs, "plant", "states", 2, "angle (rad)", do_integrate=True, fix=True)
     ax[1][0].set_xlabel("Time (s)")
 
     ax[0][1].set_title("Controller")
-    plot_device(ax[0][1], trajs, "controller", "outputs", 0, "Force (N)")
+    plot_component(ax[0][1], trajs, "controller", "outputs", 0, "Force (N)")
     ax[0][1].set_xlabel("Time (s)")
     ax[1][1].axis('off')
 
     ax[0][2].set_title("Maneuver")
-    plot_device(ax[0][2], trajs, "maneuver", "outputs", 0, "Setpoint ()", do_integrate=True, mult=-1.0)
+    plot_component(ax[0][2], trajs, "maneuver", "outputs", 0, "Setpoint ()", do_integrate=True, mult=-1.0)
     ax[1][2].axis('off')
     ax[0][2].set_xlabel("Time (s)")
 
@@ -150,22 +150,22 @@ if "shield" in config_filename:
     ## Plot Results
     fig, ax = plt.subplots(figsize=(25, 15), nrows=4, ncols=3, sharex=True)
     ax[0][0].set_title("F16 Plant")
-    plot_device(ax[0][0], trajs, "plant", "states", 11, "height (ft)")
-    plot_device(ax[1][0], trajs, "plant", "states", 0, "airspeed (ft/s)")
-    plot_device(ax[2][0], trajs, "plant", "states", 3, "roll (degrees)")
-    plot_device(ax[2][0], trajs, "plant", "states", 4, "pitch (degrees)")
-    plot_device(ax[2][0], trajs, "plant", "states", 5, "yaw (degrees)")
-    plot_device(ax[3][0], trajs, "plant", "states", 12, "power (%)")
+    plot_component(ax[0][0], trajs, "plant", "states", 11, "height (ft)")
+    plot_component(ax[1][0], trajs, "plant", "states", 0, "airspeed (ft/s)")
+    plot_component(ax[2][0], trajs, "plant", "states", 3, "roll (degrees)")
+    plot_component(ax[2][0], trajs, "plant", "states", 4, "pitch (degrees)")
+    plot_component(ax[2][0], trajs, "plant", "states", 5, "yaw (degrees)")
+    plot_component(ax[3][0], trajs, "plant", "states", 12, "power (%)")
 
     ax[0][1].set_title("Low Level Controller")
-    plot_device(ax[0][1], trajs, "controller", "outputs", 0, "e ()")
-    plot_device(ax[1][1], trajs, "controller", "outputs", 1, "a ()")
-    plot_device(ax[2][1], trajs, "controller", "outputs", 2, "r ()")
-    plot_device(ax[3][1], trajs, "controller", "outputs", 3, "throttle ()")
+    plot_component(ax[0][1], trajs, "controller", "outputs", 0, "e ()")
+    plot_component(ax[1][1], trajs, "controller", "outputs", 1, "a ()")
+    plot_component(ax[2][1], trajs, "controller", "outputs", 2, "r ()")
+    plot_component(ax[3][1], trajs, "controller", "outputs", 3, "throttle ()")
 
     ax[0][2].set_title("Autopilots")
-    plot_device(ax[0][2], trajs, "monitor", "outputs", 0, "autopilot selected ()", do_schedule=True)
-    plot_device(ax[1][2], trajs, "autopilot", "fdas", 0, "GCAS State ()", do_schedule=True)
+    plot_component(ax[0][2], trajs, "monitor", "outputs", 0, "autopilot selected ()", do_schedule=True)
+    plot_component(ax[1][2], trajs, "autopilot", "fdas", 0, "GCAS State ()", do_schedule=True)
     ax[1][2].set_title("GCAS Finite Discrete State")
     ax[2][2].axis('off')
     ax[3][2].axis('off')
@@ -177,24 +177,24 @@ elif "f16" in config_filename:
     ## Plot Results
     fig, ax = plt.subplots(figsize=(25, 15), nrows=4, ncols=3, sharex=True)
     ax[0][0].set_title("F16 Plant")
-    plot_device(ax[0][0], trajs, "plant", "states", 11, "height (ft)")
-    plot_device(ax[1][0], trajs, "plant", "states", 0, "airspeed (ft/s)")
-    plot_device(ax[2][0], trajs, "plant", "states", 3, "roll (degrees)")
-    plot_device(ax[2][0], trajs, "plant", "states", 4, "pitch (degrees)")
-    plot_device(ax[2][0], trajs, "plant", "states", 5, "yaw (degrees)")
-    plot_device(ax[3][0], trajs, "plant", "states", 12, "power (%)")
+    plot_component(ax[0][0], trajs, "plant", "states", 11, "height (ft)")
+    plot_component(ax[1][0], trajs, "plant", "states", 0, "airspeed (ft/s)")
+    plot_component(ax[2][0], trajs, "plant", "states", 3, "roll (degrees)")
+    plot_component(ax[2][0], trajs, "plant", "states", 4, "pitch (degrees)")
+    plot_component(ax[2][0], trajs, "plant", "states", 5, "yaw (degrees)")
+    plot_component(ax[3][0], trajs, "plant", "states", 12, "power (%)")
 
     ax[0][1].set_title("Low Level Controller")
-    plot_device(ax[0][1], trajs, "controller", "outputs", 0, "s0 ()")
-    plot_device(ax[1][1], trajs, "controller", "outputs", 1, "s1 ()")
-    plot_device(ax[2][1], trajs, "controller", "outputs", 2, "s2 ()")
-    plot_device(ax[3][1], trajs, "controller", "outputs", 3, "s3 ()")
+    plot_component(ax[0][1], trajs, "controller", "outputs", 0, "s0 ()")
+    plot_component(ax[1][1], trajs, "controller", "outputs", 1, "s1 ()")
+    plot_component(ax[2][1], trajs, "controller", "outputs", 2, "s2 ()")
+    plot_component(ax[3][1], trajs, "controller", "outputs", 3, "s3 ()")
 
     ax[0][2].set_title("Autopilot")
-    plot_device(ax[0][2], trajs, "autopilot", "outputs", 0, "a0 ()")
-    plot_device(ax[1][2], trajs, "autopilot", "outputs", 1, "a1 ()")
-    plot_device(ax[2][2], trajs, "autopilot", "outputs", 2, "a2 ()")
-    plot_device(ax[3][2], trajs, "autopilot", "outputs", 3, "a3 ()")
+    plot_component(ax[0][2], trajs, "autopilot", "outputs", 0, "a0 ()")
+    plot_component(ax[1][2], trajs, "autopilot", "outputs", 1, "a1 ()")
+    plot_component(ax[2][2], trajs, "autopilot", "outputs", 2, "a2 ()")
+    plot_component(ax[3][2], trajs, "autopilot", "outputs", 3, "a3 ()")
 
     [ax[3][idx].set_xlabel('Time (s)') for idx in range(3)]
 

@@ -56,7 +56,7 @@ class DynamicComponent(Component):
     def receive_input(self):
         """receive all necessary topics for a DynamicComponent"""
         for sidx, sn in enumerate(self.input_socks):
-            # message from publishers may or may not be ready (depends on frequency of devices)
+            # message from publishers may or may not be ready (depends on frequency of components)
             topics = []
             recvs = []
             # poll zmq socket and see if message is available
@@ -120,7 +120,7 @@ class DynamicComponent(Component):
         return dout
 
     def send_stimulus(self, t: float):
-        """send message of device at its current state at time t"""
+        """send message of components at its current state at time t"""
         u = list(np.zeros((self.num_inputs)))
 
         if self._state_buffer is not None:
@@ -185,12 +185,12 @@ class DynamicComponent(Component):
 
     @property
     def sampling_frequency(self):
-        """device sampling and update rate"""
+        """component sampling and update rate"""
         return self._sampling_frequency
 
     @property
     def sampling_phase(self):
-        """time skew of device"""
+        """time skew of component"""
         return 0.0
 
     @property

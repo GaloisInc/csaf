@@ -29,15 +29,15 @@ is_hybrid = false
     equations = "morelli"
 
 [inputs]
-    names = [['throttle', 'elevator', 'aileron', 'rudder']]
+  msgs = [ "f16llc_output.msg" ]
 
 [topics]
 
   [topics.outputs]
-      msg = "./msg/f16plant_output.msg"
+      msg = "f16plant_output.msg"
 
   [topics.states]
-      msg = "./msg/f16plant_state.msg"
+      msg = "f16plant_state.msg"
       initial = [   540.0,
                     0.037027160081059704,
                     0.0,

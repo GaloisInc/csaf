@@ -1,74 +1,68 @@
 # System Name
 name = "inverted-pendulum"
 
-# File to Global Defaults
-global_config = "./global_config.toml"
+# directory to output ROSmsg codecs
+codec_dir = "./codec"
 
-# Order to Construct/Evaluate Devices
+# directory to send CSAF output
+output_dir = "./output"
+
+# Order to Construct/Evaluate Components 
 evaluation_order = ["maneuver", "controller", "plant"]
 
 # File to Log Results
 log_file = "inv_pendulum.log"
 
 # Log Level (info/debug)
-log_level = "debug"
+log_level = "info"
 
-# device components
-[devices]
+[components]
 
-  [devices.controller]
+  [components.controller]
     # environment to run under
     run_command = "python3"
 
     # path to model executable
-    process = "components/ipcontroller.py"
-
-    # TOML with topics
-    config = "components/ipcontroller.toml"
+    process = "ipcontroller.py"
 
     # whether to print debug diagnostics
     debug = false
 
-    # subscribe to topic of a component (device name, topic name)
+    # subscribe to topic of a component (component name, topic name)
     sub = [["plant", "states"], ["maneuver", "outputs"]]
 
     # port to publish
     pub = 5502
 
-  [devices.plant]
+  [components.plant]
     # environment to run under
     run_command = "python3"
 
     # path to model executable
-    process = "components/ipplant.py"
-
-    # TOML with topics
-    config = "components/ipplant.toml"
+    process = "ipplant.py"
 
     # whether to print debug diagnostics
     debug = false
 
-    # subscribe to topic of a component (device name, topic name)
+    # subscribe to topic of a component (component name, topic name)
     sub = [["controller", "outputs"]]
 
     # port to publish
     pub = 5501
 
-  [devices.maneuver]
+  [components.maneuver]
     # environment to run under
     run_command = "python3"
 
     # path to model executable
-    process = "components/ipmaneuver.py"
-
-    # TOML with topics
-    config = "components/ipmaneuver.toml"
+    process = "ipmaneuver.py"
 
     # whether to print debug diagnostics
     debug = false
 
-    # subscribe to topic of a component (device name, topic name)
+    # subscribe to topic of a component (component name, topic name)
     sub = []
 
     # port to publish
     pub = 5503
+

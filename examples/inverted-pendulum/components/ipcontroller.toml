@@ -10,9 +10,8 @@ is_hybrid = false
 [parameters]
 
 [inputs]
-  names = [['angular_rate', 'angular_acceleration', 'velocity', 'acceleration'],
-            ['setpoint']]
+  msgs = ["ipplant_state.msg", "ipmaneuver_output.msg"]
 
 [topics]
   [topics.outputs]
-    msg = "./msg/ipcontroller_output.msg"
+    msg = "ipcontroller_output.msg"
