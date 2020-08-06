@@ -205,5 +205,5 @@ elif "f16" in config_filename:
 # save plot of pub/sub diagram
 my_conf.plot_config()
 # save plot of demo
-plt.savefig(os.path.join(my_conf.output_directory, "run_system_fig.png"))
+plt.savefig(os.path.join(my_conf.output_directory, f"{my_conf.name}-run.png"))
 plt.show()

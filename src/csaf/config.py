@@ -274,6 +274,11 @@ class SystemConfig:
         return self._config["output_dir"]
 
     @property
+    def name(self):
+        """configuration name"""
+        return self._config["name"]
+
+    @property
     def get_name_components(self):
         """names of components in the configuration (not the component name)"""
         return list(self._config["components"].keys())
