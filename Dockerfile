@@ -8,6 +8,7 @@ RUN apt-get install -y \
     git \
     python3 \
     python3-pip \
+    graphviz \
     python3-pyqt5
 
 RUN pip3 install -U pip

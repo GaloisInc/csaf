@@ -130,7 +130,6 @@ class DynamicComponent(Component):
         for ptopic in self._messenger_out.topics:
             if ptopic != f"{self.name}-states":
                 _, field = ptopic.split('-')
-                print(self.name, field)
                 out = self._model.get(t, self._state_buffer, u, field[:-1])
                 msg = self._messenger_out.serialize_message(out, ptopic, t)
                 self.send_message(0, msg, topic=ptopic)

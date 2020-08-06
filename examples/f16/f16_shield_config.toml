@@ -1,7 +1,6 @@
 # System Name
 name = "f16-shield-heidlauf"
 
-
 # directory to output ROSmsg codecs
 codec_dir = "./codec"
 
@@ -15,7 +14,7 @@ evaluation_order = ["autopilot", "autoairspeed", "autoaltitude", "monitor", "swi
 log_file = "f16run.log"
 
 # Log Level (info/debug)
-log_level = "debug"
+log_level = "info"
 
 [components]
 

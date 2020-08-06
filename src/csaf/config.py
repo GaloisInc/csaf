@@ -21,7 +21,7 @@ def mkdir_if_not_exist(dirname):
         return True
 
 
-def join_if_not_abs(*args, project_dir=None):
+def join_if_not_abs(*args, project_dir=None, exist=True):
     """if last argument is an absolute path, don't join the path arguments together"""
     if os.path.isabs(args[-1]):
         return args[-1]
@@ -30,7 +30,7 @@ def join_if_not_abs(*args, project_dir=None):
             pathname = os.path.join(*args[:-1], project_dir, args[-1])
         else:
             pathname = os.path.join(*args)
-        assert os.path.exists(pathname), f"path name {pathname} is required to exist!"
+        assert os.path.exists(pathname) or not exist, f"path name {pathname} is required to exist!"
         return pathname
 
 
@@ -79,8 +79,18 @@ class SystemConfig:
         for k in config.keys():
             assert k in SystemConfig.get_valid_fields(), f"config field '{k}' not a valid config field!"
 
+        # make directories
+        dpath = join_if_not_abs(base_dir, config['codec_dir'])
+        config["codec_dir"] = str(pathlib.Path(dpath).resolve())
+        outcome = mkdir_if_not_exist(dpath)
+        if outcome:
+            logging.info(f"created codec directory {dpath} because it did not exist")
+        dpath = join_if_not_abs(base_dir, config['output_dir'])
+        config["output_dir"] = str(pathlib.Path(dpath).resolve())
+        outcome = mkdir_if_not_exist(dpath)
+
         # setup logging
-        log_filepath  = join_if_not_abs(base_dir, config["log_file"])
+        log_filepath  = join_if_not_abs(config["output_dir"], config["log_file"], exist=False)
         config["log_file"] = str(pathlib.Path(log_filepath).resolve())
 
         # log is permissive -- will use filepath specified
@@ -102,15 +112,6 @@ class SystemConfig:
                             handlers=[logging.FileHandler(log_filepath), logging.StreamHandler()])
         logging.info(f"setting up CSAF System from TOML file '{toml_file}'")
 
-        # make directories
-        dpath = join_if_not_abs(base_dir, config['codec_dir'])
-        config["codec_dir"] = str(pathlib.Path(dpath).resolve())
-        outcome = mkdir_if_not_exist(dpath)
-        if outcome:
-            logging.info(f"created codec directory {dpath} because it did not exist")
-        dpath = join_if_not_abs(base_dir, config['output_dir'])
-        config["output_dir"] = str(pathlib.Path(dpath).resolve())
-        outcome = mkdir_if_not_exist(dpath)
         if outcome:
             logging.info(f"created output directory {dpath} because it did not exist")
         logging.info(f"Output Dir: {config['output_dir']}")
@@ -257,7 +258,7 @@ class SystemConfig:
             graph.add_edge(pydot.Edge(verts[e[0]], verts[e[1]], fontsize=10,
                                       label=topic + f" ({str(width)})\nport " + str(e[0])))
 
-        graph_path = pathlib.Path(join_if_not_abs(self.config_dict['output_dir'], fname))
+        graph_path = pathlib.Path(join_if_not_abs(self.config_dict['output_dir'], fname, exist=False))
         graph.write_pdf(graph_path)
 
     @property
@@ -266,6 +267,11 @@ class SystemConfig:
         preferably, use the interface accessors instead to safely handle the config
         """
         return self._config
+
+    @property
+    def output_directory(self):
+        """configuration output directory"""
+        return self._config["output_dir"]
 
     @property
     def get_name_components(self):

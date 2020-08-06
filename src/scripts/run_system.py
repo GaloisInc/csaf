@@ -9,11 +9,14 @@ Supports the Stanley Bak's f16 model, GCAS shield f16 and
 cart inverted pendulum (CIP)
 """
 import re
+import os
+import sys
+
+import matplotlib.pyplot as plt
 
 import csaf.system as csys
+import csaf.config as cconf
 import csaf.trace as ctc
-import matplotlib.pyplot as plt
-import sys
 
 
 def plot_schedule(ax, t, x):
@@ -37,6 +40,10 @@ def plot_schedule(ax, t, x):
             if (width > 0.0 and xidx >= (len(xb) -1)):
                 # if at end of time, plot remaining
                 ax.barh(idx,width=width,left=t_start,color='C0')
+            if (xidx == 0 and xbi):
+                # if at beginning of time, and true, start
+                width += t[xidx] - t[xidx-1]
+                t_start = t[xidx]
             if xbi and last_xbi: # level high
                 # continue - increase width
                 width += t[xidx] - t[xidx-1]
@@ -125,7 +132,8 @@ csaf_dir=sys.argv[1]
 csaf_config=sys.argv[2]
 config_filename = csaf_dir + "/" + csaf_config
 
-my_system = csys.System.from_toml(config_filename)
+my_conf = cconf.SystemConfig.from_toml(config_filename)
+my_system = csys.System.from_config(my_conf)
 trajs = my_system.simulate_tspan([0, 35.0], show_status=True)
 my_system.unbind()
 
@@ -198,5 +206,8 @@ elif "f16" in config_filename:
 
     [ax[3][idx].set_xlabel('Time (s)') for idx in range(3)]
 
-plt.savefig("run_system_fig.png")
+# save plot of pub/sub diagram
+my_conf.plot_config()
+# save plot of demo
+plt.savefig(os.path.join(my_conf.output_directory, "run_system_fig.png"))
 plt.show()
