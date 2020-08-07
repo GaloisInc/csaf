@@ -2,10 +2,10 @@
 name = "f16-shield-heidlauf"
 
 # directory to output ROSmsg codecs
-codec_dir = "./codec"
+codec_dir = "codec"
 
 # directory to send CSAF output
-output_dir = "./output"
+output_dir = "output"
 
 # Order to Construct/Evaluate Components
 evaluation_order = ["autopilot", "autoairspeed", "autoaltitude", "monitor", "switch", "controller", "plant"]

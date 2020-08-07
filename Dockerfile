@@ -2,9 +2,8 @@ FROM ubuntu:18.04
 
 RUN apt-get clean && \
     apt-get update && \
-    apt-get -y upgrade
-
-RUN apt-get install -y \
+    apt-get -y upgrade && \
+    apt-get install -y \
     git \
     python3 \
     python3-pip \

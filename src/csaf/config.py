@@ -30,7 +30,7 @@ def join_if_not_abs(*args, project_dir=None, exist=True):
             pathname = os.path.join(*args[:-1], project_dir, args[-1])
         else:
             pathname = os.path.join(*args)
-        assert os.path.exists(pathname) or not exist, f"path name {pathname} is required to exist!"
+        #assert os.path.exists(pathname) or not exist, f"path name {pathname} is required to exist!"
         return pathname
 
 
