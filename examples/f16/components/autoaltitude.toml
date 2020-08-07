@@ -12,22 +12,8 @@ is_hybrid = false
   xequil = [502.0, 0.03887505597600522, 0.0, 0.0, 0.03887505597600522, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1000.0, 9.05666543872074]
 
 [inputs]
-    names = [[   'vt',
-                'alpha',
-                'beta',
-                'phi',
-                'theta',
-                'psi',
-                'p',
-                'q',
-                'r',
-                'pn',
-                'pe',
-                'h',
-                'pow'],
-                ['Nz',
-                'Ny']]
+  msgs = [ "f16plant_state.msg", "f16plant_output.msg" ]
 
 [topics]
   [topics.outputs]
-      msg = "./msg/autopilot_output.msg"
+      msg = "autopilot_output.msg"

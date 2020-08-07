@@ -8,27 +8,13 @@ is_discrete = true
 is_hybrid = false
 
 [parameters]
-    setpoint = 800.0
-    p_gain = 0.01
+    setpoint = 800.0  # setpoint in airspeed (ft/s)
+    p_gain = 0.01     # P controller gain value
 
 [inputs]
-    names = [[   'vt',
-                'alpha',
-                'beta',
-                'phi',
-                'theta',
-                'psi',
-                'p',
-                'q',
-                'r',
-                'pn',
-                'pe',
-                'h',
-                'pow'],
-                ['Nz',
-                'Ny']]
+  msgs = [ "f16plant_state.msg", "f16plant_output.msg" ]
 
 [topics]
 
   [topics.outputs]
-      msg = "./msg/autopilot_output.msg"
+      msg = "autopilot_output.msg"

@@ -29,17 +29,17 @@ class System:
         TODO: decompose long classmethod into functions (?)
         """
         eval_order = config.config_dict["evaluation_order"]
-        devices = []
+        components = []
         ports = []
         names = []
-        for dname, dconfig in config.config_dict["devices"].items():
+        for dname, dconfig in config.config_dict["components"].items():
             # dynamic model
             # TODO: better Model class selection here
             is_discrete = dconfig["config"]["is_discrete"]
             model = ModelNative.from_filename(dconfig["process"], is_discrete=is_discrete)
 
             # pub/sub parameters
-            sub_ports = [[str(config.config_dict["devices"][l]["pub"]), l+"-"+t] for l, t in dconfig["sub"]]
+            sub_ports = [[str(config.config_dict["components"][l]["pub"]), l+"-"+t] for l, t in dconfig["sub"]]
             pub_ports = [str(dconfig["pub"])]
             topics_in = [s[1] for s in sub_ports]
 
@@ -65,11 +65,11 @@ class System:
 
             # bind and update structures
             comp.bind(sub_ports, pub_ports)
-            devices.append(comp)
+            components.append(comp)
             names.append(dname)
             ports += pub_ports
 
-        system = cls(devices, eval_order, config)
+        system = cls(components, eval_order, config)
         return system
 
     def __init__(self, components, eval_order, config):
@@ -77,19 +77,27 @@ class System:
         self.eval_order = eval_order
         self.config = config
 
+    def unbind(self):
+        """unbind components from ports, teardown system"""
+        for c in self.components:
+            c.unbind()
+        self.components = []
+        self.eval_order = []
+        self.config = None
+
     def simulate_tspan(self, tspan, show_status=False):
         """over a given timespan tspan, simulate the system"""
         sched = Scheduler(self.components, self.eval_order)
         s = sched.get_schedule_tspan(tspan)
 
         # produce stimulus
-        input_for_first = list(set([p for p, _ in self.config._config["devices"]["controller"]["sub"]]))
+        input_for_first = list(set([p for p, _ in self.config._config["components"]["controller"]["sub"]]))
         for dname in input_for_first:
             idx = self.names.index(dname)
             self.components[idx].send_stimulus(tspan[0])
 
         # get time trace fields
-        dnames = self.config.get_name_devices
+        dnames = self.config.get_name_components
         dtraces = {}
         for dname in dnames:
             fields = (['times'] + [f"{topic}" for topic in self.config.get_topics(dname)])

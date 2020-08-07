@@ -12,8 +12,8 @@ is_hybrid = false
   xequil = [502.0, 0.03887505597600522, 0.0, 0.0, 0.03887505597600522, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1000.0, 9.05666543872074]
 
 [inputs]
-    names = [['0', '1', '2', '3'], ['0', '1', '2', '3'], ['0', '1', '2', '3'] , ['selection']]
+  msgs = ["autopilot_output.msg", "autopilot_output.msg", "autopilot_output.msg", "monitor_output.msg"]
 
 [topics]
   [topics.outputs]
-      msg = "./msg/autopilot_output.msg"
+      msg = "autopilot_output.msg"

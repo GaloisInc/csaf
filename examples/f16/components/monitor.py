@@ -22,10 +22,9 @@ def main(time=0.0, state=None, input=[0]*4, update=False, output=False):
     if output:
         gcas_primitive = (altitude > 3400 and altitude < 4900 and np.abs(roll) < 30.0)
         if (gcas_primitive) or (finish_gcas not in ['Waiting', 'Finished']):
-            select =  [0]
+            select =  ["gcas"]
         elif airspeed < 750.0: # Fixed Altitude
-            select = [1]
+            select = ["altitude"]
         else:
-            select = [2] # Fixed Airspeed
-        print(select)
+            select = ["airspeed"] # Fixed Airspeed
         return select

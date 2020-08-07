@@ -23,31 +23,13 @@ is_hybrid = false
   rudder_min = -30.0
 
 [inputs]
-    names = [  [ 'vt',
-                'alpha',
-                'beta',
-                'phi',
-                'theta',
-                'psi',
-                'p',
-                'q',
-                'r',
-                'pn',
-                'pe',
-                'h',
-                'pow'],
-                ['Nz',
-                'Ny'],
-                ['uNz',
-                'ups',
-                'uNy+R',
-                'uthrottle']]
+  msgs = [ "f16plant_state.msg", "f16plant_output.msg", "autopilot_output.msg" ]
 
 [topics]
 
   [topics.outputs]
-    msg = "./msg/f16llc_output.msg"
+    msg = "f16llc_output.msg"
 
   [topics.states]
-    msg = "./msg/f16llc_state.msg"
+    msg = "f16llc_state.msg"
     initial = [ 0.0, 0.0, 0.0 ]
