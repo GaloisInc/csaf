@@ -11,7 +11,7 @@ class Scheduler:
     """
     @staticmethod
     def get_uniform_events(ts: float, tp: float, tspan):
-        """for a uniform time event device, get device events"""
+        """for a uniform time event component, get component events"""
         t0, tf = float(tspan[0]), float(tspan[1])
         t0p, tfp = 0.0, float(tf - t0)
         n0 = np.ceil((t0p - tp) / ts)
@@ -20,7 +20,7 @@ class Scheduler:
 
     @staticmethod
     def get_next_event(ts: float, tp: float, t0):
-        """for uniform time event device, get next event time from time t0"""
+        """for uniform time event component, get next event time from time t0"""
         t0p = 0.0
         n0 = np.ceil((t0p - tp) / (ts * t0p)) if not np.abs(ts * t0p) < sys.float_info.epsilon else 0.0
         return n0 * ts + tp + t0
@@ -39,9 +39,9 @@ class Scheduler:
             else:
                 return 1
 
-    def __init__(self, components, device_priority):
+    def __init__(self, components, component_priority):
         self._components = components
-        self._priority = device_priority
+        self._priority = component_priority
 
     def get_schedule_next(self, ct: float):
         """from current time, get next event
@@ -53,9 +53,9 @@ class Scheduler:
         return sort_struct[0]
 
     def get_schedule_tspan(self, tspan):
-        """over a given timespan tspan, determine which devices will be active
+        """over a given timespan tspan, determine which components will be active
         :param tspan: (t0, tf) tuple of times to schedule over
-        :return list of tuples (device name, times) in time sorted order
+        :return list of tuples (component name, times) in time sorted order
         """
         # assert that times are valid
         assert tspan[0] < tspan[1], f"timespan '{tspan}' is not larger at index 1"

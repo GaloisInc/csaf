@@ -33,6 +33,10 @@ class Model(abc.ABC):
     def get_state_update(self, t: float, x, u):
         raise NotImplementedError
 
+    @abc.abstractmethod
+    def get(self, t, x, u, field):
+        raise NotImplementedError
+
     @property
     def is_discrete(self):
         return self._is_discrete
@@ -75,6 +79,10 @@ class ModelNative(Model):
         """state update implementation"""
         return self._func(time=t, state=x, input=u, update=True)
 
+    def get(self, t, x, u, field):
+        kwargs = {'time': t, 'state': x, 'input': u, field:True}
+        return self._func(**kwargs)
+
 
 class ModelExecutable(Model):
     """ relate Model interface to an executable file
@@ -113,3 +121,6 @@ class ModelExecutable(Model):
     def get_state_update(self, t: float, x, u):
         """state update implementation"""
         return self._run_command(t, x, u, "--update")
+
+    def get(self, t, x, u, field):
+        return self._run_command(t, x, u, "--" + field)

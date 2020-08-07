@@ -16,10 +16,10 @@ is_hybrid = false
   length = 0.3    # length of pendulum
 
 [inputs]
-  names = [['displacement']]
+  msgs = ["ipcontroller_output.msg"]
 
 [topics]
 
   [topics.states]
-    msg = "./msg/ipplant_state.msg"
+    msg = "ipplant_state.msg"
     initial = [0.0, 0.01, 0.52 , -0.01]

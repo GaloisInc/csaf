@@ -14,10 +14,13 @@ def main(time=0.0, state=None, input=[0]*4, update=False, output=False):
             info = toml.load(ifp)
         parameters = info["parameters"]
 
-    sidx = int(input[-1])
+    mapper = ["gcas", "altitude", "airspeed"]
+    controller = input[-1]
+    if controller == 0.0:
+        sidx = int(0.0)
+    else:
+        sidx = mapper.index(controller)
     assert len(input) == 13
-    #sidx = 0
-    print(4*sidx, 4*sidx+4)
     if output:
         return input[4*sidx:4*sidx+4]
 

@@ -12,4 +12,4 @@ is_hybrid = false
 
 [topics]
   [topics.outputs]
-    msg = "./msg/ipmaneuver_output.msg"
+    msg = "ipmaneuver_output.msg"

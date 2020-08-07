@@ -5,4 +5,4 @@ string topic
 
 float64 time
 
-int32 selection
+string selection

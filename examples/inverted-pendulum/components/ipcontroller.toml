@@ -2,7 +2,7 @@ system_name = "Inverted Pendulum Controller"
 system_representation = "black box"
 system_solver = "Euler"
 
-sampling_frequency = 8
+sampling_frequency = 10
 
 is_discrete = true
 is_hybrid = false
@@ -10,9 +10,8 @@ is_hybrid = false
 [parameters]
 
 [inputs]
-  names = [['angular_rate', 'angular_acceleration', 'velocity', 'acceleration'],
-            ['setpoint']]
+  msgs = ["ipplant_state.msg", "ipmaneuver_output.msg"]
 
 [topics]
   [topics.outputs]
-    msg = "./msg/ipcontroller_output.msg"
+    msg = "ipcontroller_output.msg"
