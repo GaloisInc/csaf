@@ -9,9 +9,11 @@ component models a simple class that contains multiple subscribers/publishers to
 import time
 import json
 import threading
-import logging
 
 import zmq
+
+# override root logger with csaf logger
+from . import csaf_logger as logging
 
 
 class Component:

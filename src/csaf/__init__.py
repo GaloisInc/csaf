@@ -7,3 +7,7 @@ allows component creation using common system representations, especially for sp
 architecture is supportive of systems to be simulated with diverse components, agnostic to the languages
 and platforms from which they were implemented.
 """
+
+import logging
+
+csaf_logger = logging.getLogger("csaf")

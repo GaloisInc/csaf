@@ -6,10 +6,10 @@ Ethan Lew
 import pathlib
 import os
 import logging
-
 import toml
 
 from .rosmsg import CsafMsg, generate_serializer
+from . import csaf_logger
 
 
 def mkdir_if_not_exist(dirname):
@@ -84,7 +84,7 @@ class SystemConfig:
         config["codec_dir"] = str(pathlib.Path(dpath).resolve())
         outcome = mkdir_if_not_exist(dpath)
         if outcome:
-            logging.info(f"created codec directory {dpath} because it did not exist")
+            csaf_logger.info(f"created codec directory {dpath} because it did not exist")
         dpath = join_if_not_abs(base_dir, config['output_dir'])
         config["output_dir"] = str(pathlib.Path(dpath).resolve())
         outcome = mkdir_if_not_exist(dpath)
@@ -108,15 +108,27 @@ class SystemConfig:
                 AssertionError(f"log level '{level}' found in config file {toml_file} is not valid!")
         else:
             log_level = logging.INFO
-        logging.basicConfig(format='%(asctime)s: (%(levelname)s)  %(message)s', datefmt='%I:%M:%S %p', level=log_level,
-                            handlers=[logging.FileHandler(log_filepath), logging.StreamHandler()])
-        logging.info(f"setting up CSAF System from TOML file '{toml_file}'")
-
+        formatter = logging.Formatter('%(asctime)s: (%(levelname)s)  %(message)s', datefmt='%I:%M:%S %p')
+        # reflect user specified log level as logger level
+        csaf_logger.setLevel(log_level)
+        # setup file logging -- accept log level
+        fh = logging.FileHandler(log_filepath)
+        fh.setFormatter(formatter)
+        fh.setLevel(log_level)
+        # setup console logging -- set to info log level
+        sh = logging.StreamHandler()
+        sh.setFormatter(formatter)
+        sh.setLevel(logging.INFO)
+        # add the two handlers to csaf logging
+        csaf_logger.addHandler(fh)
+        csaf_logger.addHandler(sh)
+        # print config paths
+        csaf_logger.info(f"setting up CSAF System from TOML file '{toml_file}'")
         if outcome:
-            logging.info(f"created output directory {dpath} because it did not exist")
-        logging.info(f"Output Dir: {config['output_dir']}")
-        logging.info(f"Codec Dir: {config['codec_dir']}")
-        logging.info(f"Log Level: {config['log_level']}")
+            csaf_logger.info(f"created output directory {dpath} because it did not exist")
+        csaf_logger.info(f"Output Dir: {config['output_dir']}")
+        csaf_logger.info(f"Codec Dir: {config['codec_dir']}")
+        csaf_logger.info(f"Log Level: {config['log_level']}")
 
         # load component level config file into this config dict
         for dname, dconfig in config["components"].items():
