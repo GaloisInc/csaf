@@ -239,7 +239,7 @@ class SystemConfig:
             assert len(n) == w, f"edge between publishing component '{dout}' and subscribing component '{din}' have width " \
                                 f"disagreement (publishing {w} values but naming {len(n)})"
 
-    def plot_config(self, fname=None):
+    def plot_config(self, fname=None, **kwargs):
         """visualize the configuration file"""
         import pydot
         fname = fname if fname is not None else self.config_dict["name"] + "-config.pdf"
@@ -247,7 +247,7 @@ class SystemConfig:
         nodes, edges, edge_labels = self.build_component_graph()
         eorder = self.config_dict["evaluation_order"]
 
-        graph = pydot.Dot(graph_type='digraph', prog='UD', concentrate=True)
+        graph = pydot.Dot(graph_type='digraph', prog='UD', concentrate=True, color="white")
         graph.set_node_defaults(shape='box',
                                 fontsize='10')
 
@@ -269,7 +269,8 @@ class SystemConfig:
                                       label=topic + f" ({str(width)})\nport {port}"))
 
         graph_path = pathlib.Path(join_if_not_abs(self.config_dict['output_dir'], fname, exist=False))
-        graph.write_pdf(graph_path)
+        extension = graph_path.suffix[1:]
+        graph.write(graph_path, format=extension, **kwargs)
 
     @property
     def config_dict(self):
