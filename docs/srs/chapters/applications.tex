@@ -27,124 +27,82 @@ To show translation to components, the associated message with the pub/sub eleme
 
 \begin{figure}[h]
 \centering
-\includegraphics[width=0.5\linewidth]{./img/plant}
-\caption{F-16 Plant}
+\includegraphics[width=0.5\linewidth]{./img/llc}
+\caption{F-16 Controller}
 \label{fig:f16plant}
 \end{figure}
 
 \subsubsection*{Temporal Message}
 
+\textbf{state}
+\begin{lstlisting}	
+uint32 version_major
+uint32 version_minor
+
+string topic
+
+float64 time
+
+float64 int1
+float64 int2
+float64 int3
+\end{lstlisting}
+
+\textbf{output}
 \begin{lstlisting}
-uint32 0
-uint32 1
+uint32 version_major
+uint32 version_minor
 
-uint32 1
+string topic
 
-Header Input
-	float64 0.6
-	float64 0.01
-	float64 0.0
-	float64 0.0
-	
-Header Output
-	float64 1.0
-	float64 2.0
-	
-Header State
-	float64 540
-	float64 0.4
-	float64 -0.2
-	float64 0.0
-	float64 0.0
-	float64 0.0
-	float64 -0.01
-	float64 0.0
-	float64 0.0
-	float64 0.0
-	float64 0.0
-	float64 3600.0
-	float64 1.2
+float64 time
+
+float64 delta_e
+float64 delta_a
+float64 delta_r
+float64 throttle
 \end{lstlisting}
 
 \subsubsection*{Component Configuration}
 
-\begin{lstlisting}
-uint32 0
-uint32 1
+\begin{lstlisting}	
+system_name = "F16 Low Level Controller"
+system_representation = "black box"
+system_solver = "Euler"
 
-uint32 1
+sampling_frequency = 100
 
-Header Parameters
-    float64 300,
-    float64 30,
-    float64 11.32,
-    float64 1.57e-3,
-    float64 0.35,
-    float64 0.35,
-    float64 160.0,
-    float64 -.770,
-    float64 0.02755,
-    float64 1.055e-4,
-    float64 1.642e-6,
-    float64 .9604,
-    float64 1.759e-2,
-    float64 1.792e-5,
-    float64 -.7336,
-    float64 1.587e-5,
-    float64 57.29578,
-    float64 32.17,
-    string "morelli"
-   
-Header ParameterNames
-    string "s"
-    string "b"
-    string "cbar"
-    string "rm"
-    string "xcgr"
-    string "xcg"
-    string "he"
-    string "c1"
-    string "c2"
-    string "c3"
-    string "c4"
-    string "c5"
-    string "c6"
-    string "c7"
-    string "c8"
-    string "c9"
-    string "rtod"
-    string "g"
-    string  "equations"
-    
-Header InitialState
-	float64 500
-	float64 -0.6
-	float64 0.2
-	float64 12.0
-	float64 0.0
-	float64 0.0
-	float64 0.0
-	float64 0.0
-	float64 0.0
-	float64 0.0
-	float64 0.0
-	float64 5400.0
-	float64 0.0
-	
-Header StateNames
-	string "vt"
-	string "alpha"
-	string "beta"
-	string "phi"
-	string "theta"
-	string "psi"
-	string "p"
-	string "q"
-	string "r"
-	string "pn"
-	string "pe"
-	string "h"
-	string "pow"
+is_discrete = false
+is_hybrid = false
+
+[parameters]
+  K_lqr = [ [-156.9,  -31.0,  -38.7, 0.0, 0.0, 0.0, 0.0, 0.0],
+            [ 0.0, 0.0, 0.0, 30.5, -5.71, -9.31, -34.0, -10.7],
+            [0.0, 0.0, 0.0,-22.7,-14.2, 6.74, -53.7]]
+  xequil = [502.0, 0.039, 0.0, 0.0, 0.039, 0.0, 0.0, 0.0, 0.0, 
+  				0.0, 0.0, 1000.0, 9.06]
+  uequil = [0.139, -0.750, 0.0, 0.0]
+  throttle_max = 1
+  throttle_min = 0
+  elevator_max = 25
+  elevator_min = -25
+  aileron_max = 21.5
+  aileron_min = -21.5
+  rudder_max = 30.0
+  rudder_min = -30.0
+
+[inputs]
+  msgs = [ "f16plant_state.msg", "f16plant_output.msg", 
+  				"autopilot_output.msg" ]
+
+[topics]
+
+  [topics.outputs]
+    msg = "f16llc_output.msg"
+
+  [topics.states]
+    msg = "f16llc_state.msg"
+    initial = [ 0.0, 0.0, 0.0 ]
 \end{lstlisting}
 %
 %
