@@ -1,6 +1,8 @@
 import os
 import toml
 
+import autopilot_helper as ah
+
 parameters ={}
 
 
@@ -13,15 +15,20 @@ def main(time=0.0, state=None, input=[0]*4, update=False, output=False):
             info = toml.load(ifp)
         parameters = info["parameters"]
 
-    uref = get_u_ref(time, state, input, parameters)
+    uref = get_u_ref(time, state, input)
     if output:
         return uref
     else:
         return
 
 
-def get_u_ref(t, cstate, x_f16, parameters):
-    setpoint = parameters["setpoint"]
-    p_gain = parameters["p_gain"]
-    x_dif = setpoint - x_f16[0]
-    return [0, 0, 0, p_gain * x_dif]
+def get_u_ref(t, cstate, x_f16):
+    global parameters
+    xequil = parameters["xequil"]
+    vt = x_f16[0]
+    vt_des = xequil[0]
+
+    # basic speed control
+    throttle = ah.p_cntrl(kp=0.25, e=(vt_des - vt))
+    Nz, ps, Ny_r = 0, 0, 0
+    return Nz, ps, Ny_r, throttle
