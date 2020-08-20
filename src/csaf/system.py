@@ -40,7 +40,10 @@ class System:
 
             # pub/sub parameters
             sub_ports = [[str(config.config_dict["components"][l]["pub"]), l+"-"+t] for l, t in dconfig["sub"]]
-            pub_ports = [str(dconfig["pub"])]
+            if "pub" in dconfig:
+                pub_ports = [str(dconfig["pub"])]
+            else:
+                pub_ports = []
             topics_in = [s[1] for s in sub_ports]
 
             # produce serial messengers
@@ -53,15 +56,18 @@ class System:
             mss_out = SerialMessenger(mss_out)
             mss_in = SerialMessenger(mss_in)
 
+            def_buff = {}
+            for tname in mss_out.topics:
+                if "initial" in config.get_component_settings(dname)["config"]["topics"][tname.split("-")[1]]:
+                    def_buff[tname] = config.get_msg_setting(dname, tname.split("-")[1], "initial")
+
             # sampling frequency
             sampling_frequency = dconfig['config']['sampling_frequency']
-            comp = DynamicComponent(model, topics_in, mss_out, mss_in, sampling_frequency, name=dname)
+            comp = DynamicComponent(model, topics_in, mss_out, mss_in, sampling_frequency, name=dname, default_output=def_buff)
 
             # set properties
             if dconfig["debug"]:
                 comp.debug_node = True
-            if config.has_topic(dname, 'states'):
-                comp.state = config.get_msg_setting(dname, 'states', 'initial')
 
             # bind and update structures
             comp.bind(sub_ports, pub_ports)

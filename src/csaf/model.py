@@ -80,7 +80,7 @@ class ModelNative(Model):
         return self._func(time=t, state=x, input=u, update=True)
 
     def get(self, t, x, u, field):
-        kwargs = {'time': t, 'state': x, 'input': u, field:True}
+        kwargs = {'time': t, 'state': x, 'input': u, **({field:True} if field is not None else {})}
         return self._func(**kwargs)
 
 

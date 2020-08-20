@@ -174,24 +174,28 @@ class SystemConfig:
         # populate nodes
         nodes = {}
         for dname, dconfig in self._config["components"].items():
-            pub = dconfig["pub"]
-            nodes[pub] = {**dconfig, "dname" : dname}
+            #if "" in dconfig:
+            nodes[dname] = {**dconfig, "dname" : dname}
+                #pub = dconfig["pub"]
+                #nodes[pub] = {**dconfig, "dname" : dname}
 
         # populate edges and edge labels
         edges = []
         edge_labels = {'topic' : [], 'width' : [], 'name' : []}
         for dname, dconfig in self._config["components"].items():
-            subs = dconfig["sub"]
-            pub = dconfig["pub"]
-            targets = subs
-            source = pub
+            #if "pub" in dconfig:
+            #    pub = dconfig["pub"]
+            #    source = pub
+            if "sub" in dconfig:
+                subs = dconfig["sub"]
+                targets = subs
 
             for tidx, t in enumerate(targets):
                 name = t[0]
-                sub_port = self.get_component_settings(name)["pub"]
+                #sub_port = self.get_component_settings(name)["pub"]
 
                 # update the edges
-                edges.append((sub_port, source))
+                edges.append((name, dname))
 
                 # update the edge labels
                 edge_labels['topic'].append(t[1])
@@ -267,8 +271,9 @@ class SystemConfig:
         for eidx, e in enumerate(edges):
             topic = edge_labels["topic"][eidx]
             width = edge_labels["width"][eidx]
+            port = nodes[e[0]]["pub"] if "pub" in nodes[e[0]] else "NONE"
             graph.add_edge(pydot.Edge(verts[e[0]], verts[e[1]], fontsize=10,
-                                      label=topic + f" ({str(width)})\nport " + str(e[0])))
+                                      label=topic + f" ({str(width)})\nport {port}"))
 
         graph_path = pathlib.Path(join_if_not_abs(self.config_dict['output_dir'], fname, exist=False))
         graph.write_pdf(graph_path)
