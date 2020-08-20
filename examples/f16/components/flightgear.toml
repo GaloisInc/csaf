@@ -1,0 +1,36 @@
+system_name = "FlightGear connector"
+system_representation = "black box"
+system_solver = "Euler"
+
+# NOTE: this is "faster than real time" simulation, so any 
+# value larger than 5 is good (tweak to your machine)
+sampling_frequency = 10
+
+is_discrete = true
+is_hybrid = false
+
+[parameters]
+aileron_max = 21.5
+aileron_min = -21.5
+elevator_max = 25
+elevator_min = -25
+rudder_max = 30.0
+rudder_min = -30.0
+FG_IP = "127.0.0.1"
+FG_PORT = 5505
+FG_GENERIC_PORT = 5506
+# Start position of the aircraft
+FG_LAT = 35.802117
+FG_LON = -117.806717
+FG_GROUND_LEVEL = 705 # m
+
+# NOTE: All inputs are chained together in one long list
+[inputs]
+msgs = ["f16plant_state.msg", "f16llc_output.msg"]
+
+# TODO: remove once not necessary
+[topics]
+# NOTE: not sure why the topic has to be named "states"
+[topics.states]
+initial = ["Dummy"]
+msg = "autopilot_state.msg"

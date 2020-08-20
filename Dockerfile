@@ -22,7 +22,8 @@ RUN pip3 install \
     scipy \
     toml \
     tqdm \
-    zmq
+    zmq \
+    pymap3d
 
 RUN adduser --quiet --disabled-password qtuser
 
