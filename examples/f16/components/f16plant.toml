@@ -12,7 +12,7 @@ is_hybrid = false
     b = 30.0
     cbar = 11.32
     rm = 1.57e-3
-    xcgr = 0.35
+    xcgref = 0.35
     xcg = 0.35
     he = 160.0
     c1 = -0.770
@@ -26,7 +26,14 @@ is_hybrid = false
     c9 = 1.587e-5
     rtod = 57.29578
     g = 32.17
-    equations = "morelli"
+    xcg_mult = 1
+    cxt_mult = 1
+    cyt_mult = 1
+    czt_mult = 1
+    clt_mult = 1
+    cmt_mult = 1
+    cnt_mult = 1
+    model = "morelli"
 
 [inputs]
   msgs = [ "f16llc_output.msg" ]
