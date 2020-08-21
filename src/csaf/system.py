@@ -114,7 +114,7 @@ class System:
             s = tqdm.tqdm(s)
 
         # TODO collect updated topics only
-        for cidx, time in s:
+        for cidx, _ in s:
             idx = self.names.index(cidx)
             self.components[idx].receive_input()
             out = self.components[idx].send_output()
