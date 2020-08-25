@@ -79,6 +79,3 @@ log_level = "info"
 
     # subscribe to topic of a component (component name, topic name)
     sub = [["plant", "states"], ["controller", "outputs"]]
-
-    # port to publish, NOTE: we are not publishing anything
-    pub = 0

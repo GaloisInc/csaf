@@ -1,19 +1,18 @@
-import os
-import toml
-
 import numpy as np
 
 
-parameters = {}
+def model_state_update(model, time_t, state_pendulum, input_controller):
+    a, b, _, _ = _ss_inv_pend_cont(model.parameters)
+    return list((a @ np.array(state_pendulum)[:, np.newaxis] + b @ np.array(input_controller)[:, np.newaxis]).flatten())
 
-def _ss_inv_pend_cont():
+
+def _ss_inv_pend_cont(parameters):
     """
     Inverted Pendulum System -- Linear State Space Representation
     Taken from
     http://ctms.engin.umich.edu/CTMS/index.php?example=InvertedPendulum&section=ControlDigital#4
     :return: A, B, C and D matrices
     """
-    global parameters
     mm = parameters["mm"]        # Mass of the cart
     m = parameters["m"]         # Mass of the pendulum
     b = parameters["b"]        # coefficient of friction on cart
@@ -38,21 +37,3 @@ def _ss_inv_pend_cont():
 
     d = np.array([[0], [0]])
     return a, b, c, d
-
-
-def main(time=0.0, state=None, input=None, update=False, output=False):
-    global parameters
-    if len(parameters.keys()) == 0:
-        this_path = os.path.dirname(os.path.realpath(__file__))
-        info_file = os.path.join(this_path, "ipplant.toml")
-        with open(info_file, 'r') as ifp:
-            info = toml.load(ifp)
-        parameters = info["parameters"]
-
-    if update:
-        a, b, _, _ = _ss_inv_pend_cont()
-        return list((a @ np.array(state)[:, np.newaxis] + b @ np.array(input)[:, np.newaxis]).flatten())
-    else:
-        return []
-
-

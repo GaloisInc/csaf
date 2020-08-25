@@ -91,7 +91,7 @@ class Model(abc.ABC):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def _update_info(self, t: float, x: typ.Sized, u: typ.Sized) -> None:
+    def _update_model(self, t: float, x: typ.Sized, u: typ.Sized) -> None:
         """user implemented"""
         raise NotImplementedError
 
@@ -188,8 +188,8 @@ class ModelNative(Model):
     def _get_info(self, *args) -> typ.Any:
         return self.funcs["get_info"](self, *args)
 
-    def _update_info(self, *args) -> None:
-        return self.funcs["update_info"](self, *args)
+    def _update_model(self, *args) -> None:
+        return self.funcs["update_model"](self, *args)
 
     @dynamical_input
     def null_dynamics(self, t: float, x: typ.Sized, u: typ.Sized) -> list:
