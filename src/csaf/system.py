@@ -101,7 +101,7 @@ class System:
         input_for_first = list(set([p for p, _ in self.config._config["components"]["controller"]["sub"]]))
         for dname in input_for_first:
             idx = self.names.index(dname)
-            self.components[idx].send_stimulus(tspan[0])
+            self.components[idx].send_stimulus(float(tspan[0]))
 
         # get time trace fields
         dnames = self.config.get_name_components

@@ -25,7 +25,7 @@ def dynamical_input(func: typ.Callable):
     def check_input(*args, **kwargs):
         assert len(args) == 4, f"got length {len(args)}"
         assert isinstance(args[0], Model), f"argument 0 must be a model in dynamical function {func.__name__}"
-        #assert isinstance(args[1], float), f"argument 1 must be a time value in dynamical function {func.__name__}"
+        assert isinstance(args[1], float), f"argument 1 must be a time value in dynamical function {func.__name__}"
         assert isinstance(args[2], cabc.Sized), f"argument 2 must be sized in dynamical function {func.__name__}"
         assert isinstance(args[3], cabc.Sized), f"argument 3 must be sized in dynamical function {func.__name__}"
         assert kwargs == {}, f"no keyword arguments are permitted in dynamical function {func.__name__}"
