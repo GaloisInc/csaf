@@ -11,19 +11,8 @@ RUN apt-get clean && \
     python3-pyqt5
 
 RUN pip3 install -U pip
-RUN pip3 install \
-    fire \
-    matplotlib \
-    numpy \
-    pexpect \
-    pydot \
-    pyqtgraph \
-    pyros-genpy \
-    scipy \
-    toml \
-    tqdm \
-    zmq \
-    pymap3d
+COPY requirements.txt /tmp/requirements.txt
+RUN pip3 install -r /tmp/requirements.txt
 
 RUN adduser --quiet --disabled-password qtuser
 
