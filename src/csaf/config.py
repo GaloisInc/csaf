@@ -174,25 +174,18 @@ class SystemConfig:
         # populate nodes
         nodes = {}
         for dname, dconfig in self._config["components"].items():
-            #if "" in dconfig:
             nodes[dname] = {**dconfig, "dname" : dname}
-                #pub = dconfig["pub"]
-                #nodes[pub] = {**dconfig, "dname" : dname}
 
         # populate edges and edge labels
         edges = []
         edge_labels = {'topic' : [], 'width' : [], 'name' : []}
         for dname, dconfig in self._config["components"].items():
-            #if "pub" in dconfig:
-            #    pub = dconfig["pub"]
-            #    source = pub
             if "sub" in dconfig:
                 subs = dconfig["sub"]
                 targets = subs
 
             for tidx, t in enumerate(targets):
                 name = t[0]
-                #sub_port = self.get_component_settings(name)["pub"]
 
                 # update the edges
                 edges.append((name, dname))

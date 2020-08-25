@@ -28,7 +28,7 @@ class DynamicComponent(Component):
                  name: str,
                  default_output = None):
         # components can have only one output (but many topics)
-        super().__init__(len(messenger_in.topics), len(messenger_out.topics))
+        super().__init__(len(messenger_in.topics), 1 if len(messenger_out.topics) > 0 else 0)
 
         # dynamic model
         self._model: Model = model
