@@ -36,7 +36,8 @@ class System:
             # dynamic model
             # TODO: better Model class selection here
             is_discrete = dconfig["config"]["is_discrete"]
-            model = ModelNative.from_filename(dconfig["process"], is_discrete=is_discrete)
+            #model = ModelNative.from_filename(dconfig["process"], is_discrete=is_discrete)
+            model = ModelNative.from_config(dconfig["process"], dconfig["config"])
 
             # pub/sub parameters
             sub_ports = [[str(config.config_dict["components"][l]["pub"]), l+"-"+t] for l, t in dconfig["sub"]]
