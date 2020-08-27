@@ -1,9 +1,5 @@
-import os
-import toml
 import numpy as np
 
-import sys
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import autopilot_helper as ah
 
 
@@ -16,38 +12,15 @@ class GcasAutopilot():
     STATE_DONE = 'Finished'
 
 
-parameters = {}
-
-
-def main(time=0.0, state='Waiting', input=[0]*4, update=False, output=False, fda=False):
-    """TODO: actually implement the autopilot"""
-    global parameters
-    if len(parameters.keys()) == 0:
-        this_path = os.path.dirname(os.path.realpath(__file__))
-        info_file = os.path.join(this_path, "autopilot.toml")
-        with open(info_file, 'r') as ifp:
-            info = toml.load(ifp)
-        parameters = info["parameters"]
-
-    nstate = advance_discrete_state(time, state, input)
-    uref = get_u_ref(time, state, input)
-    if output:
-        return list(uref)
-    elif fda:
-        return list([nstate])
-    else:
-        return list([nstate])
-
-
-def advance_discrete_state(t, cstate, x_f16):
+def model_state_update(model, time_t, state_controller, input_f16):
     """advance the discrete state based on the current aircraft state"""
-    state = cstate[0]
+    state = state_controller[0]
 
     # Pull out important variables for ease of use
-    phi = x_f16[3]             # Roll angle    (rad)
-    p = x_f16[6]               # Roll rate     (rad/sec)
-    theta = x_f16[4]           # Pitch angle   (rad)
-    alpha = x_f16[1]           # AoA           (rad)
+    phi = input_f16[3]             # Roll angle    (rad)
+    p = input_f16[6]               # Roll rate     (rad/sec)
+    theta = input_f16[4]           # Pitch angle   (rad)
+    alpha = input_f16[1]           # AoA           (rad)
 
     eps_phi = np.deg2rad(5)   # Max roll angle magnitude before pulling g's
     eps_p = np.deg2rad(1)     # Max roll rate magnitude before pulling g's
@@ -56,7 +29,7 @@ def advance_discrete_state(t, cstate, x_f16):
 
     old_state = state
     if state == GcasAutopilot.STATE_START:
-        if t >= man_start:
+        if time_t >= man_start:
             state = GcasAutopilot.STATE_ROLL
 
     elif state == GcasAutopilot.STATE_ROLL:
@@ -72,26 +45,24 @@ def advance_discrete_state(t, cstate, x_f16):
 
         if (theta - alpha) - 2 * np.pi * radsFromNoseLevel > path_goal:
             state = GcasAutopilot.STATE_DONE
+    return [state]
 
-    return state
+
+def model_info(model, time_t, state_controller, input_f16):
+    return state_controller
 
 
-def get_u_ref(t, cstate, x_f16):
+def model_output(model, time_t, state_controller, input_f16):
     """for the current discrete state, get the reference inputs signals"""
-    global parameters
-
-    state = cstate[0]
-    NzMax = parameters["NzMax"]
-    xequil = parameters["xequil"]
-
-    Nz_des = min(5, NzMax) # Desired maneuver g's
+    state = state_controller[0]
+    Nz_des = min(5, model.NzMax) # Desired maneuver g's
 
     # Pull out important variables for ease of use
-    phi = x_f16[3]             # Roll angle    (rad)
-    p = x_f16[6]               # Roll rate     (rad/sec)
-    theta = x_f16[4]           # Pitch angle   (rad)
-    alpha = x_f16[1]           # AoA           (rad)
-    vt = x_f16[0]
+    phi = input_f16[3]             # Roll angle    (rad)
+    p = input_f16[6]               # Roll rate     (rad/sec)
+    theta = input_f16[4]           # Pitch angle   (rad)
+    alpha = input_f16[1]           # AoA           (rad)
+    vt = input_f16[0]
     # Note: pathAngle = theta - alpha
     gamma = theta-alpha
 
@@ -117,7 +88,7 @@ def get_u_ref(t, cstate, x_f16):
     # tries to decrease the force and slows speed and maybe altitude gain?
 
     # basic speed control
-    throttle = ah.p_cntrl(kp=0.25, e=(xequil[0]-vt))
+    throttle = ah.p_cntrl(kp=0.25, e=(model.xequil[0]-vt))
     Ny_r = 0
     # New references
     return Nz, ps, Ny_r, throttle
@@ -162,8 +133,3 @@ def state_done(gamma_des, phi_des, p_des, gamma, phi, p):
     #Nz = -(gamma - gamma_des) * K_prop2 - p*K_der2
     Nz = ah.pd_cntrl(K_prop2, K_der2, e_nz, ed_nz)
     return Nz, ps
-
-
-if __name__ == '__main__':
-    import fire
-    fire.Fire(main)

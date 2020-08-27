@@ -8,6 +8,7 @@ is_discrete = true
 is_hybrid = false
 
 [parameters]
+  xform = [-1.0000, -1.6567, 18.6854, 3.4594]
 
 [inputs]
   msgs = ["ipplant_state.msg", "ipmaneuver_output.msg"]

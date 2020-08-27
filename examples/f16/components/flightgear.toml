@@ -28,9 +28,4 @@ FG_GROUND_LEVEL = 705 # m
 [inputs]
 msgs = ["f16plant_state.msg", "f16llc_output.msg"]
 
-# TODO: remove once not necessary
 [topics]
-# NOTE: not sure why the topic has to be named "states"
-[topics.states]
-initial = ["Dummy"]
-msg = "autopilot_state.msg"

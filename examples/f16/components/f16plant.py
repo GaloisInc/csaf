@@ -1,37 +1,16 @@
-import os
-import sys
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-
 import enum
-import toml
-
 import numpy as np
 import f16plant_helper as ph
 from stevens_dyn import stevens_f16
 from morelli_dyn import morelli_f16
-import fire
 
 
-parameters = {}
+def model_output(model, time_t, state_f16, input_controller):
+    return subf16df(model, time_t, state_f16, input_controller)[1]
 
 
-def main(time=0.0, state=(.1,)*13, input=(0)*4, update=False, output=False):
-    global parameters
-    if len(parameters.keys()) == 0:
-        this_path = os.path.dirname(os.path.realpath(__file__))
-        info_file = os.path.join(this_path, "f16plant.toml")
-        with open(info_file, 'r') as ifp:
-            info = toml.load(ifp)
-        parameters = info["parameters"]
-
-    xd, xout = subf16df(time, state, input)
-
-    if update:
-        return list(xd)
-    elif output:
-        return list(xout)
-    else:
-        return
+def model_state_update(model, time_t, state_f16, input_controller):
+    return subf16df(model, time_t, state_f16, input_controller)[0]
 
 
 states = ['vt', 'alpha', 'beta', 'phi', 'theta', 'psi', 'p', 'q', 'r', 'pn', 'pe', 'h', 'power']
@@ -47,11 +26,12 @@ def state_vector(**x):
     return l
 
 
-def subf16df(t, x, u, adjust_cy=True):
+def subf16df(model, t, x, u, adjust_cy=True):
     ''' Calculate state space differential '''
     #if len(f) != 4+4:
     #    raise E.SystemDimensionError("forcing vector must have 4 values")
-    global parameters
+    parameters = model.parameters
+
     thtlc, el, ail, rdr = u[0:4]
     s, b, cbar, rm, xcgref, xcg, he, c1, c2, c3, c4, c5, c6, c7, c8, c9, rtod, g = \
         (parameters[p] for p in 's b cbar rm xcgref xcg he c1 c2 c3 c4 c5 c6 c7 c8 c9 rtod g'.split())
@@ -173,7 +153,3 @@ def subf16df(t, x, u, adjust_cy=True):
                                  phi=phi_dot, theta=theta_dot, psi=psi_dot, p=p_dot, q=q_dot,
                                  r=r_dot, pn=pn_dot, pe=pe_dot, h=alt_dot, power=power_dot))
     return xdot, output
-
-
-if __name__ == "__main__":
-    fire.Fire(main)

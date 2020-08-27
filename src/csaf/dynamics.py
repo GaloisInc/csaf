@@ -119,7 +119,7 @@ class DynamicComponent(Component):
 
             # continuous state is a special case
             if not (self._model.is_continuous and getter == "update"):
-                return_value = self._model.get(current_time, state_vector, input_vector, getter)
+               return_value = self._model.get(current_time, state_vector, input_vector, getter)
             else:
                 state_diff_fcn = lambda y, t: self._model.get_state_update(t, y, input_vector)
                 ivp_solution = scipy.integrate.odeint(state_diff_fcn, state_vector, [current_time-update_increment, current_time])
@@ -132,7 +132,7 @@ class DynamicComponent(Component):
             return_buffer[tname.split('-')[1]] = return_value
 
         # default caller -- model state but not component state
-        self._model.get(current_time, state_vector, input_vector, None)
+        self._model.update_model(current_time, state_vector, input_vector)
 
         # add time to return buffer
         return_buffer['times'] = current_time
