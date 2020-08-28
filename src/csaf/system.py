@@ -123,6 +123,10 @@ class System:
 
         return dtraces
 
+    def set_state(self, component_name, state):
+        component = self.components[self.names.index(component_name)]
+        component.state = state
+
     @property
     def names(self):
         """names of the components used in the system"""
