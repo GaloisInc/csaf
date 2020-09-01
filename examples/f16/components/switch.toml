@@ -8,8 +8,7 @@ is_discrete = true
 is_hybrid = false
 
 [parameters]
-  setpoint = 6000.0
-  xequil = [502.0, 0.03887505597600522, 0.0, 0.0, 0.03887505597600522, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1000.0, 9.05666543872074]
+  mapper = ["gcas", "altitude", "airspeed"]
 
 [inputs]
   msgs = ["autopilot_output.msg", "autopilot_output.msg", "autopilot_output.msg", "monitor_output.msg"]

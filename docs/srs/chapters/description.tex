@@ -17,7 +17,7 @@ These CSAF components can be composed together to create a closed loop system. F
 \begin{figure}
 \centering
 \includegraphics[width=0.9\textwidth]{systemanalysis.pdf}
-\caption{Analyzer for a Closed Loop System of \acrshort{csaf} Components }
+\caption{A closed loop system represented as pub/sub components. Control signals are broadcasted as a collection of messages with specific topics. The component processes the input, producing system output as a collection of messages with topics. }
 \label{fig:csys}
 \end{figure}
 
@@ -87,7 +87,6 @@ system were of interest in the \acrshort{aa} project, new simulation methods may
 
 No planned support for
 \begin{enumerate}
-\item  variable rate or multi sampling rate systems
 \item closed loop continuous time controllers
 \item interaction with fast/time critical systems
 \end{enumerate}

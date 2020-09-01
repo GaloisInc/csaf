@@ -10,6 +10,7 @@ is_hybrid = false
 [parameters]
     setpoint = 800.0  # setpoint in airspeed (ft/s)
     p_gain = 0.01     # P controller gain value
+    xequil = [502.0, 0.03887505597600522, 0.0, 0.0, 0.03887505597600522, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1000.0, 9.05666543872074]
 
 [inputs]
   msgs = [ "f16plant_state.msg", "f16plant_output.msg" ]

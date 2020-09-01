@@ -1,0 +1,12 @@
+fire==0.2.1
+matplotlib==3.1.0
+numpy==1.18.1
+pexpect==4.8.0
+pydot==1.4.1
+pyqtgraph==0.10.0
+pyros-genpy==0.6.5
+scipy==1.4.1
+toml==0.10.1
+tqdm==4.47.0
+pyzmq==18.1.1
+pymap3d==2.4.0

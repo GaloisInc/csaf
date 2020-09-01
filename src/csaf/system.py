@@ -36,11 +36,15 @@ class System:
             # dynamic model
             # TODO: better Model class selection here
             is_discrete = dconfig["config"]["is_discrete"]
-            model = ModelNative.from_filename(dconfig["process"], is_discrete=is_discrete)
+            #model = ModelNative.from_filename(dconfig["process"], is_discrete=is_discrete)
+            model = ModelNative.from_config(dconfig["process"], dconfig["config"])
 
             # pub/sub parameters
             sub_ports = [[str(config.config_dict["components"][l]["pub"]), l+"-"+t] for l, t in dconfig["sub"]]
-            pub_ports = [str(dconfig["pub"])]
+            if "pub" in dconfig:
+                pub_ports = [str(dconfig["pub"])]
+            else:
+                pub_ports = []
             topics_in = [s[1] for s in sub_ports]
 
             # produce serial messengers
@@ -53,15 +57,18 @@ class System:
             mss_out = SerialMessenger(mss_out)
             mss_in = SerialMessenger(mss_in)
 
+            def_buff = {}
+            for tname in mss_out.topics:
+                if "initial" in config.get_component_settings(dname)["config"]["topics"][tname.split("-")[1]]:
+                    def_buff[tname] = config.get_msg_setting(dname, tname.split("-")[1], "initial")
+
             # sampling frequency
             sampling_frequency = dconfig['config']['sampling_frequency']
-            comp = DynamicComponent(model, topics_in, mss_out, mss_in, sampling_frequency, name=dname)
+            comp = DynamicComponent(model, topics_in, mss_out, mss_in, sampling_frequency, name=dname, default_output=def_buff)
 
             # set properties
             if dconfig["debug"]:
                 comp.debug_node = True
-            if config.has_topic(dname, 'states'):
-                comp.state = config.get_msg_setting(dname, 'states', 'initial')
 
             # bind and update structures
             comp.bind(sub_ports, pub_ports)
@@ -94,7 +101,7 @@ class System:
         input_for_first = list(set([p for p, _ in self.config._config["components"]["controller"]["sub"]]))
         for dname in input_for_first:
             idx = self.names.index(dname)
-            self.components[idx].send_stimulus(tspan[0])
+            self.components[idx].send_stimulus(float(tspan[0]))
 
         # get time trace fields
         dnames = self.config.get_name_components
@@ -108,7 +115,7 @@ class System:
             s = tqdm.tqdm(s)
 
         # TODO collect updated topics only
-        for cidx, time in s:
+        for cidx, _ in s:
             idx = self.names.index(cidx)
             self.components[idx].receive_input()
             out = self.components[idx].send_output()

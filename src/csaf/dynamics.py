@@ -1,6 +1,5 @@
 import numpy as np
 import time
-import typing
 import zmq
 
 import scipy.integrate
@@ -26,32 +25,49 @@ class DynamicComponent(Component):
                  messenger_out: SerialMessenger,
                  messenger_in: SerialMessenger,
                  sampling_frequency: float,
-                 name: str):
+                 name: str,
+                 default_output = None):
         # components can have only one output (but many topics)
-        super().__init__(len(messenger_in.topics), 1)
+        super().__init__(len(messenger_in.topics), 1 if len(messenger_out.topics) > 0 else 0)
+
         # dynamic model
         self._model: Model = model
+
         # input/output serializers
         self._messenger_out: SerialMessenger = messenger_out
         self._messenger_in: SerialMessenger = messenger_in
+
         # component attributes
         self._sampling_frequency: float = sampling_frequency
         self._name: str = name
+
         # topics order to input vector
         self._topics_input: list = topics_input
+
         # input buffering for mixed rate components
         self._input_buffer: dict = {}
         self.current_time = 0
+
         # initial state and consequent state buffer
-        self._state_buffer: typing.Union[None, list] = ([0.0, ] * self.num_states if self.num_states > 0 else None)
+        self._default_output = default_output if default_output is not None else {}
+        self._output_buffer = {}
+        self.init_state_buffer()
+
+    def init_state_buffer(self):
+        # TODO: move to Component class
+        for tname in self._messenger_out.topics:
+            if tname in self._default_output:
+                self._output_buffer[tname] = self._default_output[tname]
+            else:
+                num_key = self._num_topic(tname, self._messenger_out)
+                self._output_buffer[tname] = ([0.0, ] * num_key if num_key > 0 else None)
 
     def reset(self):
         """reset the time, state and input buffers of component"""
         # input buffering for mixed rate components
         self._input_buffer: dict = {}
         self.current_time = 0
-        # initial state and consequent state buffer
-        self._state_buffer: typing.Union[None, list] = ([0.0, ] * self.num_states if self.num_states > 0 else None)
+        self.init_state_buffer()
 
     def receive_input(self):
         """receive all necessary topics for a DynamicComponent"""
@@ -59,17 +75,20 @@ class DynamicComponent(Component):
             # message from publishers may or may not be ready (depends on frequency of components)
             topics = []
             recvs = []
+
             # poll zmq socket and see if message is available
             time.sleep(1e-5)
             while sn.poll(0) == zmq.POLLIN:
                 topics.append(sn.recv_string(zmq.DONTWAIT))
                 recvs.append(sn.recv_pyobj(zmq.DONTWAIT))
+
             # is message received, update the input buffer
             if len(topics) > 0:
                 topic = topics[-1]
                 recv = recvs[-1]
                 t, self._input_buffer[topic] = self._messenger_in.deserialize_message(recv, topic, 0.0)
                 self._input_buffer['time'] = t
+
         # avoid infinite recursion by checking whether _input_buffer was initialized
         if len(self._input_buffer.keys()) == 0 and len(self.input_socks) > 0:
             time.sleep(1e-4)
@@ -79,60 +98,61 @@ class DynamicComponent(Component):
 
     def send_output(self):
         """send {states, outputs} for DynamicComponent"""
-        t = self.current_time
-        dt = 1.0 / self.sampling_frequency
-        dout = {}
+        update_increment = 1.0 / self.sampling_frequency
+        current_time = self.current_time + update_increment
+        return_buffer = {}
 
         # obtain the input vector by concatenating the messages together
+        input_vector = []
         if len(self._topics_input) > 0:
-            u = []
             for f in self._topics_input:
-                u += self._input_buffer[f]
-        else:
-            u = []
+                input_vector += self._input_buffer[f]
 
-        if self._state_buffer is not None:
-            if self._model.is_discrete:
-                xp = self._model.get_state_update(t, self._state_buffer, u)
-                assert len(xp) == self.num_states
+        # obtain state vector
+        state_vector = self._output_buffer[f"{self.name}-states"] if f"{self.name}-states" in self._output_buffer else []
+
+        # iterate through topics and send output
+        for tname in self._messenger_out.topics:
+            # TODO: getter is a mess
+            getter = tname.split('-')[1][:-1]
+            getter = getter if getter != "state" else "update"
+
+            # continuous state is a special case
+            if not (self._model.is_continuous and getter == "update"):
+               return_value = self._model.get(current_time, state_vector, input_vector, getter)
             else:
-                df = lambda y, t: self._model.get_state_update(t, y, u)
-                sol = scipy.integrate.odeint(df, self._state_buffer, [t, t+dt])
-                xp = list(sol[-1])
-                #df = lambda t, y: self._model.get_state_update(t, y, u)
-                #sol = scipy.integrate.solve_ivp(df, [t, t+dt+1E-3], np.array(self._state_buffer), method='RK45', t_eval=[t+dt])
-                #xp = list(sol.y.flatten())
-            self._state_buffer = xp
-            msg = self._messenger_out.serialize_message(xp, f'{self.name}-states', t)
-            self.send_message(0, msg, topic=f"{self.name}-states")
-            dout['states'] = xp
-        else:
-            xp = []
+                state_diff_fcn = lambda y, t: self._model.get_state_update(t, y, input_vector)
+                ivp_solution = scipy.integrate.odeint(state_diff_fcn, state_vector, [current_time-update_increment, current_time])
+                return_value = list(ivp_solution[-1])
+            self._output_buffer[tname] = return_value
 
-        for ptopic in self._messenger_out.topics:
-            if ptopic != f"{self.name}-states":
-                _, field = ptopic.split('-')
-                out = self._model.get(t, xp, u, field[:-1])
-                msg = self._messenger_out.serialize_message(out, ptopic, t)
-                self.send_message(0, msg, topic=ptopic)
-                dout[field] = out
-        dout['times'] = t
-        return dout
+            # serialize, send message, and update return buffer
+            msg = self._messenger_out.serialize_message(return_value, tname, current_time)
+            self.send_message(0, msg, topic=tname)
+            return_buffer[tname.split('-')[1]] = return_value
+
+        # default caller -- model state but not component state
+        self._model.update_model(current_time, state_vector, input_vector)
+
+        # add time to return buffer
+        return_buffer['times'] = current_time
+
+        return return_buffer
 
     def send_stimulus(self, t: float):
         """send message of components at its current state at time t"""
+        state_buffer = self._output_buffer[f"{self.name}-states"] if f"{self.name}-states" in self._output_buffer else []
         u = list(np.zeros((self.num_inputs)))
-
-        if self._state_buffer is not None:
-            msg = self._messenger_out.serialize_message(self._state_buffer, f'{self.name}-states', t)
-            self.send_message(0, msg, topic=f"{self.name}-states")
-
-        for ptopic in self._messenger_out.topics:
-            if ptopic != f"{self.name}-states":
-                _, field = ptopic.split('-')
-                out = self._model.get(t, self._state_buffer, u, field[:-1])
-                msg = self._messenger_out.serialize_message(out, ptopic, t)
-                self.send_message(0, msg, topic=ptopic)
+        for tname in self._messenger_out.topics:
+            if tname in self._default_output:
+                msg = self._messenger_out.serialize_message(self._output_buffer[tname], tname, t)
+                self.send_message(0, msg, topic=tname)
+            else:
+                getter = tname.split("-")[1][:-1]
+                getter = getter if getter != "state" else "update"
+                out = self._model.get(t, state_buffer, u, getter)
+                msg = self._messenger_out.serialize_message(out, tname, t)
+                self.send_message(0, msg, topic=tname)
 
     def _names_topic(self, topic: str, messenger: SerialMessenger) -> list:
         """generic names getter for messenger"""

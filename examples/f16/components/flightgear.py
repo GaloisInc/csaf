@@ -5,16 +5,12 @@ a quick visual feedback about what is happening
 
 TODO: This file should be modified to enable replay of a finished trajetory
 """
-import os
-import toml
-
 import struct
 import socket
 import math
 
 import pymap3d as pm
 
-parameters = {}
 
 class FGNetFDM:
     """
@@ -464,21 +460,12 @@ class FGNetFDM:
         packed_data = s.pack(*values)
         return packed_data
 
+
 fdm = FGNetFDM()
 
-def main(time=0.0, state=None, input=None, update=False, output=False):
-    global parameters
-    if len(parameters.keys()) == 0:
-        this_path = os.path.dirname(os.path.realpath(__file__))
-        info_file = os.path.join(this_path, "flightgear.toml")
-        with open(info_file, 'r') as ifp:
-            info = toml.load(ifp)
-        parameters = info["parameters"]
 
+def model_update(model, time_t, state_fg, input_f16):
     if not fdm.running:
-        fdm.init_from_params(parameters)
+        fdm.init_from_params(model.parameters)
         print("FDM Init")
-
-    if update:
-        fdm.update_and_send(input)
-        return state
+    fdm.update_and_send(input_f16)

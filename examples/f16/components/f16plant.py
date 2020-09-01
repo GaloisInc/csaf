@@ -1,123 +1,87 @@
-import os
-import sys
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-
-import os
-import toml
-
+import enum
 import numpy as np
 import f16plant_helper as ph
-import fire
+from stevens_dyn import stevens_f16
+from morelli_dyn import morelli_f16
 
 
-parameters = {}
+def model_output(model, time_t, state_f16, input_controller):
+    return subf16df(model, time_t, state_f16, input_controller)[1]
 
 
-def main(time=0.0, state=(.1,)*13, input=(0)*4, update=False, output=False):
-    global parameters
-    if len(parameters.keys()) == 0:
-        this_path = os.path.dirname(os.path.realpath(__file__))
-        info_file = os.path.join(this_path, "f16plant.toml")
-        with open(info_file, 'r') as ifp:
-            info = toml.load(ifp)
-        parameters = info["parameters"]
-
-    xd, xout = subf16df(time, state, input, parameters)
-
-    if update:
-        return list(xd)
-    elif output:
-        return list(xout)
-    else:
-        return
+def model_state_update(model, time_t, state_f16, input_controller):
+    return subf16df(model, time_t, state_f16, input_controller)[0]
 
 
-def subf16df(t, x, f, parameters, mult=None):
-    """ Calculate state space differential """
+states = ['vt', 'alpha', 'beta', 'phi', 'theta', 'psi', 'p', 'q', 'r', 'pn', 'pe', 'h', 'power']
 
-    thtlc, el, ail, rdr = f
 
-    s = parameters["s"]
-    b = parameters["b"]
-    cbar = parameters["cbar"]
-    rm = parameters["rm"]
-    xcgr = parameters["xcgr"]
-    xcg = parameters["xcg"]
-    he = parameters["he"]
-    c1 = parameters["c1"]
-    c2 = parameters["c2"]
-    c3 = parameters["c3"]
-    c4 = parameters["c4"]
-    c5 = parameters["c5"]
-    c6 = parameters["c6"]
-    c7 = parameters["c7"]
-    c8 = parameters["c8"]
-    c9 = parameters["c9"]
-    rtod = parameters["rtod"]
-    g = parameters["g"]
-    equations = parameters["equations"]
+State = enum.IntEnum('State', states, start=0)
 
-    xd = np.zeros((13))
-    vt = x[0]
-    alpha = x[1]*rtod
-    beta = x[2]*rtod
-    phi = x[3]
-    theta = x[4]
-    psi = x[5]
-    p = x[6]
-    q = x[7]
-    r = x[8]
-    alt = x[11]
-    power = x[12]
 
-    if mult is not None:
-        xcg *= mult[0]
+def state_vector(**x):
+    l = [0]*len(State)
+    for k, d in x.items():
+        l[getattr(State, k)] = d
+    return l
+
+
+def subf16df(model, t, x, u, adjust_cy=True):
+    ''' Calculate state space differential '''
+    #if len(f) != 4+4:
+    #    raise E.SystemDimensionError("forcing vector must have 4 values")
+    parameters = model.parameters
+
+    thtlc, el, ail, rdr = u[0:4]
+    s, b, cbar, rm, xcgref, xcg, he, c1, c2, c3, c4, c5, c6, c7, c8, c9, rtod, g = \
+        (parameters[p] for p in 's b cbar rm xcgref xcg he c1 c2 c3 c4 c5 c6 c7 c8 c9 rtod g'.split())
+
+    xcg_mult, cxt_mult, cyt_mult, czt_mult, clt_mult, cmt_mult, cnt_mult = \
+        (parameters[p] for p in 'xcg_mult cxt_mult cyt_mult czt_mult clt_mult cmt_mult cnt_mult'.split())
+
+    vt, alpha, beta, phi, theta, psi, p, q, r  = x[0:9]
+    alt, power = x[11], x[12]
+
+    #XXX: Whats the rtod multiplier?
+    alpha, beta = alpha*rtod, beta*rtod
+    xcg *= xcg_mult
 
     # get air data computer and engine model
-    amach, qbar = ph.adc(vt, alt)
-    cpow = ph.tgear(thtlc)
 
-    xd[12] = ph.pdot(power, cpow)
+    qbar = ph.qbar(vt, alt)
 
-    t = ph.thrust(power, alt, amach)
-    dail = ail/20
-    drdr = rdr/30
+    # XXX: nonlinear
+    power_dot, thrust = ph.engine(thtlc, power, vt, alt)
 
-    # get cxt, cyt, czt, clt, cmt, cnt
-    if equations == "stevens":
-        cxt = ph.cx(alpha, el)
-        cyt = ph.cy(beta, ail, rdr)
-        czt = ph.cz(alpha, beta, el)
+    if parameters['model'] == 'stevens':
+        cxt, cyt, czt, clt, cmt, cnt = stevens_f16(alpha=alpha,
+                                                   beta=beta, el=el, ail=ail, rdr=rdr, dail=ail/20,
+                                                   drdr=rdr/30)
+    elif parameters['model'] == 'morelli':
+        cxt, cyt, czt, clt, cmt, cnt = morelli_f16(alpha=alpha,
+                                                   beta=beta, de=el, da=ail, dr=rdr, p=p, q=q, r=r,
+                                                   cbar=cbar, b=b, V=vt, xcg=xcg, xcgref=xcgref)
+    else:
+        raise NotImplementedError
 
-        clt = ph.cl(alpha, beta) + ph.dlda(alpha, beta) * dail + ph.dldr(alpha, beta) * drdr
-        cmt = ph.cm(alpha, el)
-        cnt = ph.cn(alpha, beta) + ph.dnda(alpha, beta) * dail + ph.dndr(alpha, beta) * drdr
-    elif equations == "morelli":
-        pi = np.pi
-        cxt, cyt, czt, clt, cmt, cnt = ph.morelli_f16(alpha * pi / 180, beta * pi / 180, el * pi / 180, ail * pi / 180, rdr * pi / 180, \
-                                                      p, q, r, cbar, b, vt, xcg, xcgr)
-
-    if mult is not None:
-        cxt *= mult[1]
-        cyt *= mult[2]
-        czt *= mult[3]
-
-        clt *= mult[4]
-        cmt *= mult[5]
-        cnt *= mult[6]
+    cxt *= cxt_mult; cyt *= cyt_mult; czt *= czt_mult; clt *= clt_mult; cmt *= cmt_mult; cnt *= cnt_mult
 
     tvt = .5 / vt
     b2v = b * tvt
     cq = cbar * q * tvt
 
-    # get ready for state equations
-    d = ph.dampp(alpha)
+    # Add damping derivatives
+    # XXX: nonlinear
+    d = ph.dampp_lookup(alpha)
+
     cxt = cxt + cq * d[0]
     cyt = cyt + b2v * (d[1] * r + d[2] * p)
     czt = czt + cq * d[3]
     clt = clt + b2v * (d[4] * r + d[5] * p)
-    cmt = cmt + cq * d[6] + czt * (xcgr-xcg)
-    cnt = cnt + b2v * (d[7] * r + d[8] * p)-cyt * (xcgr-xcg) * cbar/b
+    cmt = cmt + cq * d[6] + czt * (xcgref-xcg)
+    cnt = cnt + b2v * (d[7] * r + d[8] * p)-cyt * (xcgref-xcg) * cbar/b
+
+    # Get redy for state equations
     cbta = np.cos(x[2])
     u = vt * np.cos(x[1]) * cbta
     v = vt * np.sin(x[2])
@@ -137,25 +101,25 @@ def subf16df(t, x, f, parameters, mult=None):
     az = rmqs * czt
 
     # force equations
-    udot = r * v-q * w-g * sth + rm * (qs * cxt + t)
+    udot = r * v-q * w-g * sth + rm * (qs * cxt + thrust)
     vdot = p * w-r * u + gcth * sph + ay
     wdot = q * u-p * v + gcth * cph + az
     dum = (u * u + w * w)
 
-    xd[0] = (u * udot + v * vdot + w * wdot)/vt
-    xd[1] = (u * wdot-w * udot)/dum
-    xd[2] = (vt * vdot-v * xd[0]) * cbta/dum
+    vt_dot = (u * udot + v * vdot + w * wdot)/vt
+    alpha_dot = (u * wdot-w * udot)/dum
+    beta_dot = (vt * vdot-v * vt_dot) * cbta/dum
 
     # kinematics
-    xd[3] = p + (sth/cth) * (qsph + r * cph)
-    xd[4] = q * cph-r * sph
-    xd[5] = (qsph + r * cph)/cth
+    phi_dot = p + (sth/cth) * (qsph + r * cph)
+    theta_dot = q * cph-r * sph
+    psi_dot = (qsph + r * cph)/cth
 
+    # XXX: Looks quite different form the book
     # moments
-    xd[6] = (c2 * p + c1 * r + c4 * he) * q + qsb * (c3 * clt + c4 * cnt)
-
-    xd[7] = (c5 * p-c7 * he) * r + c6 * (r * r-p * p) + qs * cbar * c7 * cmt
-    xd[8] = (c8 * p-c2 * r + c9 * he) * q + qsb * (c4 * clt + c9 * cnt)
+    p_dot = (c2 * p + c1 * r + c4 * he) * q + qsb * (c3 * clt + c4 * cnt)
+    q_dot = (c5 * p-c7 * he) * r + c6 * (r * r-p * p) + qs * cbar * c7 * cmt
+    r_dot = (c8 * p-c2 * r + c9 * he) * q + qsb * (c4 * clt + c9 * cnt)
 
     # navigation
     t1 = sph * cpsi
@@ -169,21 +133,23 @@ def subf16df(t, x, f, parameters, mult=None):
     s6 = t2 * cpsi + t3
     s7 = t2 * spsi-t1
     s8 = cph * cth
-    xd[9] = u * s1 + v * s3 + w * s6    # north speed
-    xd[10] = u * s2 + v * s4 + w * s7   # east speed
-    xd[11] = u * sth-v * s5-w * s8      # vertical speed
+    pn_dot = u * s1 + v * s3 + w * s6    # north speed
+    pe_dot = u * s2 + v * s4 + w * s7   # east speed
+    alt_dot = u * sth-v * s5-w * s8      # vertical speed
 
     xa = 15.0                  # sets distance normal accel is in front of the c.g. (xa = 15.0 at pilot)
-    az = az-xa * xd[7]           # moves normal accel in front of c.g.
+    az = az-xa * q_dot           # moves normal accel in front of c.g.
+
+    if adjust_cy:
+        ay = ay+xa*r_dot           # moves side accel in front of c.g.
 
     # For extraction of Nz
     Nz = (-az / g) - 1 # zeroed at 1 g, positive g = pulling up
     Ny = ay / g
 
-    output = np.array([Nz, Ny])
+    output = np.array([Nz, Ny, az, ay])
 
-    return xd, output
-
-
-if __name__ == "__main__":
-    fire.Fire(main)
+    xdot = np.array(state_vector(vt=vt_dot, alpha=alpha_dot, beta=beta_dot,
+                                 phi=phi_dot, theta=theta_dot, psi=psi_dot, p=p_dot, q=q_dot,
+                                 r=r_dot, pn=pn_dot, pe=pe_dot, h=alt_dot, power=power_dot))
+    return xdot, output
