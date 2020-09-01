@@ -1,6 +1,11 @@
 #!/bin/bash
 
 SCRIPT_DIR="csaf_architecture"
+EXAMPLE_NAME=""
+NATIVE=""
+LOCAL=""
+CONF_NAME=""
+EXAMPLE_DIR=""
 
 validate_dir() {
 
@@ -16,16 +21,45 @@ validate_dir
 
 source .common.sh
 
-EXAMPLE_NAME=$1
-
-echo "${EXAMPLE_NAME}"
-
-request_example() {
-	show_error_and_exit "An example name is required [f16-shield, f16-simple, inv-pendulum]"
+print_help() {
+	printf "Usage: -t <tag_name>\n"
+	printf "   -e      the name of the example { f16-shield, f16-simple, inv-pendulum }\n"
+	printf "   -l      build the image locally\n"
+	printf "   -n      run CSAF natively\n"
+	printf "   -h      prints the help menu\n"
+	printf "\n"
 }
 
-CONF_NAME=""
-EXAMPLE_DIR=""
+while getopts ":e:lnh" opt; do
+	case ${opt} in
+        e )
+		EXAMPLE_NAME=$OPTARG
+		;;
+        l )
+		LOCAL="-l"
+		;;
+        n )
+		NATIVE="-n"
+		;;
+
+	h )
+		print_help
+		exit 0
+		;;
+	* )
+		show_error_and_exit "Unknown argument"
+		;;
+	esac
+done
+
+if [[ ! -z ${LOCAL} && ! -z ${NATIVE} ]] ; then
+	show_error_and_exit "the \'native\' and \'local\' options cannot be combined"
+fi
+
+if [ -z ${EXAMPLE_NAME} ]
+then
+	show_error_and_exit "An example name is required [f16-shield, f16-simple, inv-pendulum]"
+fi
 
 case $EXAMPLE_NAME in
 	"f16-simple")
@@ -45,4 +79,4 @@ case $EXAMPLE_NAME in
 		;;
 esac
 
-./run-csaf.sh -l -d "${PWD}/${EXAMPLE_DIR}" -c ${CONF_NAME}
+./run-csaf.sh ${LOCAL} ${NATIVE} -d "${PWD}/${EXAMPLE_DIR}" -c ${CONF_NAME}
