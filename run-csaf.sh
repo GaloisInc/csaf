@@ -1,7 +1,8 @@
 #!/bin/bash
 
-LOCAL=0
 SCRIPT_DIR="csaf_architecture"
+LOCAL=0
+NATIVE=0
 CSAF_LOC=""
 CONFIG_NAME=""
 
@@ -24,12 +25,13 @@ print_help() {
 	printf "   -c      the name of the config file\n"
 	printf "   -d      fully qualified path to the directory defining the control system\n"
 	printf "   -l      build the image locally\n"
+	printf "   -n      run CSAF natively\n"
 	printf "   -t      the tag of the image { stable, edge, latest }\n"
 	printf "   -h      prints the help menu\n"
 	printf "\n"
 }
 
-while getopts ":c:d:t:lh" opt; do
+while getopts ":c:d:t:lhn" opt; do
 	case ${opt} in
         c )
 		CONFIG_NAME=$OPTARG
@@ -39,6 +41,9 @@ while getopts ":c:d:t:lh" opt; do
 		;;
         l )
 		LOCAL=1
+		;;
+        n )
+		NATIVE=1
 		;;
 	t )
 		IMAGE_TAG=$OPTARG
@@ -63,6 +68,10 @@ then
 	show_error_and_exit "A CSAF directory must be supplied"
 fi
 
+if [[ ${LOCAL} -eq 1 && ${NATIVE} -eq 1 ]] ; then
+	show_error_and_exit "the \'native\' and \'local\' options cannot be combined"
+fi
+
 if [[ ${LOCAL} -eq 1 ]] ; then
 	build_img
 else
@@ -70,6 +79,8 @@ else
 	# TODO
 fi
 
-echo ${CSAF_LOC}
-
-docker run -it -v ${CSAF_LOC}:/csaf-system --network host ${IMAGE_NAME}:${IMAGE_TAG} python3 "/app/scripts/run_system.py" "/csaf-system" ${CONFIG_NAME}
+if [[ ${NATIVE} -eq 1 ]] ; then
+	python3 "src/run_system.py" ${CSAF_LOC} ${CONFIG_NAME}
+else
+	docker run -it -v ${CSAF_LOC}:/csaf-system --network host ${IMAGE_NAME}:${IMAGE_TAG} python3 "/app/run_system.py" "/csaf-system" ${CONFIG_NAME}
+fi
