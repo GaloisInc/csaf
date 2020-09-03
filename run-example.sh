@@ -2,6 +2,7 @@
 
 SCRIPT_DIR="csaf_architecture"
 EXAMPLE_NAME=""
+JUPYTER=""
 NATIVE=""
 LOCAL=""
 CONF_NAME=""
@@ -24,16 +25,24 @@ source .common.sh
 print_help() {
 	printf "Usage: -t <tag_name>\n"
 	printf "   -e      the name of the example { f16-shield, f16-simple, inv-pendulum }\n"
+	printf "   -j      launch a jupyter notebook\n"
 	printf "   -l      build the image locally\n"
 	printf "   -n      run CSAF natively\n"
 	printf "   -h      prints the help menu\n"
 	printf "\n"
 }
 
-while getopts ":e:lnh" opt; do
+request_example() {
+	show_error_and_exit "An example name is required [f16-shield, f16-simple, inv-pendulum]"
+}
+
+while getopts ":e:jlnh" opt; do
 	case ${opt} in
         e )
 		EXAMPLE_NAME=$OPTARG
+		;;
+        j )
+		JUPYTER="-j"
 		;;
         l )
 		LOCAL="-l"
@@ -56,9 +65,13 @@ if [[ ! -z ${LOCAL} && ! -z ${NATIVE} ]] ; then
 	show_error_and_exit "the \'native\' and \'local\' options cannot be combined"
 fi
 
+if [[ ! -z ${JUPYTER} && ! -z ${NATIVE} ]] ; then
+	show_error_and_exit "the \'jupyter\' and \'native\' options cannot be combined"
+fi
+
 if [ -z ${EXAMPLE_NAME} ]
 then
-	show_error_and_exit "An example name is required [f16-shield, f16-simple, inv-pendulum]"
+	request_example
 fi
 
 case $EXAMPLE_NAME in
@@ -79,4 +92,4 @@ case $EXAMPLE_NAME in
 		;;
 esac
 
-./run-csaf.sh ${LOCAL} ${NATIVE} -d "${PWD}/${EXAMPLE_DIR}" -c ${CONF_NAME}
+./run-csaf.sh ${JUPYTER} ${LOCAL} ${NATIVE} -d "${PWD}/${EXAMPLE_DIR}" -c ${CONF_NAME}
