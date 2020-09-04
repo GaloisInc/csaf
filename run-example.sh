@@ -50,7 +50,6 @@ while getopts ":e:jlnh" opt; do
         n )
 		NATIVE="-n"
 		;;
-
 	h )
 		print_help
 		exit 0
