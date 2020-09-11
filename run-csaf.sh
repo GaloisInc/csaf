@@ -75,8 +75,8 @@ fi
 if [[ ${LOCAL} -eq 1 ]] ; then
 	build_img
 else
-	show_info "Pulling image from Docker Hub"
-	# TODO
+	#show_info "Pulling image from Docker Hub"
+	echo "Pulling the docker image not implemented yet, please run natively"
 fi
 
 if [[ ${NATIVE} -eq 1 ]] ; then
