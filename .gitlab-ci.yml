@@ -1,0 +1,20 @@
+image: podhrmic/csaf:latest
+
+before_script:
+  - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
+  - eval $(ssh-agent -s)
+  - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
+  - mkdir -p ~/.ssh
+  - chmod 700 ~/.ssh
+
+f16-shield:
+  script:
+    - ./run-example.sh -e f16-shield -n
+
+f16-simple:
+  script:
+    - ./run-example.sh -e f16-simple -n
+
+inv-pendulum:
+  script:
+    - ./run-example.sh -e inv-pendulum -n
