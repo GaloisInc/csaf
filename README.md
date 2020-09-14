@@ -8,7 +8,7 @@ the middleware. To show off the power of the system, we've ported the F16 code
 into CSAF as a collection of independent components. To see the system in 
 action, simply run the following command:
 
-`./run-example.sh -e f16-shield`
+`./run-example.sh f16-shield`
 
 The only software dependency is docker itself. Also, note that first run of the 
 script will be slow, as the docker image is built and cached.
