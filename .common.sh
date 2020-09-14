@@ -1,5 +1,6 @@
 #!/bin/bash
 
+#IMAGE_NAME=galoisinc/csaf
 IMAGE_NAME=podhrmic/csaf
 IMAGE_TAG=latest
 

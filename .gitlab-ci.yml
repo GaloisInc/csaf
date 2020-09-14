@@ -1,3 +1,4 @@
+#image: galoisinc/csaf:latest
 image: podhrmic/csaf:latest
 
 before_script:
@@ -11,35 +12,35 @@ f16-shield:
   script:
     - ./run-example.sh -e f16-shield -n
   artifacts:
-  when: always
-  expire_in: 1 week
-  paths:
-      - ./examples/f16/output/f16run.log
-      - ./examples/f16/output/f16-shield-heidlauf-config.pdf
-      - ./examples/f16/output/f16-shield-heidlauf-run.png
+    when: always
+    expire_in: 1 week
+    paths:
+        - ./examples/f16/output/f16run.log
+        - ./examples/f16/output/f16-shield-heidlauf-config.pdf
+        - ./examples/f16/output/f16-shield-heidlauf-run.png
 
 
 f16-simple:
   script:
     - ./run-example.sh -e f16-simple -n
   artifacts:
-  when: always
-  expire_in: 1 week
-  paths:
-      - ./examples/f16/output/f16run.log
-      - ./examples/f16/output/f16-shield-heidlauf-config.pdf
-      - ./examples/f16/output/f16-shield-heidlauf-run.png
+    when: always
+    expire_in: 1 week
+    paths:
+        - ./examples/f16/output/f16run.log
+        - ./examples/f16/output/f16-shield-heidlauf-config.pdf
+        - ./examples/f16/output/f16-shield-heidlauf-run.png
 
 inv-pendulum:
   script:
     - ./run-example.sh -e inv-pendulum -n
   artifacts:
-  when: always
-  expire_in: 1 week
-  paths:
-      - ./examples/inverted-pendulum/output/inverted-pendulum.log
-      - ./examples/inverted-pendulum/output/inverted-pendulum-config.pdf
-      - ./examples/inverted-pendulum/output/inverted-pendulum-run.png
+    when: always
+    expire_in: 1 week
+    paths:
+        - ./examples/inverted-pendulum/output/inverted-pendulum.log
+        - ./examples/inverted-pendulum/output/inverted-pendulum-config.pdf
+        - ./examples/inverted-pendulum/output/inverted-pendulum-run.png
 
 notebooks:
   script:

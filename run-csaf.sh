@@ -73,13 +73,12 @@ if [[ ${LOCAL} -eq 1 && ${NATIVE} -eq 1 ]] ; then
 fi
 
 if [[ ${LOCAL} -eq 1 ]] ; then
+	show_info "Building docker image locally."
 	build_img
-else
-	#show_info "Pulling image from Docker Hub"
-	echo "Pulling the docker image not implemented yet, please run natively"
 fi
 
 if [[ ${NATIVE} -eq 1 ]] ; then
+	show_info "Running natively."
 	python3 "src/run_system.py" ${CSAF_LOC} ${CONFIG_NAME}
 else
 	docker run -it -v ${CSAF_LOC}:/csaf-system --network host ${IMAGE_NAME}:${IMAGE_TAG} python3 "/app/run_system.py" "/csaf-system" ${CONFIG_NAME}
