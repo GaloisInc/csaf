@@ -10,3 +10,4 @@ toml==0.10.1
 tqdm==4.47.0
 pyzmq==18.1.1
 pymap3d==2.4.0
+jupyter==1.0
