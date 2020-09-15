@@ -7,6 +7,7 @@ import pathlib
 import os
 import logging
 import toml
+import shutil
 
 from .rosmsg import CsafMsg, generate_serializer
 from . import csaf_logger
@@ -132,6 +133,12 @@ class SystemConfig:
 
         # load component level config file into this config dict
         for dname, dconfig in config["components"].items():
+            # make command absolute path if it exists
+            if 'run_command' in dconfig:
+                command_path = shutil.which(dconfig["run_command"]) # pathlib.Path(dconfig["run_command"])
+                assert os.path.exists(command_path), f"run_command path '{command_path}' for component '{dname}' must exist!"
+                config["components"][dname]["run_command"] = str(command_path)
+
             # make process absolute path
             process_path = pathlib.Path(join_if_not_abs(base_dir, dconfig["process"], project_dir="components"))
             assert os.path.exists(process_path), f"process path '{process_path}' for component '{dname}' must exist!"

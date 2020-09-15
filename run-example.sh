@@ -23,7 +23,7 @@ source .common.sh
 
 print_help() {
 	printf "Usage: -t <tag_name>\n"
-	printf "   -e      the name of the example { f16-shield, f16-simple, inv-pendulum }\n"
+	printf "   -e      the name of the example { f16-shield, f16-simple, inv-pendulum, rpc-inv-pendulum }\n"
 	printf "   -l      build the image locally\n"
 	printf "   -n      run CSAF natively\n"
 	printf "   -h      prints the help menu\n"
@@ -58,7 +58,7 @@ fi
 
 if [ -z ${EXAMPLE_NAME} ]
 then
-	show_error_and_exit "An example name is required [f16-shield, f16-simple, inv-pendulum]"
+	show_error_and_exit "An example name is required [f16-shield, f16-simple, inv-pendulum, rpc-inv-pendulum]"
 fi
 
 case $EXAMPLE_NAME in
@@ -73,6 +73,10 @@ case $EXAMPLE_NAME in
 	"inv-pendulum")
 		CONF_NAME="inv_pendulum_config.toml"
 		EXAMPLE_DIR="examples/inverted-pendulum"
+		;;
+	"rpc-inv-pendulum")
+		CONF_NAME="rpc_inv_pendulum_config.toml"
+		EXAMPLE_DIR="examples/rpc-inverted-pendulum"
 		;;
 	*)
 		request_example

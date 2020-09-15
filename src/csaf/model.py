@@ -9,8 +9,11 @@ import keyword
 import os, sys
 import importlib
 import pathlib
+import subprocess as subproc
+import json
 import toml
 from inspect import signature
+from . import csaf_logger as logging
 
 
 def dynamical_input(func: typ.Callable):
@@ -195,3 +198,114 @@ class ModelNative(Model):
     def null_dynamics(self, t: float, x: typ.Sized, u: typ.Sized) -> list:
         return []
 
+
+
+
+
+
+
+
+class ModelJsonRpc(Model):
+    """ ModelJsonRpc
+
+    For external models that communicate via a simple JSON RPC over stdin/stdout:
+    send:
+        {"function" := "model_output" OR "model_state_update" OR "model_info" OR "model_update",
+        "model" := parameter dictionary,
+        "time" := float,
+        "state" := list or object with `tolist()` method,
+        "input" := list}
+    receive:
+        JSON
+
+    N.B., the component spec must indicate where the executable/script is located (i.e., the `process`
+    field in the TOML config) and what command to run it with if necessary (i.e., the optional `run_command`
+    field in the components TOML config)
+    """
+    user_functions: typ.Sequence[str] = ["model_output", "model_state_update", "model_info", "model_update"]
+
+    @classmethod
+    def from_filename(cls, mname:str, cname: str):
+        """given a configuration file, load in a Model object with correct members"""
+        assert os.path.exists(cname)
+        with open(cname, 'r') as fp:
+            info = toml.load(fp)
+        return cls.from_config(info.get('run_command'), mname, info)
+
+    @classmethod
+    def from_config(cls, opt_run_cmd:typ.Union[str, None], mname:str, config):
+        parameters = config["parameters"]
+        is_discrete = config["is_discrete"]
+        representation = config["system_representation"]
+        return cls(opt_run_cmd, mname, parameters, representation, is_discrete)
+
+    def __init__(self, opt_run_cmd:typ.Union[str, None], mname: str, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._model_name = mname
+        assert os.path.exists(mname)
+        # initialize the external model process
+        logging.info("Starting external JsonRpc model " + mname + "...")
+
+        if opt_run_cmd == None:
+            cmd = [str(pathlib.Path(mname).absolute())]
+        else:
+            cmd = [str(pathlib.Path(opt_run_cmd).absolute()),str(pathlib.Path(mname).absolute())]
+
+        self._model_proc = subproc.Popen(\
+            cmd,\
+            stdin=subproc.PIPE,\
+            stdout=subproc.PIPE,\
+            stderr=subproc.STDOUT,\
+            universal_newlines=True) # opens the pipes in text instead of binary mode
+
+
+    def _build_model(self) -> typ.Dict:
+        """Extract the model's explicit model parameters from the object into a dictionary."""
+        model = {}
+        for key, val in self.parameters.items():
+            model[key] = val
+        return model
+
+    def _build_state(self, state) -> typ.Dict:
+        if isinstance(state, list):
+            return state
+        else:
+            return state.tolist()
+
+    def _do_rpc(self, fn_name, time, state, input) -> typ.Any:
+        """Send a JSON RPC to the external process."""
+        model = self._build_model()
+        state = self._build_state(state)
+        rpc = {                 \
+            'function':fn_name, \
+            'model':model,      \
+            'time':time,        \
+            'state':state, \
+            'input':input}
+        rpc = json.dumps(rpc).replace('\n', ' ').replace('\r', '')
+        # logging.debug("Sending RPC to " + self._model_name + ":\n" + rpc)
+        self._model_proc.stdin.write(rpc)
+        self._model_proc.stdin.write('\n')
+        self._model_proc.stdin.flush()
+        # logging.debug("Waiting on RPC response..." )
+        rawResponse = self._model_proc.stdout.readline().strip()
+        # logging.debug("RPC response: " + rawResponse)
+        return json.loads(rawResponse)
+
+    def _get_output(self, time, state, input) -> typ.Sized:
+        return self._do_rpc("model_output", time, state, input)
+
+    def _get_state_update(self, time, state, input) -> typ.Sized:
+        return self._do_rpc("model_state_update", time, state, input)
+
+    def _get_info(self, time, state, input) -> typ.Any:
+        return self._do_rpc("model_info", time, state, input)
+
+    def _update_model(self, time, state, input) -> None:
+        self._do_rpc("model_update", time, state, input)
+        ## FIXME this method should probably update this objects state appropriately
+        return None
+
+    @dynamical_input
+    def null_dynamics(self, t: float, x: typ.Sized, u: typ.Sized) -> list:
+        return []

@@ -7,7 +7,7 @@ from .config import SystemConfig
 from .dynamics import DynamicComponent
 from .messenger import SerialMessenger
 from .scheduler import Scheduler
-from .model import ModelNative
+from .model import ModelNative, ModelJsonRpc
 from .trace import TimeTrace
 
 
@@ -36,8 +36,11 @@ class System:
             # dynamic model
             # TODO: better Model class selection here
             is_discrete = dconfig["config"]["is_discrete"]
-            #model = ModelNative.from_filename(dconfig["process"], is_discrete=is_discrete)
-            model = ModelNative.from_config(dconfig["process"], dconfig["config"])
+            if dconfig.get("model_kind") == "JsonRpc":
+                model = ModelJsonRpc.from_config(dconfig.get("run_command"), dconfig["process"], dconfig["config"])
+            else:
+                #model = ModelNative.from_filename(dconfig["process"], is_discrete=is_discrete)
+                model = ModelNative.from_config(dconfig["process"], dconfig["config"])
 
             # pub/sub parameters
             sub_ports = [[str(config.config_dict["components"][l]["pub"]), l+"-"+t] for l, t in dconfig["sub"]]
