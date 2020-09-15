@@ -1,0 +1,25 @@
+system_name = "Inverted Pendulum Model"
+system_representation = "black box"
+system_solver = "Euler"
+
+sampling_frequency = 100
+
+is_discrete = false
+is_hybrid = false
+
+[parameters]
+    g = 9.81
+    l = 1.0
+    b = 0.05
+    m = 0.7
+
+[inputs]
+msgs = ["pid_model_output.msg"]
+
+[topics]
+[topics.outputs]
+msg = "ip_model_output.msg"
+
+[topics.states]
+msg = "ip_model_state.msg"
+initial=[0.2, -0.3]

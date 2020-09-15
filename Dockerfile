@@ -8,7 +8,8 @@ RUN apt-get clean && \
     python3 \
     python3-pip \
     graphviz \
-    python3-pyqt5
+    python3-pyqt5 \
+    swig
 
 RUN pip3 install -U pip
 COPY requirements.txt /tmp/requirements.txt

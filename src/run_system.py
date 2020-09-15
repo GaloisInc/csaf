@@ -150,6 +150,18 @@ if "pendulum" in config_filename:
     ax[1][2].axis('off')
     ax[0][2].set_xlabel("Time (s)")
 
+if "pid" in config_filename:
+    fig, ax = plt.subplots(figsize=(12, 8), nrows=2, ncols=2, sharex=True)
+    ax[0][0].set_title("Pendulum Plant")
+    plot_component(ax[0][0], trajs, "plant", "states", 0, "Angle (rad)")
+    plot_component(ax[1][0], trajs, "plant", "states", 1, "Angular Rate (rad/s)")
+    ax[1][0].set_xlabel("Time (s)")
+
+    ax[0][1].set_title("Controller")
+    plot_component(ax[0][1], trajs, "controller", "outputs", 0, "Torque (Nm)")
+    plot_component(ax[1][1], trajs, "controller", "states", 0, "Error (rad s)")
+    ax[1][1].set_xlabel("Time (s)")
+
 if "shield" in config_filename:
     ## Plot Results
     fig, ax = plt.subplots(figsize=(25, 15), nrows=4, ncols=3, sharex=True)
