@@ -164,5 +164,5 @@ dmypy.json
 cython_debug/
 
 # Jupyter notebooks files
-# We don't want to inlude these PDFs
+# We don't want to include these PDFs
 docs/notebooks/CSAF_Simulation.pdf
