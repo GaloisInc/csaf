@@ -15,4 +15,3 @@ pip3 install --upgrade pip
 
 # Latex for notebooks
 apt-get install -y texlive-xetex texlive-fonts-recommended texlive-generic-recommended
-apt-get -y install pandoc
