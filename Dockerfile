@@ -1,16 +1,12 @@
 FROM ubuntu:18.04
 
-RUN apt-get clean && \
-    apt-get update && \
-    apt-get -y upgrade && \
-    apt-get install -y \
-    git \
-    python3 \
-    python3-pip \
-    graphviz \
-    python3-pyqt5
+ARG DEBIAN_FRONTEND=noninteractive
+
+COPY dependencies.sh /tmp/deps.sh
+RUN /tmp/deps.sh
 
 RUN pip3 install -U pip
+RUN pip3 install --upgrade pip
 COPY requirements.txt /tmp/requirements.txt
 RUN pip3 install -r /tmp/requirements.txt
 

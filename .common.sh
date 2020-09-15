@@ -1,6 +1,5 @@
 #!/bin/bash
-
-IMAGE_NAME=galois/csaf
+IMAGE_NAME=galoisinc/csaf
 IMAGE_TAG=latest
 
 show_error_and_exit() {
