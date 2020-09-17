@@ -1,6 +1,4 @@
 #!/bin/bash
-
-SCRIPT_DIR="csaf_architecture"
 EXAMPLE_NAME=""
 JUPYTER=""
 NATIVE=""
@@ -8,19 +6,9 @@ LOCAL=""
 CONF_NAME=""
 EXAMPLE_DIR=""
 
-validate_dir() {
-
-	DIR=$(basename ${PWD})      
-	if [ ${DIR} != ${SCRIPT_DIR} ]
-	then
-		printf "ERROR: Script must be run from the \"${SCRIPT_DIR}\" directory\n"
-		exit 1
-	fi
-}
+source .common.sh
 
 validate_dir
-
-source .common.sh
 
 print_help() {
 	printf "Usage: -t <tag_name>\n"
@@ -51,22 +39,14 @@ while getopts ":e:jlnh" opt; do
 		exit 0
 		;;
 	* )
-		show_error_and_exit "Unknown argument"
+		show_error_and_exit "Unknown argument: " $OPTARG
 		;;
 	esac
 done
 
-if [[ ! -z ${LOCAL} && ! -z ${NATIVE} ]] ; then
-	show_error_and_exit "the \'native\' and \'local\' options cannot be combined"
-fi
-
 if [ -z ${EXAMPLE_NAME} ]
 then
 	show_error_and_exit "An example name is required [f16-shield, f16-simple, inv-pendulum]"
-fi
-
-if [[ ! -z ${JUPYTER} && ! -z ${NATIVE} ]] ; then
-	show_error_and_exit "the \'jupyter\' and \'native\' options cannot be combined"
 fi
 
 if [ -z ${EXAMPLE_NAME} ]

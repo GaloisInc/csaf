@@ -16,11 +16,6 @@ validate_dir
 
 source .common.sh
 
-# We are allowing 3 tag names
-#  - "stable" is for general use by customers
-#  - "edge" is to provide experimental features to customers
-#  - "latest" is for internal development
-
 print_help() {
 	printf "Usage: -p -t <tag_name>\n"
 	printf "   -p      publish the image to docker hub\n"

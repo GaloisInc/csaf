@@ -1,24 +1,12 @@
 #!/bin/bash
-
-SCRIPT_DIR="csaf_architecture"
 LOCAL=0
 NATIVE=0
 CSAF_LOC=""
 CONFIG_NAME=""
 
-validate_dir() {
-
-	DIR=$(basename ${PWD})      
-	if [ ${DIR} != ${SCRIPT_DIR} ]
-	then
-		printf "ERROR: Script must be run from the \"${SCRIPT_DIR}\" directory\n"
-		exit 1
-	fi
-}
+source .common.sh
 
 validate_dir
-
-source .common.sh
 
 print_help() {
 	printf "Usage: -t <tag_name>\n"
@@ -57,7 +45,7 @@ while getopts ":c:d:t:jlhn" opt; do
 		exit 0
 		;;
 	* )
-		show_error_and_exit "Unknown argument"
+		show_error_and_exit "Unknown argument: " $OPTARG
 		;;
 	esac
 done
@@ -77,24 +65,29 @@ if [[ ${LOCAL} -eq 1 && ${NATIVE} -eq 1 ]] ; then
 fi
 
 if [[ ${JUYPTER} -eq 1 && ${NATIVE} -eq 1  ]] ; then
-	show_error_and_exit "the \'native\' and \'jupyter\' options cannot be combined"
+    show_error_and_exit "the \'native\' and \'jupyter\' options cannot be combined"
 fi
 
 if [[ ${LOCAL} -eq 1 ]] ; then
 	show_info "Building docker image locally."
 	build_img
-else
-	show_info "Pulling image from Docker Hub"
-	# TODO
 fi
 
 if [[ ${NATIVE} -eq 1 ]] ; then
-	python3 "src/run_system.py" ${CSAF_LOC} ${CONFIG_NAME}
+	if [[ ${JUYPTER} -eq 1 ]] ; then
+		jupyter notebook --no-browser --notebook-dir=${PWD}/docs/notebooks
+	else
+		python3 "src/run_system.py" ${CSAF_LOC} ${CONFIG_NAME}
+	fi
 else
 	if [[ ${JUYPTER} -eq 1 ]] ; then
-		docker run -p 8888:8888 -it -v ${CSAF_LOC}:/csaf-system ${IMAGE_NAME}:${IMAGE_TAG} "jupyter" "notebook" "--port=8888" "--no-browser" "--ip=0.0.0.0" "--allow-root" "--notebook-dir=/notebooks";
+		docker run --init -p 8888:8888 -it -v ${CSAF_LOC}:/csaf-system \
+			-v ${PWD}/src:/app -v ${PWD}/docs/notebooks:/notebooks \
+			${IMAGE_NAME}:${IMAGE_TAG} "jupyter" "notebook" "--port=8888"\
+			"--no-browser" "--ip=0.0.0.0" "--allow-root" "--notebook-dir=/notebooks";
 	else
-		docker run -it -v ${CSAF_LOC}:/csaf-system --network host ${IMAGE_NAME}:${IMAGE_TAG} python3 "/app/run_system.py" "/csaf-system" ${CONFIG_NAME}
+		docker run --init -it -v ${PWD}/src:/app -v ${CSAF_LOC}:/csaf-system --network host \
+			${IMAGE_NAME}:${IMAGE_TAG} python3 "/app/run_system.py" "/csaf-system" ${CONFIG_NAME}
 	fi
 fi
 
