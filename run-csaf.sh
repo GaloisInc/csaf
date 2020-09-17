@@ -83,8 +83,8 @@ else
 	if [[ ${JUYPTER} -eq 1 ]] ; then
 		docker run --init -p 8888:8888 -it -v ${CSAF_LOC}:/csaf-system \
 			-v ${PWD}/src:/app -v ${PWD}/docs/notebooks:/notebooks \
-			${IMAGE_NAME}:${IMAGE_TAG} "jupyter" "notebook" "--port=8888"\
-			"--no-browser" "--ip=0.0.0.0" "--allow-root" "--notebook-dir=/notebooks";
+			${IMAGE_NAME}:${IMAGE_TAG} "jupyter" "notebook" "--port=8888" \
+			"--no-browser" "--ip=0.0.0.0" "--allow-root" "--notebook-dir=/notebooks"
 	else
 		docker run --init -it -v ${PWD}/src:/app -v ${CSAF_LOC}:/csaf-system --network host \
 			${IMAGE_NAME}:${IMAGE_TAG} python3 "/app/run_system.py" "/csaf-system" ${CONFIG_NAME}

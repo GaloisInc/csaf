@@ -6,6 +6,8 @@ before_script:
   - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
   - mkdir -p ~/.ssh
   - chmod 700 ~/.ssh
+  - export PYTHONPATH=${PYTHONPATH}:${PWD}/src
+
 
 f16-shield:
   script:
@@ -43,7 +45,10 @@ inv-pendulum:
 
 notebooks:
   script:
+    - echo "Adjust example paths to match jupyter notebook launch for f16-shield"
+    - ln -s ${PWD}/examples/f16 /csaf-system
     - jupyter nbconvert --to pdf --execute  docs/notebooks/f16-shield.ipynb
+    - rm /csaf-system
   artifacts:
     when: always
     expire_in: 1 week
