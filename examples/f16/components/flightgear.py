@@ -467,5 +467,4 @@ fdm = FGNetFDM()
 def model_update(model, time_t, state_fg, input_f16):
     if not fdm.running:
         fdm.init_from_params(model.parameters)
-        print("FDM Init")
     fdm.update_and_send(input_f16)
