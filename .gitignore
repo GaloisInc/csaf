@@ -166,3 +166,6 @@ cython_debug/
 # Jupyter notebooks files
 # We don't want to include these PDFs
 docs/notebooks/*.pdf
+
+# Pipenv files
+Pipfile*
