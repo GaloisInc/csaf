@@ -8,7 +8,7 @@ codec_dir = "codec"
 output_dir = "output"
 
 # Order to Construct/Evaluate Components
-evaluation_order = ["controller", "plant", "autopilot","flightgear"]
+evaluation_order = ["controller", "plant", "autopilot"]
 
 # File to Log Results
 log_file = "f16run.log"

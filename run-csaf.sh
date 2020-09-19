@@ -3,15 +3,17 @@ LOCAL=0
 NATIVE=0
 CSAF_LOC=""
 CONFIG_NAME=""
+JOB_CONFIG_PATH=""
 
 source .common.sh
 
 validate_dir
 
 print_help() {
-	printf "Usage: -t <tag_name>\n"
+	printf "Usage:\n"
 	printf "   -c      the name of the config file\n"
 	printf "   -d      fully qualified path to the directory defining the control system\n"
+	printf "   -f      fully qualified path to the job config file\n"
 	printf "   -j      launch a jupyter notebook\n"
 	printf "   -l      build the image locally\n"
 	printf "   -n      run CSAF natively\n"
@@ -20,13 +22,16 @@ print_help() {
 	printf "\n"
 }
 
-while getopts ":c:d:t:jlhn" opt; do
+while getopts ":c:d:f:t:jlhn" opt; do
 	case ${opt} in
         c )
 		CONFIG_NAME=$OPTARG
 		;;
         d )
 		CSAF_LOC=$OPTARG
+		;;
+		f )
+		JOB_CONFIG_PATH=$OPTARG
 		;;
         j )
 		JUYPTER=1
@@ -37,14 +42,14 @@ while getopts ":c:d:t:jlhn" opt; do
         n )
 		NATIVE=1
 		;;
-	t )
+		t )
 		IMAGE_TAG=$OPTARG
 		;;
-	h )
+		h )
 		print_help
 		exit 0
 		;;
-	* )
+		* )
 		show_error_and_exit "Unknown argument: " $OPTARG
 		;;
 	esac
@@ -77,7 +82,7 @@ if [[ ${NATIVE} -eq 1 ]] ; then
 	if [[ ${JUYPTER} -eq 1 ]] ; then
 		jupyter notebook --no-browser --notebook-dir=${PWD}/docs/notebooks
 	else
-		python3 "src/run_system.py" ${CSAF_LOC} ${CONFIG_NAME}
+		python3 "src/run_system.py" ${CSAF_LOC} ${CONFIG_NAME} ${JOB_CONFIG_PATH}
 	fi
 else
 	if [[ ${JUYPTER} -eq 1 ]] ; then
@@ -87,7 +92,7 @@ else
 			"--no-browser" "--ip=0.0.0.0" "--allow-root" "--notebook-dir=/notebooks"
 	else
 		docker run --init -it -v ${PWD}/src:/app -v ${CSAF_LOC}:/csaf-system --network host \
-			${IMAGE_NAME}:${IMAGE_TAG} python3 "/app/run_system.py" "/csaf-system" ${CONFIG_NAME}
+			${IMAGE_NAME}:${IMAGE_TAG} python3 "/app/run_system.py" "/csaf-system" ${CONFIG_NAME} ${JOB_CONFIG_PATH}
 	fi
 fi
 
