@@ -10,6 +10,44 @@ import numpy as np
 
 from plot import plot_component
 
+from components import fgnetfdm
+
+def render_in_flightgear(trajs):
+    """
+    Render the trajectory in FlightGear
+    """
+    fdm = fgnetfdm.FGNetFDM()
+    fdm.init_from_params({})
+
+    initial_time = time.monotonic()
+    while True:
+        real_time = time.monotonic()
+        sim_time = real_time - initial_time
+        timestamp = next(filter(lambda x: x > sim_time, trajs['plant'].times), None)
+        if timestamp:
+            # Plant states
+            idx = trajs['plant'].times.index(timestamp)
+            states = trajs['plant'].states[idx]
+            # Controller output
+            idx = trajs['controller'].times.index(timestamp)
+            ctrls = trajs['controller'].states[idx]
+
+            # Update
+            input_f16 = np.concatenate((np.asarray(states),ctrls))
+            fdm.update_and_send(input_f16)
+
+            # Check if we crashed
+            if fdm.agl <= 0:
+                print(fdm.agl)
+                print("CRASH!")
+                break
+
+            # Delay
+            time.sleep(fgnetfdm.FGNetFDM.FG_SLEEP_S)
+        else:
+            print("Done!")
+            break
+
 def plot_shield(trajs):
     """
     Plot results for GCSA shield autopilot

@@ -123,10 +123,6 @@ def plot_results(config_filename, trajs, filename=None):
         from f16_plot import plot_shield
         plot_shield(trajs)
 
-    elif "f16_llc_analyze" in config_filename:
-        from f16_plot import plot_shield
-        plot_shield(trajs)
-
     elif "f16_simple" in config_filename:
         from f16_plot import plot_simple
         plot_simple(trajs)

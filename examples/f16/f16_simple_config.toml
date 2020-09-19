@@ -66,16 +66,3 @@ log_level = "info"
 
     # port to publish
     pub = 5503
-
-  [components.flightgear]
-    # environment to run under
-    run_command = "python3"
-
-    # path to model executable
-    process = "flightgear.py"
-
-    # whether to print debug diagnostics
-    debug = false
-
-    # subscribe to topic of a component (component name, topic name)
-    sub = [["plant", "states"], ["controller", "outputs"]]
