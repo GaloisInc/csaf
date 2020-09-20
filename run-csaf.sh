@@ -39,7 +39,7 @@ print_help() {
     printf "    ./run-csaf.sh -e f16-simple -x\n"
 }
 
-while getopts ":c:d:e:f:t:jlhn:x" opt; do
+while getopts ":c:d:e:f:t:jlhnx:" opt; do
 	case ${opt} in
         c )
 		CONFIG_NAME=$OPTARG
