@@ -12,8 +12,8 @@ print_help() {
     the middleware.\n"
     printf "\n\033[1mUSAGE\033[0m\n"
     printf "   -e      the name of the example { f16-shield, f16-simple, inv-pendulum }\n"
-    printf "   -c      the name of the config file\n"
-    printf "   -d      fully qualified path to the directory defining the control system\n"
+    printf "   -c      the name of the model config file (must be in the same directory as your system)\n"
+    printf "   -d      fully qualified path to the directory defining the model system\n"
     printf "   -f      name of the job config file (must be in the same directory as your system)\n"
     printf "   -j      launch a jupyter notebook\n"
     printf "   -l      build the image locally\n"
@@ -42,7 +42,7 @@ print_help() {
 while getopts ":c:d:e:f:t:jlhnx:" opt; do
     case ${opt} in
         c )
-            CONFIG_NAME=$OPTARG
+            CONFIG_NAME=`basename $OPTARG`
             ;;
         d )
             CSAF_LOC=$OPTARG
@@ -51,7 +51,7 @@ while getopts ":c:d:e:f:t:jlhnx:" opt; do
             EXAMPLE_NAME=$OPTARG
             ;;
         f )
-            JOB_CONFIG_PATH=$OPTARG
+            JOB_CONFIG_PATH=`basename $OPTARG`
             ;;
         j )
             JUPYTER=1
