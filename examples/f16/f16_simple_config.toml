@@ -48,6 +48,9 @@ log_level = "info"
     # subscribe to topic of a component (component name, topic name)
     sub = [["controller", "outputs"]]
 
+    # method to transport the messages
+    transport = "ipc"
+
     # port to publish
     pub = 5501
 

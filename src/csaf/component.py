@@ -53,13 +53,6 @@ class Component:
 
         self._name = "system" if name is None else name
 
-    def debug_start(self):
-        return f"Component '{self.name}' {self.__class__.__name__}"
-
-    def print_if_debug(self, s):
-        if self.debug_node:
-            logging.debug(self.debug_start() + s)
-
     def bind(self, in_ports, out_ports):
         """bind subscribers/publishers to their respective ports"""
 
@@ -78,7 +71,13 @@ class Component:
         self.output_socks = []
         for idx in range(self.num_output_socks):
             sock = self.zmq_context.socket(zmq.PUB)
-            sock.bind(f"tcp://*:{out_ports[idx]}")
+            if out_ports[idx][1] == "tcp":
+                transport_string = f"tcp://*:{out_ports[idx][0]}"
+            elif out_ports[idx][1] == "ipc":
+                transport_string = f"{out_ports[idx][1]}://{out_ports[idx][0]}"
+            else:
+                raise ValueError(f"outports configured for {self.name} with invalid transport {out_ports[idx][1]}")
+            sock.bind(transport_string)
             self.output_socks.append(sock)
 
         # setup subscribers over TCP network
@@ -86,9 +85,15 @@ class Component:
         self.input_topics = []
         for idx in range(self.num_input_socks):
             sock = self.zmq_context.socket(zmq.SUB)
-            sock.connect(f"tcp://127.0.0.1:{in_ports[idx][0]}")
+            if in_ports[idx][2] == "tcp":
+                transport_string = f"tcp://127.0.0.1:{in_ports[idx][0]}"
+            elif in_ports[idx][2] == "ipc":
+                transport_string = f"{in_ports[idx][2]}://{in_ports[idx][0]}"
+            else:
+                raise ValueError(f"outports configured for {self.name} with invalid transport {out_ports[idx][1]}")
+            sock.connect(transport_string)
+            print(f"{in_ports[idx][2]}://{in_ports[idx][0]}")
             topic = in_ports[idx][1]
-            self.print_if_debug(f"binding socket {in_ports[idx][0]} with topic {topic}")
             sock.setsockopt_string(zmq.SUBSCRIBE, topic)
             sock.setsockopt(zmq.CONFLATE, 1)
             self.input_socks.append(sock)

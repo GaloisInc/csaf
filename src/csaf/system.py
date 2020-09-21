@@ -40,9 +40,10 @@ class System:
             model = ModelNative.from_config(dconfig["process"], dconfig["config"])
 
             # pub/sub parameters
-            sub_ports = [[str(config.config_dict["components"][l]["pub"]), l+"-"+t] for l, t in dconfig["sub"]]
+            sub_ports = [(str(config.config_dict["components"][l]["pub"]), l+"-"+t,
+                          config.get_transport_type(l+"-"+t)) for l, t in dconfig["sub"]]
             if "pub" in dconfig:
-                pub_ports = [str(dconfig["pub"])]
+                pub_ports = [(str(dconfig["pub"]), config.get_transport_type(dname))]
             else:
                 pub_ports = []
             topics_in = [s[1] for s in sub_ports]

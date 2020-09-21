@@ -168,6 +168,20 @@ class SystemConfig:
     def __init__(self, config: dict):
         self._config = config
         self.assert_io_widths()
+        self.transport_data = None
+
+    def get_transport_type(self, tname):
+        if self.transport_data is None:
+            self._build_transport_data()
+        return self.transport_data[tname]
+
+    def _build_transport_data(self):
+        self.transport_data = {}
+        for dname, dconfig in self._config["components"].items():
+            for tname in self.get_topics(dname):
+                transport = dconfig.get("transport", "ipc")
+                self.transport_data[f"{dname}-{tname}"] = transport
+                self.transport_data[dname] = transport
 
     def build_component_graph(self):
         """build a graph representation of the system from the config"""
