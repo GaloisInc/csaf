@@ -1,5 +1,5 @@
 # System Name
-name = "f16-heidlauf"
+name = "inverted-pendulum"
 
 # directory to output ROSmsg codecs
 codec_dir = "codec"
@@ -7,16 +7,15 @@ codec_dir = "codec"
 # directory to send CSAF output
 output_dir = "output"
 
-# Order to Construct/Evaluate Components
-evaluation_order = ["controller", "plant", "autopilot"]
+# Order to Construct/Evaluate Components 
+evaluation_order = ["maneuver", "controller", "plant"]
 
 # File to Log Results
-log_file = "f16run.log"
+log_file = "inv_pendulum.log"
 
 # Log Level (info/debug)
 log_level = "info"
 
-# component components
 [components]
 
   [components.controller]
@@ -24,13 +23,13 @@ log_level = "info"
     run_command = "python3"
 
     # path to model executable
-    process = "f16llc.py"
+    process = "ipcontroller.py"
 
     # whether to print debug diagnostics
     debug = false
 
     # subscribe to topic of a component (component name, topic name)
-    sub = [["plant", "states"], ["plant", "outputs"], ["autopilot", "outputs"]]
+    sub = [["plant", "states"], ["maneuver", "outputs"]]
 
     # port to publish
     pub = 5502
@@ -40,7 +39,7 @@ log_level = "info"
     run_command = "python3"
 
     # path to model executable
-    process = "f16plant.py"
+    process = "ipplant.py"
 
     # whether to print debug diagnostics
     debug = false
@@ -51,18 +50,18 @@ log_level = "info"
     # port to publish
     pub = 5501
 
-  [components.autopilot]
+  [components.maneuver]
     # environment to run under
     run_command = "python3"
 
     # path to model executable
-    process = "autopilot.py"
+    process = "signal_generator.py"
 
     # whether to print debug diagnostics
     debug = false
 
     # subscribe to topic of a component (component name, topic name)
-    sub = [["plant", "states"], ["plant", "outputs"]]
+    sub = []
 
     # port to publish
     pub = 5503

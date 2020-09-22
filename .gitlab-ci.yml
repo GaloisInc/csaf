@@ -10,7 +10,7 @@ before_script:
 
 f16-shield:
   script:
-    - ./run-example.sh -e f16-shield -n
+    - ./run-csaf.sh -e f16-shield -n
   artifacts:
     when: always
     expire_in: 1 week
@@ -22,7 +22,7 @@ f16-shield:
 
 f16-simple:
   script:
-    - ./run-example.sh -e f16-simple -n
+    - ./run-csaf.sh -e f16-simple -n
   artifacts:
     when: always
     expire_in: 1 week
@@ -33,7 +33,7 @@ f16-simple:
 
 inv-pendulum:
   script:
-    - ./run-example.sh -e inv-pendulum -n
+    - ./run-csaf.sh -e inv-pendulum -n
   artifacts:
     when: always
     expire_in: 1 week

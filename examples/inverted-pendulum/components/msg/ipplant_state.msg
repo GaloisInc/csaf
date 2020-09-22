@@ -5,7 +5,7 @@ string topic
 
 float64 time
 
+float64 position
 float64 velocity
-float64 acceleration
-float64 angular_rate
-float64 angular_acceleration
+float64 angular_position
+float64 angular_velocity

@@ -11,11 +11,8 @@ is_hybrid = false
 
 [parameters]
 aileron_max = 21.5
-aileron_min = -21.5
 elevator_max = 25
-elevator_min = -25
 rudder_max = 30.0
-rudder_min = -30.0
 FG_IP = "127.0.0.1"
 FG_PORT = 5505
 FG_GENERIC_PORT = 5506

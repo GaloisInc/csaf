@@ -14,7 +14,7 @@ evaluation_order = ["controller", "plant", "autopilot"]
 log_file = "f16run.log"
 
 # Log Level (info/debug)
-log_level = "info"
+log_level = "debug"
 
 # component components
 [components]
@@ -56,13 +56,13 @@ log_level = "info"
     run_command = "python3"
 
     # path to model executable
-    process = "autopilot.py"
+    process = "signal_generator.py"
 
     # whether to print debug diagnostics
     debug = false
 
     # subscribe to topic of a component (component name, topic name)
-    sub = [["plant", "states"], ["plant", "outputs"]]
+    sub = []
 
     # port to publish
     pub = 5503

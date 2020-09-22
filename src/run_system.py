@@ -21,7 +21,7 @@ import plot
 ## build and simulate system
 csaf_dir=sys.argv[1]
 csaf_config=sys.argv[2]
-config_filename = csaf_dir + "/" + csaf_config
+config_filename = os.path.join(csaf_dir, csaf_config)
 
 # NOTE: appending path to have access to example specific files
 # Hacky way to do this?
@@ -31,7 +31,8 @@ model_conf = cconf.SystemConfig.from_toml(config_filename)
 
 # Optional job configuration
 if len(sys.argv) > 3:
-    with open(sys.argv[3], 'r') as f:
+    job_filename = os.path.join(csaf_dir, sys.argv[3])
+    with open(job_filename, 'r') as f:
         job_conf = toml.load(f)
 else:
     job_conf = {}
