@@ -35,12 +35,12 @@ class Worker(Process):
 
 
 class Task(object):
-    def __init__(self, idx, system_attr, states, *args, **kwargs):
+    def __init__(self, idx, system_attr, initial_states, *args, **kwargs):
         self.idx = idx
         self.system_attr = system_attr
         self.args = args
         self.kwargs = kwargs
-        self.states = states
+        self.states = initial_states
 
     def __call__(self, system: csys.System):
         for cname, cstate in self.states.items():
@@ -52,7 +52,7 @@ class Task(object):
         except Exception as exc:
             answer = [self.idx, exc]
         # some ugliness to get around the unpicklable named tuple
-        if self.system_attr == "simulate_tspan":
+        if self.system_attr == "simulate_tspan" and isinstance(answer[1], dict):
             answer_picklable = {}
             for k, v in answer[1].items():
                 if isinstance(v, ctc.TimeTrace):
@@ -66,7 +66,7 @@ class Task(object):
         return f"id {self.idx} -- {self.system_attr}(args={self.args}, kwargs={self.kwargs})"
 
 
-def run_workgroup(n_tasks, config, states, *args):
+def run_workgroup(n_tasks, config, initial_states, *args):
     # Establish communication queues
     tasks = JoinableQueue()
     results = Queue()
@@ -83,7 +83,7 @@ def run_workgroup(n_tasks, config, states, *args):
 
     # Enqueue jobs
     for idx in range(n_tasks):
-        t = Task(idx, "simulate_tspan", states[idx], *args, show_status=False)
+        t = Task(idx, "simulate_tspan", initial_states[idx], *args, show_status=False)
         print(t)
         tasks.put(t)
 
@@ -104,20 +104,54 @@ def run_workgroup(n_tasks, config, states, *args):
 
 
 if __name__ == '__main__':
+    import numpy as np
+    import matplotlib.pyplot as plt
+
+    def gen_random_state(bounds):
+        sample = np.random.rand(len(bounds))
+        ranges = np.array([b[1] - b[0] for b in bounds])
+        offset = np.array([- b[0] for b in bounds])
+        return sample * ranges - offset
+
+    bounds = [(200, 1500),
+              (np.deg2rad(2.1215-0.6), np.deg2rad(2.1215+0.6)),
+              (0.0, 0.0),
+              ((np.pi/2)*0.5, (np.pi/2)*0.5),
+              (-np.pi, np.pi),
+              (-np.pi/4, -np.pi/4 ),
+              (0.0, 0.0),
+              (-0.1, 0.1),
+              (0.0, 0.0),
+              (0.0, 0.0),
+              (0.0, 0.0),
+              (500, 8000),
+              (9, 9)]
+
     ## build and simulate system
     csaf_dir=sys.argv[1]
     csaf_config=sys.argv[2]
+    state_index = int(sys.argv[3])
 
     ## system to run in parallel
     config_filename = os.path.join(csaf_dir, csaf_config)
     model_conf = cconf.SystemConfig.from_toml(config_filename)
 
     # number of jobs to run
-    n_tasks = 4
+    n_tasks = 16
 
     # define states of component to run
     # format [{"plant": <list>}, ..., {"plant" : <list>, "controller": <list>}]
-    states = [{},] * n_tasks
+    states = [{"plant" : gen_random_state(bounds)} for _ in range(n_tasks)]
 
     # run 128 tasks in a workgroup
-    print(run_workgroup(n_tasks, model_conf, states, (0.0, 35.0)))
+    runs = run_workgroup(n_tasks, model_conf, states, (0.0, 35.0))
+    altitudes = [np.array(r["plant"]["states"])[:, state_index] for r in runs if not isinstance(r, Exception)]
+    times = [r["plant"]["times"] for r in runs if not isinstance(r, Exception)]
+    fig, ax = plt.subplots(figsize=(12, 3 * len(altitudes)), nrows=len(altitudes))
+    for idx, traces in enumerate(zip(times, altitudes)):
+        ax[idx].plot(*traces)
+        ax[idx].set_xlabel("Time (s)")
+        ax[idx].set_ylabel(f"Run {idx}")
+    ax[0].set_title("Simulation Workgroup Runs")
+    plt.show()
+
