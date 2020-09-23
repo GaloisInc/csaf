@@ -17,7 +17,6 @@ import csaf.config as cconf
 import csaf.trace as ctc
 
 import plot
-from analyze import component_analyzer
 
 ## build and simulate system
 csaf_dir=sys.argv[1]
