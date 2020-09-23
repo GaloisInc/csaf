@@ -17,15 +17,12 @@ import csaf.config as cconf
 import csaf.trace as ctc
 
 import plot
+from analyze import component_analyzer
 
 ## build and simulate system
 csaf_dir=sys.argv[1]
 csaf_config=sys.argv[2]
 config_filename = os.path.join(csaf_dir, csaf_config)
-
-# NOTE: appending path to have access to example specific files
-# Hacky way to do this?
-sys.path.append(csaf_dir)
 
 model_conf = cconf.SystemConfig.from_toml(config_filename)
 
@@ -45,22 +42,19 @@ tspan = job_conf.get('tspan', [0, 35.0])
 do_plot = job_conf.get('plot', True)
 filename = job_conf.get('plot_filename', None)
 
-# Get (deafult) analysis settings
-do_analyze = job_conf.get('analyze', False)
+# Initial conditions
+x0 = job_conf.get('initial_conditions', None)
 
-if do_analyze:
-    print("Running controller analytics")
-    from analyze import controller_analyzer
-    controller_analyzer(model_conf, job_conf, config_filename)
-else:
-    # Regular run
-    print("Running simulation!")
-    my_system = csys.System.from_config(model_conf)
-    trajs = my_system.simulate_tspan(tspan, show_status=show_status)
-    my_system.unbind()
-    filename = os.path.join(model_conf.output_directory, f"{model_conf.name}-run.png")
-    if do_plot:
-        plot.plot_results(config_filename, trajs, filename)
+# Regular run
+print("Running simulation!")
+my_system = csys.System.from_config(model_conf)
+if x0:
+    my_system.set_state("plant", x0)
+trajs = my_system.simulate_tspan(tspan, show_status=show_status)
+my_system.unbind()
+filename = os.path.join(model_conf.output_directory, f"{model_conf.name}-run.png")
+if do_plot:
+    plot.plot_results(config_filename, trajs, filename)
 
 # save plot of pub/sub diagram
 model_conf.plot_config()
