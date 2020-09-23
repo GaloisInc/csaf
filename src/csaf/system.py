@@ -11,12 +11,37 @@ from .model import ModelNative
 from .trace import TimeTrace
 
 
+import socket
+import socketserver
+
 
 class System:
     """ System accepts a component configuration, and then configures and composes them into a controlled system
 
     Has a scheduler to permit time simulations of the component system
     """
+    @staticmethod
+    def check_port(port):
+        # TODO: add to config processor
+        location = ("127.0.0.1", port)
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as a_socket:
+            result_of_check = a_socket.connect_ex(location)
+        return result_of_check == 0
+
+    @staticmethod
+    def reassign_ports(config):
+        # TODO: add to config processor
+        for dname, dconfig in config.config_dict["components"].items():
+            if "pub" in dconfig:
+                port_num = dconfig["pub"]
+                if System.check_port(port_num):
+                    with socketserver.TCPServer(("localhost", 0), None) as s:
+                        free_port = s.server_address[1]
+                else:
+                    free_port = port_num
+                config.config_dict["components"][dname]["pub"] = free_port
+        return config
+
     @classmethod
     def from_toml(cls, config_file: str):
         """produce a system from a toml file"""
@@ -24,7 +49,7 @@ class System:
         return cls.from_config(config)
 
     @classmethod
-    def from_config(cls, config: SystemConfig):
+    def from_config(cls, config: SystemConfig, recover_port_conflicts=True):
         """produce system from SystemConfig object
         TODO: decompose long classmethod into functions (?)
         """
@@ -32,6 +57,10 @@ class System:
         components = []
         ports = []
         names = []
+
+        if recover_port_conflicts:
+            config = cls.reassign_ports(config)
+
         for dname, dconfig in config.config_dict["components"].items():
             # dynamic model
             # TODO: better Model class selection here
@@ -92,7 +121,11 @@ class System:
         self.eval_order = []
         self.config = None
 
-    def simulate_tspan(self, tspan, show_status=False):
+    def reset(self):
+        for c in self.components:
+            c.reset()
+
+    def simulate_tspan(self, tspan, show_status=False, terminating_conditions=None):
         """over a given timespan tspan, simulate the system"""
         sched = Scheduler(self.components, self.eval_order)
         s = sched.get_schedule_tspan(tspan)
@@ -119,6 +152,8 @@ class System:
             idx = self.names.index(cidx)
             self.components[idx].receive_input()
             out = self.components[idx].send_output()
+            if terminating_conditions is not None and terminating_conditions(cidx, out):
+                return dtraces
             dtraces[cidx].append(**out)
 
         return dtraces
