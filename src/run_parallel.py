@@ -66,7 +66,7 @@ class Task(object):
         return f"id {self.idx} -- {self.system_attr}(args={self.args}, kwargs={self.kwargs})"
 
 
-def run_workgroup(n_tasks, config, initial_states, *args):
+def run_workgroup(n_tasks, config, initial_states, *args, **kwargs):
     # Establish communication queues
     tasks = JoinableQueue()
     results = Queue()
@@ -83,7 +83,7 @@ def run_workgroup(n_tasks, config, initial_states, *args):
 
     # Enqueue jobs
     for idx in range(n_tasks):
-        t = Task(idx, "simulate_tspan", initial_states[idx], *args, show_status=False)
+        t = Task(idx, "simulate_tspan", initial_states[idx], *args, **kwargs, show_status=False)
         print(t)
         tasks.put(t)
 
@@ -106,6 +106,10 @@ def run_workgroup(n_tasks, config, initial_states, *args):
 if __name__ == '__main__':
     import numpy as np
     import matplotlib.pyplot as plt
+
+    def term_condition(cname, outs):
+        """ground collision"""
+        return cname == "plant" and outs["states"][11] <= 0.0
 
     def gen_random_state(bounds):
         sample = np.random.rand(len(bounds))
@@ -143,15 +147,14 @@ if __name__ == '__main__':
     # format [{"plant": <list>}, ..., {"plant" : <list>, "controller": <list>}]
     states = [{"plant" : gen_random_state(bounds)} for _ in range(n_tasks)]
 
-    # run 128 tasks in a workgroup
-    runs = run_workgroup(n_tasks, model_conf, states, (0.0, 35.0))
+    # run tasks in a workgroup
+    runs = run_workgroup(n_tasks, model_conf, states, (0.0, 35.0), terminating_conditions=term_condition)
     altitudes = [np.array(r["plant"]["states"])[:, state_index] for r in runs if not isinstance(r, Exception)]
     times = [r["plant"]["times"] for r in runs if not isinstance(r, Exception)]
-    fig, ax = plt.subplots(figsize=(12, 3 * len(altitudes)), nrows=len(altitudes))
+    fig, ax = plt.subplots(figsize=(12, 3 * len(altitudes)), nrows=len(altitudes), sharex=True)
     for idx, traces in enumerate(zip(times, altitudes)):
         ax[idx].plot(*traces)
-        ax[idx].set_xlabel("Time (s)")
         ax[idx].set_ylabel(f"Run {idx}")
+    ax[-1].set_xlabel("Time (s)")
     ax[0].set_title("Simulation Workgroup Runs")
     plt.show()
-

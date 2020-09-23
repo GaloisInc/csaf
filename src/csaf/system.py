@@ -125,7 +125,7 @@ class System:
         for c in self.components:
             c.reset()
 
-    def simulate_tspan(self, tspan, show_status=False):
+    def simulate_tspan(self, tspan, show_status=False, terminating_conditions=None):
         """over a given timespan tspan, simulate the system"""
         sched = Scheduler(self.components, self.eval_order)
         s = sched.get_schedule_tspan(tspan)
@@ -152,6 +152,8 @@ class System:
             idx = self.names.index(cidx)
             self.components[idx].receive_input()
             out = self.components[idx].send_output()
+            if terminating_conditions is not None and terminating_conditions(cidx, out):
+                return dtraces
             dtraces[cidx].append(**out)
 
         return dtraces
