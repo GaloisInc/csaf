@@ -43,7 +43,7 @@ class Task(object):
         self.states = states
 
     def __call__(self, system: csys.System):
-        for cname, cstate in self.states:
+        for cname, cstate in self.states.items():
             system.set_state(cname, cstate)
         assert hasattr(system, self.system_attr)
         try:
