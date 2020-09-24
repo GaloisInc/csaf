@@ -23,6 +23,10 @@ csaf_dir=sys.argv[1]
 csaf_config=sys.argv[2]
 config_filename = os.path.join(csaf_dir, csaf_config)
 
+# NOTE: appending path to have access to example specific files
+# Hacky way to do this?
+sys.path.append(csaf_dir)
+
 model_conf = cconf.SystemConfig.from_toml(config_filename)
 
 # Optional job configuration
