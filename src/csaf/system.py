@@ -125,6 +125,29 @@ class System:
         for c in self.components:
             c.reset()
 
+    def validate_tspan(self, tspan, terminating_conditions, show_status=False):
+        """over a given timespan tspan, determine if simulation fully runs"""
+        sched = Scheduler(self.components, self.eval_order)
+        s = sched.get_schedule_tspan(tspan)
+
+        # produce stimulus
+        input_for_first = list(set([p for p, _ in self.config._config["components"]["controller"]["sub"]]))
+        for dname in input_for_first:
+            idx = self.names.index(dname)
+            self.components[idx].send_stimulus(float(tspan[0]))
+
+        if show_status:
+            import tqdm
+            s = tqdm.tqdm(s)
+
+        for cidx, _ in s:
+            idx = self.names.index(cidx)
+            self.components[idx].receive_input()
+            out = self.components[idx].send_output()
+            if terminating_conditions is not None and terminating_conditions(cidx, out):
+                return False
+        return True
+
     def simulate_tspan(self, tspan, show_status=False, terminating_conditions=None):
         """over a given timespan tspan, simulate the system"""
         sched = Scheduler(self.components, self.eval_order)
