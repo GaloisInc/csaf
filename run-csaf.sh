@@ -149,7 +149,7 @@ if [[ ${NATIVE} -eq 1 ]] ; then
     if [[ ${JUPYTER} -eq 1 ]] ; then
         jupyter notebook --no-browser --notebook-dir=${PWD}/docs/notebooks
     else
-        python3 "src/run_parallel.py" ${CSAF_LOC} ${CONFIG_NAME} ${JOB_CONFIG_PATH}
+        python3 "src/run_system.py" ${CSAF_LOC} ${CONFIG_NAME} ${JOB_CONFIG_PATH}
     fi
 else
     if [[ ${JUPYTER} -eq 1 ]] ; then
