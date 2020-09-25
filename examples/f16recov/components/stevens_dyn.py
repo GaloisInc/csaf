@@ -1,7 +1,4 @@
 import numpy as np
-import os
-import sys
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from f16plant_helper import fix, sign
 
 def cx(alpha, el):
@@ -393,4 +390,3 @@ def stevens_f16(*, alpha, beta, el, ail, rdr, dail, drdr):
     cmt = cm(alpha, el)
     cnt = cn(alpha, beta) + dnda(alpha, beta) * dail + dndr(alpha, beta) * drdr
     return cxt, cyt, czt, clt, cmt, cnt
-

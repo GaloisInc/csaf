@@ -24,7 +24,7 @@ log_level = "info"
     run_command = "python3"
 
     # path to model executable
-    process = "f16llc.py"
+    process = "llc.py"
 
     # whether to print debug diagnostics
     debug = false

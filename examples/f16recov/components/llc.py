@@ -1,6 +1,7 @@
 import llc_helper as lh
 import lqr
 
+#TODO: push the global value into run_system script
 #TODO: is_discrete
 llc = lh.FeedbackController(lh.CtrlLimits(), is_discrete=False, feedback_controller=lqr.get_lqr('lqr_original'))
 

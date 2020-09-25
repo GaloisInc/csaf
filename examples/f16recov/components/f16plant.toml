@@ -33,7 +33,7 @@ is_hybrid = false
     clt_mult = 1
     cmt_mult = 1
     cnt_mult = 1
-    model = "morelli"
+    model = "stevens"
 
 [inputs]
   msgs = [ "f16llc_output.msg" ]

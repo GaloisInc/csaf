@@ -58,6 +58,7 @@ class LowLevelControllerNN(lh.LLCBase):
         return self.extracted_model.predict(x)
 
 
+#TODO: push the global value into run_system script
 llc = LowLevelControllerNN(lh.CtrlLimits(), is_discrete=False)
 
 def model_output(model, t, state_controller, input_all):
