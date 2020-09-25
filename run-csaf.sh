@@ -141,6 +141,21 @@ if [[ ${CLEAR_OUTPUT} -eq 1 ]] ; then
     exit 0
 fi
 
+
+OS="`uname`"
+case $OS in
+  'Linux')
+    OS='Linux'
+    JUPYTER_NETWORK='--init --network host'
+    ;;
+  'Darwin') 
+    JUPYTER_NETWORK='-p 8888:8888 -p 5005:5005 -p 5006:5006'
+    ;;
+  *)
+    show_error_and_exit "Unsupported OS type: "$OS
+    ;;
+esac
+
 if [[ ${NATIVE} -eq 1 ]] ; then
     if [[ ${JUPYTER} -eq 1 ]] ; then
         jupyter notebook --no-browser --notebook-dir=${PWD}/docs/notebooks
@@ -149,7 +164,7 @@ if [[ ${NATIVE} -eq 1 ]] ; then
     fi
 else
     if [[ ${JUPYTER} -eq 1 ]] ; then
-	 docker run -p 8888:8888 -it -v ${CSAF_LOC}:/csaf-system \
+	 docker run ${JUPYTER_NETWORK} -it -v ${CSAF_LOC}:/csaf-system \
             -v ${PWD}/src:/app -v ${PWD}/docs/notebooks:/notebooks \
             ${IMAGE_NAME}:${IMAGE_TAG} "jupyter" "notebook" "--port=8888" \
             "--no-browser" "--ip=0.0.0.0" "--allow-root" "--notebook-dir=/notebooks"
