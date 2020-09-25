@@ -149,7 +149,7 @@ if [[ ${NATIVE} -eq 1 ]] ; then
     fi
 else
     if [[ ${JUPYTER} -eq 1 ]] ; then
-        docker run --init --network host -it -v ${CSAF_LOC}:/csaf-system \
+	 docker run -p 8888:8888 -it -v ${CSAF_LOC}:/csaf-system \
             -v ${PWD}/src:/app -v ${PWD}/docs/notebooks:/notebooks \
             ${IMAGE_NAME}:${IMAGE_TAG} "jupyter" "notebook" "--port=8888" \
             "--no-browser" "--ip=0.0.0.0" "--allow-root" "--notebook-dir=/notebooks"
