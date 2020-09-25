@@ -1,22 +1,16 @@
 import numpy as np
-import textwrap
 
 import helpers.llc_helper as lh
 from helpers import fops
 
 class Model:
-    default_np_model_path = fops.path(('examples', 'f16recov', 'components', 'trained_models', 'f16', 'np', '128_128.npz'))
+    default_np_model_path = fops.path(('examples', 'f16', 'components', 'trained_models', 'np', '128_128.npz'))
     def __init__(self, ctrlLimits):
         try:
             p = np.load(Model.default_np_model_path)
             w0, b0, w1, b1, w2, b2 = p['w0'], p['b0'], p['w1'], p['b1'], p['w2'], p['b2']
         except FileNotFoundError:
-            msg = textwrap.dedent(f'''
-            Missing numpy model file {Model.default_np_model_path}. Please run the
-            extraction script (in utils/) and generate the file. This step will
-            require atleast stablebaselines and tf. Refer to the dev notes for
-            details.  ''').replace('\n', ' ')
-            raise FileNotFoundError(msg)
+            raise FileNotFoundError('Missing numpy model file {Model.default_np_model_path}')
             #w0, b0, w1, b1, w2, b2 = extract_ddpg_nn.extract_zikangs_model(default_np_model_path)
 
         self.w0, self.b0, self.w1, self.b1, self.w2, self.b2 = w0, b0, w1, b1, w2, b2
