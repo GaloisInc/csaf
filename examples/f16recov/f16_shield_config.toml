@@ -1,0 +1,73 @@
+# System Name
+name = "f16-shield-heidlauf"
+
+# directory to output ROSmsg codecs
+codec_dir = "codec"
+
+# directory to send CSAF output
+output_dir = "output"
+
+# Order to Construct/Evaluate Components
+evaluation_order = ["autopilot", "autoairspeed", "autoaltitude", "monitor", "switch", "controller", "plant"]
+
+# File to Log Results
+log_file = "f16run.log"
+
+# Log Level (info/debug)
+log_level = "info"
+
+[components]
+
+  [components.controller]
+    run_command = "python3"
+    process = "f16llc.py"
+    debug = false
+    sub = [["plant", "states"], ["plant", "outputs"], ["switch", "outputs"]]
+    pub = 5502
+
+  [components.plant]
+    run_command = "python3"
+    process = "f16plant.py"
+    debug = false
+    sub = [["controller", "outputs"]]
+    pub = 5501
+
+  [components.autopilot]
+    run_command = "python3"
+    process = "autopilot.py"
+    debug = false
+    sub = [["plant", "states"], ["plant", "outputs"]]
+    pub = 5503
+
+  [components.autoairspeed]
+    run_command = "python3"
+    process = "autoairspeed.py"
+    debug = false
+    sub = [["plant", "states"], ["plant", "outputs"]]
+    pub = 5504
+
+  [components.autoaltitude]
+    run_command = "python3"
+    process = "autoaltitude.py"
+    debug = false
+    sub = [["plant", "states"], ["plant", "outputs"]]
+    pub = 5505
+
+  [components.monitor]
+    run_command = "python3"
+    process = "monitor.py"
+    debug = false
+    sub = [ ["plant", "states"],
+            ["plant", "outputs"],
+            ["autopilot", "fdas"]]
+    pub = 5506
+
+  [components.switch]
+    run_command = "python3"
+    process = "switch.py"
+    debug = false
+    sub = [ ["autopilot", "outputs"],
+            ["autoairspeed", "outputs"],
+            ['autoaltitude', 'outputs'],
+            ['monitor', 'outputs']]
+    pub = 5507
