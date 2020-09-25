@@ -2,6 +2,8 @@ import sys, os
 from multiprocessing import Process, Event, Queue, JoinableQueue
 import multiprocessing
 
+import tqdm
+
 import csaf.system as csys
 import csaf.config as cconf
 import csaf.trace as ctc
@@ -20,11 +22,9 @@ class Worker(Process):
         proc_name = self.name
         self.system = csys.System.from_config(self._config)
         self._evt.set()
-        print(f"{proc_name}: Starting")
         while True:
             next_task = self._task_queue.get()
             if next_task is None:
-                print(f'{proc_name}: Exiting')
                 self._task_queue.task_done()
                 break
             answer = next_task(self.system)
@@ -66,7 +66,7 @@ class Task(object):
         return f"id {self.idx} -- {self.system_attr}(args={self.args}, kwargs={self.kwargs})"
 
 
-def run_workgroup(n_tasks, config, initial_states, *args, **kwargs):
+def run_workgroup(n_tasks, config, initial_states, *args, fname="simulate_tspan", **kwargs):
     # Establish communication queues
     tasks = JoinableQueue()
     results = Queue()
@@ -82,9 +82,8 @@ def run_workgroup(n_tasks, config, initial_states, *args, **kwargs):
         workers.append(w)
 
     # Enqueue jobs
-    for idx in range(n_tasks):
-        t = Task(idx, "simulate_tspan", initial_states[idx], *args, **kwargs, show_status=False)
-        print(t)
+    for idx in tqdm.tqdm(range(n_tasks)):
+        t = Task(idx, fname, initial_states[idx], *args, **kwargs, show_status=False)
         tasks.put(t)
 
     # Stop all workers
