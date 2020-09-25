@@ -45,7 +45,7 @@ class Model(abc.ABC):
         4. _update_model is available for updating entities that are NOT relevant to the dynamic model
         5. parameters are initialized by default but also settable
     """
-    dynamic_callables: typ.Sequence[str] = ["get_output", "get_state_update", "get_info", "update_model"]
+    dynamic_callables: typ.Sequence[str] = ["init_model", "get_output", "get_state_update", "get_info", "update_model"]
 
     def __init__(self, parameters, representation, is_discrete):
         self._parameters: typ.Mapping =  parameters
@@ -137,7 +137,7 @@ class ModelNative(Model):
     For models written in an environment compatible python, interact with their main function
     natively.
     """
-    user_functions: typ.Sequence[str] = ["model_output", "model_state_update", "model_info", "model_update"]
+    user_functions: typ.Sequence[str] = ["model_init", "model_output", "model_state_update", "model_info", "model_update"]
 
     @classmethod
     def from_filename(cls, mname:str, cname: str):
@@ -172,12 +172,18 @@ class ModelNative(Model):
         for iface, uface in zip(self.dynamic_callables, self.user_functions):
             if hasattr(module, uface):
                 ufunc = getattr(module, uface)
-                # check the input length
-                sig = signature(ufunc)
-                assert len(sig.parameters.keys()) == 4, f"user defined function {uface} must have 4 arguments"
+                if iface != "init_model":
+                    # check the input length
+                    sig = signature(ufunc)
+                    assert len(sig.parameters.keys()) == 4, f"user defined function {uface} must have 4 arguments"
                 self.funcs[iface] = ufunc
             else:
-                self.funcs[iface] = lambda m, t, x, u: m.null_dynamics(t, x, u)
+                if iface != "init_model":
+                    self.funcs[iface] = lambda m, t, x, u: m.null_dynamics(t, x, u)
+                else:
+                    self.funcs[iface] = lambda m: None
+
+        self.funcs["init_model"](self)
 
     def _get_output(self, *args) -> typ.Sized:
         return self.funcs["get_output"](self, *args)
