@@ -14,7 +14,7 @@ The only software dependency is docker itself. Also, note that first run of the
 script will be slow, as the docker image is built and cached.
 
 Once the simulation completes, navigate to `examples/f16/output` to view the 
-generated heidlauf run:
+generated run:
 
 ![f16-shield-heidlauf-run](/uploads/edbd5d4567c74af2ee824ecfe6f3d853/f16-shield-heidlauf-run.png)
 
