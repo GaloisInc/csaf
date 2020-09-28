@@ -218,10 +218,10 @@ class DynamicComponent(Component):
 
     @property
     def state(self):
-        return self._state_buffer
+        return self._output_buffer[f"{self.name}-states"]
 
     @state.setter
     def state(self, state: list):
         assert len(state) == self.num_states, f"state must be array with length {self.num_states} " \
                                               f"(got length {len(state)} instead)"
-        self._state_buffer = state
+        self._output_buffer[f"{self.name}-states"] = state

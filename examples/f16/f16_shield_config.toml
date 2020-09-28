@@ -1,5 +1,5 @@
 # System Name
-name = "f16-shield-heidlauf"
+name = "f16-shield"
 
 # directory to output ROSmsg codecs
 codec_dir = "codec"

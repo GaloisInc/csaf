@@ -1,0 +1,46 @@
+<?xml version="1.0"?>
+<PropertyList>
+<generic>
+  <input>
+    <binary_mode>true</binary_mode>
+    <line_separator></line_separator>
+    <var_separator></var_separator>
+
+    <chunk>
+      <node>/sim/multiplay/generic/float[4]</node>
+      <name>Right Elevator</name>
+      <type>float</type>
+      <format>%03.4f</format>
+    </chunk>
+
+    <chunk>
+      <node>/surface-positions/leftrad2</node>
+      <name>Left Flapperon Rad</name>
+      <type>float</type>
+      <format>%03.4f</format>
+    </chunk>
+
+    <chunk>
+      <node>/surface-positions/leftrad</node>
+      <name>Left Flapperon Rad</name>
+      <type>float</type>
+      <format>%03.4f</format>
+    </chunk>
+
+    <chunk>
+      <node>/surface-positions/rightrad2</node>
+      <name>Right Flapperon Rad</name>
+      <type>float</type>
+      <format>%03.4f</format>
+    </chunk>
+
+    <chunk>
+      <node>/surface-positions/rightrad</node>
+      <name>Right Flapperon Rad</name>
+      <type>float</type>
+      <format>%03.4f</format>
+    </chunk>
+
+  </input>
+</generic>
+</PropertyList>

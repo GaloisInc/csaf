@@ -1,3 +1,6 @@
+"""
+Generates a half-elipse reference, from t=[0,2*xm]
+"""
 def model_output(model, time_t, state_controller, input_pendulum):
     if model.maneuver_name == "step":
         m = 0.05

@@ -1,0 +1,20 @@
+# Simple job configuration file
+
+# simulation options
+tspan = [0.0, 10.0]
+show_status = true # show progress during simulation
+plot = true # plot results on screen
+
+initial_conditions = [  540.0,
+                        0.037027160081059704,
+                        0.0,
+                        0.1,
+                        -0.1,
+                        -0.1,
+                        0.0,
+                        0.0,
+                        0.0,
+                        0.0,
+                        0.0,
+                        4800.0,
+                        90.0]

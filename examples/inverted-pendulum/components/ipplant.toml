@@ -22,4 +22,5 @@ is_hybrid = false
 
   [topics.states]
     msg = "ipplant_state.msg"
+    description = ["position[m]","velocity[m/s]","angular position [rad]","angular velocity [rad/s]"]
     initial = [0.0, 0.01, 0.52 , -0.01]

@@ -1,0 +1,19 @@
+system_name = "Signal Generator"
+system_representation = "black box"
+system_solver = "Euler"
+
+sampling_frequency = 5
+
+is_discrete = true
+is_hybrid = false
+
+[parameters]
+  # step | impulse | sin
+  response_type = "step"
+  response_amplitude = 0.2
+  response_time = 1.0
+  impulse_epsilon = 0.01
+
+[topics]
+  [topics.outputs]
+      msg = "ipmaneuver_output.msg"
