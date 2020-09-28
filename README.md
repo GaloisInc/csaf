@@ -5,17 +5,17 @@ CSAF is a framework to minimize the effort required to evaluate, implement, and 
 * Component based controller design
 * Native support for python and C language executables
 * Compatibility with external hardware and software processes
-* Ease of deployment 
+* Ease of deployment
 
 ![csaf_importing_components](/uploads/c8ba6291daf48f2ab49270f577576b31/csaf_importing_controllers.png)
 
 Controllers, subsystems and plants are implemented as a collection of components.
-Components communicate via a 0MQ pub/sub configuration and serialize/deserialize ROSmsgs. Below is an example of a topology graph of F16 system with GCAS autopilot.
+Components communicate via a 0MQ pub/sub configuration and serialize/deserialize ROS messages. Below is an example of a topology graph of F16 system with GCAS autopilot.
 
 
 ![f16_with_gcas](/uploads/27e47ebbb19aa11d144db1b01435afb0/image.png)
 
-CSAF currently contains two examples, one is F16 with low level LQR controller and GCAS autopilot, and the second one is a classic [Inverted pendulum model](http://ctms.engin.umich.edu/CTMS/index.php?example=InvertedPendulum&section=ControlDigital#4). Both examples are in `examples` directory. 
+CSAF currently contains two examples, one is F16 with a low level LQR controller and GCAS autopilot, and the second one is a classic [Inverted pendulum model](http://ctms.engin.umich.edu/CTMS/index.php?example=InvertedPendulum&section=ControlDigital#4). Both examples are in `examples` directory.
 
 
 ## Quick Start
