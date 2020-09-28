@@ -11,7 +11,7 @@ print_help() {
     loop topologies and component implementations are specified independently of
     the middleware.\n"
     printf "\n\033[1mUSAGE\033[0m\n"
-    printf "   -e      the name of the example { f16-shield, f16-simple, inv-pendulum }\n"
+    printf "   -e      the name of the example { f16-shield, f16-simple, f16-llc, inv-pendulum }\n"
     printf "   -c      the name of the model config file (must be in the same directory as your system)\n"
     printf "   -d      fully qualified path to the directory defining the model system\n"
     printf "   -f      name of the job config file (must be in the same directory as your system)\n"
@@ -98,6 +98,10 @@ then
             CONFIG_NAME="inv_pendulum_config.toml"
             CSAF_LOC=${PWD}/"examples/inverted-pendulum"
             ;;
+	"f16-llc")
+            CONFIG_NAME="f16_llc_analyze_config.toml"
+            CSAF_LOC=${PWD}/"examples/f16"
+            ;;
         *)
             show_error_and_exit "Unknown example: ${EXAMPLE_NAME} Please use one of [f16-shield, f16-simple, inv-pendulum]"
             ;;
@@ -141,6 +145,21 @@ if [[ ${CLEAR_OUTPUT} -eq 1 ]] ; then
     exit 0
 fi
 
+
+OS="`uname`"
+case $OS in
+  'Linux')
+    OS='Linux'
+    JUPYTER_NETWORK='--init --network host'
+    ;;
+  'Darwin') 
+    JUPYTER_NETWORK='-p 8888:8888 -p 5005:5005 -p 5006:5006'
+    ;;
+  *)
+    show_error_and_exit "Unsupported OS type: "$OS
+    ;;
+esac
+
 if [[ ${NATIVE} -eq 1 ]] ; then
     if [[ ${JUPYTER} -eq 1 ]] ; then
         jupyter notebook --no-browser --notebook-dir=${PWD}/docs/notebooks
@@ -149,7 +168,7 @@ if [[ ${NATIVE} -eq 1 ]] ; then
     fi
 else
     if [[ ${JUPYTER} -eq 1 ]] ; then
-	 docker run -p 8888:8888 -it -v ${CSAF_LOC}:/csaf-system \
+	 docker run ${JUPYTER_NETWORK} -it -v ${CSAF_LOC}:/csaf-system \
             -v ${PWD}/src:/app -v ${PWD}/docs/notebooks:/notebooks \
             ${IMAGE_NAME}:${IMAGE_TAG} "jupyter" "notebook" "--port=8888" \
             "--no-browser" "--ip=0.0.0.0" "--allow-root" "--notebook-dir=/notebooks"

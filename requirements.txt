@@ -11,3 +11,6 @@ tqdm==4.47.0
 pyzmq==18.1.1
 pymap3d==2.4.0
 jupyter==1.0
+sklearn
+modAL==0.3.6
+tqdm==4.47

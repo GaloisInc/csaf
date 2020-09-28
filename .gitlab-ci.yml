@@ -42,7 +42,7 @@ inv-pendulum:
         - ./examples/inverted-pendulum/output/inverted-pendulum-config.pdf
         - ./examples/inverted-pendulum/output/inverted-pendulum-run.png
 
-notebooks:
+notebook:
   script:
     - echo "Adjust example paths to match jupyter notebook launch for f16-shield"
     - ln -s ${PWD}/examples/f16 /csaf-system
