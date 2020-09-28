@@ -15,10 +15,8 @@ Note:
 ## Beta (2020-09-28)
 
 ### New Features
-* TODO
-
-### Bug Fixes
-* TODO
-
-### Release notes
-TODO
+* Parallel runners
+* User experience improvements
+* FlightGear visualisation
+* CSAF docker image available on Dockerhub
+* Added new Jupyter notebook examples
