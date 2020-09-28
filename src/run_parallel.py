@@ -2,8 +2,6 @@ import sys, os
 from multiprocessing import Process, Event, Queue, JoinableQueue
 import multiprocessing
 
-import tqdm
-
 import csaf.system as csys
 import csaf.config as cconf
 import csaf.trace as ctc
@@ -82,7 +80,7 @@ def run_workgroup(n_tasks, config, initial_states, *args, fname="simulate_tspan"
         workers.append(w)
 
     # Enqueue jobs
-    for idx in tqdm.tqdm(range(n_tasks)):
+    for idx in range(n_tasks):
         t = Task(idx, fname, initial_states[idx], *args, **kwargs, show_status=False)
         tasks.put(t)
 
