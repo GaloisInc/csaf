@@ -10,8 +10,14 @@ is_hybrid = false
 [parameters]
   # step | impulse | sin
   response_type = "step"
-  # Nz | ps
-  output_to_excite = "Nz"
+  # Amplitude / size of the response
+  response_amplitude = 1.0
+  # When does the response start? Valid for impulse | step
+  response_time = 1.0
+  # zero-index the ouptut:
+  # for F16 LLC it is: Nz, ps, Ny_r, throttle (based on autopilot_output.msg)
+  output_idx = 0
+  output_size = 4
 
 [topics]
   [topics.outputs]

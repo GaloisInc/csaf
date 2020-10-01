@@ -16,8 +16,8 @@ f16-shield:
     expire_in: 1 week
     paths:
         - ./examples/f16/output/f16run.log
-        - ./examples/f16/output/f16-shield-heidlauf-config.pdf
-        - ./examples/f16/output/f16-shield-heidlauf-run.png
+        - ./examples/f16/output/f16-shield-config.pdf
+        - ./examples/f16/output/f16-shield-run.png
 
 
 f16-simple:
@@ -28,8 +28,8 @@ f16-simple:
     expire_in: 1 week
     paths:
         - ./examples/f16/output/f16run.log
-        - ./examples/f16/output/f16-shield-heidlauf-config.pdf
-        - ./examples/f16/output/f16-shield-heidlauf-run.png
+        - ./examples/f16/output/f16-shield-config.pdf
+        - ./examples/f16/output/f16-shield-run.png
 
 inv-pendulum:
   script:
@@ -42,7 +42,7 @@ inv-pendulum:
         - ./examples/inverted-pendulum/output/inverted-pendulum-config.pdf
         - ./examples/inverted-pendulum/output/inverted-pendulum-run.png
 
-notebooks:
+notebook:
   script:
     - echo "Adjust example paths to match jupyter notebook launch for f16-shield"
     - ln -s ${PWD}/examples/f16 /csaf-system

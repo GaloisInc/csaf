@@ -53,6 +53,7 @@ We use jupyer notebooks extensively, and in order to avoid some [common problems
 
 When releasing a new version of the CSAF:
 
+- Update `CHANGELOG.md`
 - Merge `develop` into `master`
 - Tag with a semantic version number, such as `release-4.3`
 

@@ -126,6 +126,11 @@ def plot_results(config_filename, trajs, filename=None):
     elif "f16_simple" in config_filename or "f16_llc_nn" in config_filename:
         from f16_plot import plot_simple
         plot_simple(trajs)
+    elif "llc_analyze" in config_filename:
+        from f16_plot import plot_llc
+        plot_llc(trajs)
+    else:
+        raise NotImplementedError("Plot options for {} not implemented.".format(config_filename))
 
     # save plot of demo
     if filename:

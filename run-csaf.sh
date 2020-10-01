@@ -43,7 +43,7 @@ print_help() {
 while getopts ":c:d:e:f:t:jlhnx:" opt; do
     case ${opt} in
         c )
-            CONFIG_NAME=$OPTARG
+            CONFIG_NAME=`basename $OPTARG`
             ;;
         d )
             CSAF_LOC=$OPTARG
@@ -52,7 +52,7 @@ while getopts ":c:d:e:f:t:jlhnx:" opt; do
             EXAMPLE_NAME=$OPTARG
             ;;
         f )
-            JOB_CONFIG_PATH=$OPTARG
+            JOB_CONFIG_PATH=`basename $OPTARG`
             ;;
         j )
             JUPYTER=1
@@ -146,6 +146,21 @@ if [[ ${CLEAR_OUTPUT} -eq 1 ]] ; then
     exit 0
 fi
 
+
+OS="`uname`"
+case $OS in
+  'Linux')
+    OS='Linux'
+    JUPYTER_NETWORK='--init --network host'
+    ;;
+  'Darwin') 
+    JUPYTER_NETWORK='-p 8888:8888 -p 5005:5005 -p 5006:5006'
+    ;;
+  *)
+    show_error_and_exit "Unsupported OS type: "$OS
+    ;;
+esac
+
 if [[ ${NATIVE} -eq 1 ]] ; then
     if [[ ${JUPYTER} -eq 1 ]] ; then
         jupyter notebook --no-browser --notebook-dir=${PWD}/docs/notebooks
@@ -154,7 +169,7 @@ if [[ ${NATIVE} -eq 1 ]] ; then
     fi
 else
     if [[ ${JUPYTER} -eq 1 ]] ; then
-        docker run --init --network host -it -v ${CSAF_LOC}:/csaf-system \
+	 docker run ${JUPYTER_NETWORK} -it -v ${CSAF_LOC}:/csaf-system \
             -v ${PWD}/src:/app -v ${PWD}/docs/notebooks:/notebooks \
             ${IMAGE_NAME}:${IMAGE_TAG} "jupyter" "notebook" "--port=8888" \
             "--no-browser" "--ip=0.0.0.0" "--allow-root" "--notebook-dir=/notebooks"
