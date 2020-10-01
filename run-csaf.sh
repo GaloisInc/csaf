@@ -4,6 +4,7 @@ source .common.sh
 
 validate_dir
 
+EXAMPLES="{f16-shield, f16-simple, f16-llc-nn, inv-pendulum}"
 print_help() {
     printf "\033[1mCSAF\033[0m\n"
     printf "    Control System Analysis Framework (CSAF) is a middleware framework that
@@ -11,9 +12,9 @@ print_help() {
     loop topologies and component implementations are specified independently of
     the middleware.\n"
     printf "\n\033[1mUSAGE\033[0m\n"
-    printf "   -e      the name of the example { f16-shield, f16-simple, f16-llc, inv-pendulum }\n"
-    printf "   -c      the name of the model config file (must be in the same directory as your system)\n"
-    printf "   -d      fully qualified path to the directory defining the model system\n"
+    printf "   -e      the name of the example ${EXAMPLES}\n"
+    printf "   -c      the name of the config file\n"
+    printf "   -d      fully qualified path to the directory defining the control system\n"
     printf "   -f      name of the job config file (must be in the same directory as your system)\n"
     printf "   -j      launch a jupyter notebook\n"
     printf "   -l      build the image locally\n"
@@ -98,12 +99,12 @@ then
             CONFIG_NAME="inv_pendulum_config.toml"
             CSAF_LOC=${PWD}/"examples/inverted-pendulum"
             ;;
-	"f16-llc")
-            CONFIG_NAME="f16_llc_analyze_config.toml"
+        "f16-llc-nn")
+            CONFIG_NAME="f16_llc_nn_config.toml"
             CSAF_LOC=${PWD}/"examples/f16"
             ;;
         *)
-            show_error_and_exit "Unknown example: ${EXAMPLE_NAME} Please use one of [f16-shield, f16-simple, inv-pendulum]"
+            show_error_and_exit "Unknown example: ${EXAMPLE_NAME} Please use one of ${EXAMPLES}"
             ;;
     esac
 fi

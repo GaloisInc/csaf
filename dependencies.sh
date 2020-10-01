@@ -8,7 +8,8 @@ apt-get clean && \
     python3-pip \
     graphviz \
     python3-pyqt5 \
-    pandoc
+    pandoc \
+    libopenmpi-dev
 
 pip3 install -U pip
 pip3 install --upgrade pip
