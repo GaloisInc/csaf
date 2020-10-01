@@ -106,6 +106,7 @@ class DynamicComponent(Component):
         input_vector = []
         if len(self._topics_input) > 0:
             for f in self._topics_input:
+                print(self.name, self._input_buffer)
                 input_vector += self._input_buffer[f]
 
         # obtain state vector

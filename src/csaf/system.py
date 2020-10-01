@@ -131,7 +131,8 @@ class System:
         s = sched.get_schedule_tspan(tspan)
 
         # produce stimulus
-        input_for_first = list(set([p for p, _ in self.config._config["components"]["controller"]["sub"]]))
+        #input_for_first = list(set([p for p, _ in self.config._config["components"]["controller"]["sub"]]))
+        input_for_first = list(set([p for p, _ in self.config._config["components"][self.eval_order[0]]["sub"]]))
         for dname in input_for_first:
             idx = self.names.index(dname)
             self.components[idx].send_stimulus(float(tspan[0]))
@@ -154,7 +155,9 @@ class System:
         s = sched.get_schedule_tspan(tspan)
 
         # produce stimulus
-        input_for_first = list(set([p for p, _ in self.config._config["components"]["controller"]["sub"]]))
+        #input_for_first = list(set([p for p, _ in self.config._config["components"]["controller"]["sub"]]))
+        input_for_first = list(set([p for p, _ in self.config._config["components"][self.eval_order[0]]["sub"]]))
+
         for dname in input_for_first:
             idx = self.names.index(dname)
             self.components[idx].send_stimulus(float(tspan[0]))

@@ -7,8 +7,7 @@ sampling_frequency = 100
 is_discrete = true
 is_hybrid = false
 
-#[parameters]
-  #mapper = ["gcas", "altitude", "airspeed"]
+[parameters]
 
 [inputs]
   msgs = ["f16plant_state.msg", "f16llc_output.msg", "f16llc_output.msg"]

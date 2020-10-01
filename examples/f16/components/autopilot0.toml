@@ -8,18 +8,12 @@ sampling_frequency = 10
 is_discrete = true
 is_hybrid = false
 
-#[parameters]
+[parameters]
 
-#[inputs]
-#  msgs = [ "f16plant_state.msg", "f16plant_output.msg" ]
+[inputs]
+  msgs = [ "f16plant_state.msg", "f16plant_output.msg" ]
 
 [topics]
-#  [topics.states]
-#      msg = "autopilot_state.msg"
-#      initial = ["Waiting"]
 
   [topics.outputs]
       msg = "autopilot_output.msg"
-
-#  [topics.fdas]
-#      msg = "autopilot_state.msg"

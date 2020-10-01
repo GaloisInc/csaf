@@ -24,7 +24,7 @@ log_level = "info"
     process = "f16llc.py"
     config = './components/llc_lqr_c1.toml'
     debug = false
-    sub = [["plant", "states"], ["plant", "outputs"]]
+    sub = [["plant", "states"], ["plant", "outputs"], ["autopilot", "outputs"]]
     pub = 5520
 
   # Recovery Controller with formal guarantees
@@ -33,7 +33,7 @@ log_level = "info"
     process = "f16llc.py"
     config = './components/llc_lqr_c13_tuned.toml'
     debug = false
-    sub = [["plant", "states"], ["plant", "outputs"]]
+    sub = [["plant", "states"], ["plant", "outputs"], ["autopilot", "outputs"]]
     pub = 5530
 
   [components.plant]
@@ -53,9 +53,7 @@ log_level = "info"
   [components.shield_llc]
     run_command = "python3"
     process = "shield_stall.py"
+    config = "./components/shield_stall.toml"
     debug = false
-    sub = [ ["plant", "states"],
-            ["cperf", "outputs"],
-            ["crecov", "outputs"]
-            ]
+    sub = [["plant", "states"], ["cperf", "outputs"], ["crecov", "outputs"]]
     pub = 5507
