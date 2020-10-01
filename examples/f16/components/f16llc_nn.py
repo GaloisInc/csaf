@@ -15,7 +15,7 @@ from stable_baselines.common.vec_env import DummyVecEnv
 
 def model_init(model):
     """load trained model"""
-    path = prepend_curr_path(('trained_models', 'f16', 'ddpg', '128_128'))
+    path = prepend_curr_path(('../', 'ddpg_128_128'))
     register_env()
     env = gym.make('F16GCAS-v0')
     env = DummyVecEnv([lambda: env])
@@ -25,8 +25,8 @@ def model_init(model):
 
 def model_output(model, time_t, state_controller, input_f16):
     """ neural network low level controller output """
-    x_f16, y, u_ref = input_f16[:13], input_f16[13:15], input_f16[15:]
-    compute_fcn, *trim_points = getattr(ah, model.lqr_name)()
+    x_f16, _y, u_ref = input_f16[:13], input_f16[13:15], input_f16[15:]
+    _compute_fcn, *trim_points = getattr(ah, model.lqr_name)()
     x_ctrl = get_x_ctrl(trim_points, np.concatenate([x_f16, state_controller]))
     action, _states = model.model.predict(x_ctrl)
     u_deg = np.zeros((4,))
