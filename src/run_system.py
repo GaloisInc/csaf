@@ -61,3 +61,5 @@ if do_plot:
 
 # save plot of pub/sub diagram
 model_conf.plot_config()
+
+print("CSAF done.")
