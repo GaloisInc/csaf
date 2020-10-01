@@ -55,7 +55,7 @@ To prepare a new CSAF version for release:
 
 1. Sanity-check:
    * are all feature or bugfix branches merged?
-   * has documentation (especially README.md and CHANGELOG.md) been updated?
+   * has documentation (`README.md`, `CHANGELOG.md` etc.) been updated?
 1. Pull `master` and `develop` branches
 1. Make sure all tests pass on `develop`
 1. `git checkout master`
