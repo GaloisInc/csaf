@@ -1,0 +1,25 @@
+# Dummy autopilot component to demo level flight; Holds all output references at 0
+system_name = "F16 Zero Autopilot"
+system_representation = "black box"
+system_solver = "Euler"
+
+sampling_frequency = 10
+
+is_discrete = true
+is_hybrid = false
+
+#[parameters]
+
+#[inputs]
+#  msgs = [ "f16plant_state.msg", "f16plant_output.msg" ]
+
+[topics]
+#  [topics.states]
+#      msg = "autopilot_state.msg"
+#      initial = ["Waiting"]
+
+  [topics.outputs]
+      msg = "autopilot_output.msg"
+
+#  [topics.fdas]
+#      msg = "autopilot_state.msg"
