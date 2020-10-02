@@ -10,9 +10,4 @@ and platforms from which they were implemented.
 
 import logging
 
-FORMAT2 = '%(levelname) -10s %(asctime)s %(module)s: %(lineno)s %(funcName)s() %(message)s'
-
-logging.basicConfig(filename='casf.log', filemode='w', format=FORMAT2, level=logging.DEBUG)
-#csaf_logger = logging.getLogger(__name__)
-
 csaf_logger = logging.getLogger("csaf")

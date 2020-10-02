@@ -1,3 +1,5 @@
+## Demo's the shield-llc recovering the F16 from pitch_rate_exceeded failure during the GCAS pull-up maneuver
+
 # System Name
 name = "f16-shield"
 

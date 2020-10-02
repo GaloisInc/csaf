@@ -5,4 +5,4 @@ string topic
 
 float64 time
 
-string state
+string gcas_state

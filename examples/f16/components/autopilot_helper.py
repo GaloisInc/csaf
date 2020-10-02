@@ -64,33 +64,10 @@ def lqr_original_faulty_roll():
     # Longitudinal Gains
     K_lqr_long = [-156.8801506723475, -31.037008068526642, -38.72983346216317]
 
-#     LQR_lat Gains =
-#                           beta            p            r     int_e_ps   int_e_Ny_r
-#           aileron
-#            rudder
-
     # Lateral Gains
     K_lqr_lat = [[30, -5.7, -9.3, -0.9, -10.6],
                  [-22, +1.3, -14.2, 6.7, -53.7]]
     return get_ctrl_law(xequil, uequil, K_lqr_long, np.array(K_lqr_lat))
-
-# def lqr_original_faulty_pitch():
-#     '''
-#     lqr_original controller with modified gains K_long.
-#     The control gain for alpha K_lqr_long[0] is modified
-#     '''
-
-#     xequil = [502.0, 0.03887505597600522, 0.0, 0.0, 0.03887505597600522, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1000.0, 9.05666543872074]
-#     uequil = [0.13946204864060271, -0.7495784725828754, 0.0, 0.0]
-
-#     # params used to compute, like cost fn, ...?
-#     # Longitudinal Gains
-#     K_lqr_long = [-25, -10, -38]
-
-#     # Lateral Gains
-#     K_lqr_lat = [[30.511411060051355, -5.705403676148551, -9.310178739319714, -33.97951344944365, -10.652777306717681],
-#                  [-22.65901530645282, 1.3193739204719577, -14.2051751789712, 6.7374079391328845, -53.726328142239225]]
-#     return get_ctrl_law(xequil, uequil, K_lqr_long, K_lqr_lat)
 
 def lqr2():
              # vt   alpha            beta roll  pitch          yaw p  q   r  pe pn  h     pow
@@ -265,17 +242,6 @@ def lqr_c11():
 
     xequil = [500.00000, 0.14144, 0, 0, 0.14144, 0, 0, 0, 0, 0, 0, 30000, 22.31226]
     uequil = [0.34358, -0.58337, 0, 0]
-
-#     K_lqr_long = [[-130.68208,    -49.32303,    -38.72983]]
-#     K_lqr_lat = [
-#         [39.63904,    -10.32529,    -23.65289,    -34.10563,     -9.59249],
-#         [-27.93590,      1.31604,    -27.36404,      6.06682,    -53.92573]
-#         ]
-
-#     K_lqr_long = np.array([[-26.41456983, -21.68413662,  -3.87298335]])
-
-#     K_lqr_lat = np.array([[ 3.45295062, -1.76937846, -9.3021737 , -3.46399737, -0.04249096],
-#            [-4.18487116, -0.29615515, -3.23298322,  0.02687365, -5.47706076]])
 
     K_lqr_long = np.array([[-61.07338446, -34.55754756, -12.24744871]])
 

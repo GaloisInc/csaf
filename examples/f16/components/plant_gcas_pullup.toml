@@ -1,3 +1,5 @@
+# Uses Stevens model
+
 system_name = "F16 Plant Model"
 system_representation = "black box"
 system_solver = "Euler"

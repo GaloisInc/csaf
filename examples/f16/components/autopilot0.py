@@ -1,3 +1,8 @@
+"""
+Dummy Autopilot with all references held at 0.
+Used to check level flight, low level controller's response at equil and more.
+"""
+
 def model_state_update(model, time_t, state_controller, input_f16):
     """advance the discrete state based on the current aircraft state"""
     pass

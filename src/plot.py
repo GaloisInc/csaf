@@ -119,6 +119,7 @@ def plot_results(config_filename, trajs, filename=None):
         from inv_plot import plot_pendulum
         plot_pendulum(trajs)
 
+    # Shield-LLC example
     elif "f16" in config_filename and "shield" in config_filename and "llc" in config_filename:
         from f16_plot import plot_llc_shield
         plot_llc_shield(trajs)

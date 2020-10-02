@@ -172,10 +172,10 @@ class SystemConfig:
     def build_component_graph(self):
         """build a graph representation of the system from the config"""
         # populate nodes
-        csaf_logger.debug('Building component graph: populating nodes.')
+        csaf_logger.debug('Building component graph.')
         nodes = {}
         for dname, dconfig in self._config["components"].items():
-            csaf_logger.debug(f'processing: {dname}')
+            csaf_logger.debug(f'processing component:: {dname}')
             nodes[dname] = {**dconfig, "dname" : dname}
 
         # populate edges and edge labels
@@ -238,7 +238,7 @@ class SystemConfig:
         for e, w, n in zip(edges, width, name):
             dout = nodes[e[0]]["dname"]
             din = nodes[e[1]]["dname"]
-            print(f'{n}, {dout} -> {din}')
+            csaf_logger.debug(f'{n}, {dout} -> {din}')
             assert len(n) == w, f"edge between publishing component '{dout}' and subscribing component '{din}' have width " \
                                 f"disagreement (publishing {w} values but naming {len(n)})"
 
