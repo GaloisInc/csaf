@@ -1,10 +1,10 @@
 import numpy as np
-import autopilot_helper as ah
+from helpers import lqr
 
 
 def model_output(model, time_t, state_controller, input_all):
     """ get the reference commands for the control surfaces """
-    compute_fcn, *trim_points = getattr(ah, model.lqr_name)()
+    compute_fcn, *trim_points = getattr(lqr, model.lqr_name)()
 
     assert len(input_all) == 21
     #TODO: hard coded indices!
@@ -27,7 +27,7 @@ def model_output(model, time_t, state_controller, input_all):
 
 def model_state_update(model, time_t, state_controller, input_all):
     """ get the derivatives of the integrators in the low-level controller """
-    _compute_fcn, *trim_points = getattr(ah, model.lqr_name)()
+    _compute_fcn, *trim_points = getattr(lqr, model.lqr_name)()
     x_f16, y, u_ref = input_all[:13], input_all[13:17], input_all[17:]
     Nz, Ny, _az, _ay = y
     x_ctrl = get_x_ctrl(trim_points, np.concatenate([x_f16, state_controller]))
