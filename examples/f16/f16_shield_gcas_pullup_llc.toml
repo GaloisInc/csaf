@@ -22,7 +22,7 @@ log_level = "info"
   [components.cperf]
     run_command = "python3"
     process = "f16llc.py"
-    config = './components/llc_lqr_c1.toml'
+    config = './components/llc_lqr_original_faulty_pitch.toml'
     debug = false
     sub = [["plant", "states"], ["plant", "outputs"], ["autopilot", "outputs"]]
     pub = 5520
@@ -31,7 +31,7 @@ log_level = "info"
   [components.crecov]
     run_command = "python3"
     process = "f16llc.py"
-    config = './components/llc_lqr_c13_tuned.toml'
+    config = './components/llc_lqr_original.toml'
     debug = false
     sub = [["plant", "states"], ["plant", "outputs"], ["autopilot", "outputs"]]
     pub = 5530
@@ -39,21 +39,21 @@ log_level = "info"
   [components.plant]
     run_command = "python3"
     process = "f16plant.py"
-    config = "./components/plant_stall.toml"
+    config = "./components/plant_gcas_pullup.toml"
     debug = false
     sub = [["shield_llc", "outputs"]]
     pub = 5501
 
   [components.autopilot]
     run_command = "python3"
-    process = "autopilot0.py"
+    process = "autopilot.py"
     debug = false
     sub = [["plant", "states"], ["plant", "outputs"]]
     pub = 5503
 
   [components.shield_llc]
     run_command = "python3"
-    process = "shield_llc.py"
+    process = "./shield_llc.py"
     debug = false
     sub = [["plant", "states"], ["cperf", "outputs"], ["crecov", "outputs"]]
     pub = 5507
