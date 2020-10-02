@@ -12,7 +12,7 @@ def pi_cntrl(kp, ki, e, ei):
 def pid_cntrl(kp, kd, ki, e, ed, ei):
     return e*kp + ed*kd + ei*ki
 
-def get_ctrl_law(xequil, uequil, klong, klat):
+def get_ctrl_law(klong, klat):
     # Hard coded LQR gain matrix from BuildLqrControllers.py
     k = np.zeros((3, 8))
     k[:1, :3] = klong
@@ -21,7 +21,7 @@ def get_ctrl_law(xequil, uequil, klong, klat):
     def ctrl_fn(x):
         return np.dot(-k, x)
 
-    return ctrl_fn, xequil, uequil
+    return ctrl_fn
 
 def lqr_original():
 
@@ -35,7 +35,7 @@ def lqr_original():
     # Lateral Gains
     K_lqr_lat = [[30.511411060051355, -5.705403676148551, -9.310178739319714, -33.97951344944365, -10.652777306717681],
                  [-22.65901530645282, 1.3193739204719577, -14.2051751789712, 6.7374079391328845, -53.726328142239225]]
-    return get_ctrl_law(xequil, uequil, K_lqr_long, K_lqr_lat)
+    return get_ctrl_law(K_lqr_long, K_lqr_lat), xequil, uequil
 
 def lqr_original_faulty_pitch():
     '''
@@ -53,7 +53,7 @@ def lqr_original_faulty_pitch():
     # Lateral Gains
     K_lqr_lat = [[30.511411060051355, -5.705403676148551, -9.310178739319714, -33.97951344944365, -10.652777306717681],
                  [-22.65901530645282, 1.3193739204719577, -14.2051751789712, 6.7374079391328845, -53.726328142239225]]
-    return get_ctrl_law(xequil, uequil, K_lqr_long, K_lqr_lat)
+    return get_ctrl_law(K_lqr_long, K_lqr_lat), xequil, uequil
 
 def lqr_original_faulty_roll():
 
@@ -67,7 +67,7 @@ def lqr_original_faulty_roll():
     # Lateral Gains
     K_lqr_lat = [[30, -5.7, -9.3, -0.9, -10.6],
                  [-22, +1.3, -14.2, 6.7, -53.7]]
-    return get_ctrl_law(xequil, uequil, K_lqr_long, np.array(K_lqr_lat))
+    return get_ctrl_law(K_lqr_long, K_lqr_lat), xequil, uequil
 
 def lqr2():
              # vt   alpha            beta roll  pitch          yaw p  q   r  pe pn  h     pow
@@ -77,17 +77,17 @@ def lqr2():
     K_lqr_long = [[-176.596484550912, -27.096597715439, -38.7298334620741]]
     K_lqr_lat = [[30.471599413636401,  -4.948438468207930, -7.188850992173120, -33.836559844552703, -11.735333174435199],
                  [-18.369883691977400,   1.306793804824020, -12.292148077612501, 7.422076386429880, -53.500298646689700]]
-    return get_ctrl_law(xequil, uequil, K_lqr_long, K_lqr_lat)
+    return get_ctrl_law(K_lqr_long, K_lqr_lat), xequil, uequil
 
 def lqr_zero():
     xequil = [502, 0.038875055905, 0, 0, 0.038875055905, 0, 0, 0, 0, 0, 0, 1000, 9.056665434701]
     uequil = [0.139462048578702,-0.749578472735319,0, 0]
-    return get_ctrl_law(xequil, uequil, np.zeros(3), np.zeros((2,5)))
+    return get_ctrl_law(K_lqr_long, K_lqr_lat), xequil, uequil
 
 def lqr_zero_1():
     xequil = [1000, 0.00402947047, 0, 0, 0.00402947047, 0, 0, 0, 0, 0, 0, 20000.0, 28.23298113313]
     uequil = [0.434754868080227, -0.912291004757661, 0, 0]
-    return get_ctrl_law(xequil, uequil, np.zeros(3), np.zeros((2,5)))
+    return get_ctrl_law(K_lqr_long, K_lqr_lat), xequil, uequil
 
 #10 controllers that ChouYi built
 def lqr_c1():
@@ -99,7 +99,7 @@ def lqr_c1():
         [31.168206546133, -6.304852459746, -10.988073099895, -34.053251856399,  -10.046894794492],
         [-24.886039774476, 1.319363485905, -15.704103338210, 6.354214192537, -53.842918800789]
         ]
-    return get_ctrl_law(xequil, uequil, K_lqr_long, K_lqr_lat)
+    return get_ctrl_law(K_lqr_long, K_lqr_lat), xequil, uequil
 
 
 def lqr_c2():
@@ -111,7 +111,7 @@ def lqr_c2():
         [32.450577872733, -6.953174688222, -12.408493280742, -34.082869711804, -9.792598251767],
         [-26.343158242747, 1.350653216560, -17.256566810970, 6.193382937313, -53.889748742033]
         ]
-    return get_ctrl_law(xequil, uequil, K_lqr_long, K_lqr_lat)
+    return get_ctrl_law(K_lqr_long, K_lqr_lat), xequil, uequil
 
 
 def lqr_c3():
@@ -123,7 +123,7 @@ def lqr_c3():
         [30.038651255251, -5.234441092149, -8.162247596957, -33.916691161832, -11.142044317911],
         [-20.518614600206, 1.299208570547, -13.063619250891, 7.046847567027, -53.626997383946]
         ]
-    return get_ctrl_law(xequil, uequil, K_lqr_long, K_lqr_lat)
+    return get_ctrl_law(K_lqr_long, K_lqr_lat), xequil, uequil
 
 
 def lqr_c4():
@@ -135,7 +135,7 @@ def lqr_c4():
         [31.236757139617, -5.803493339820, -9.097305519523, -33.950330713866, -10.882904531781],
         [-22.502028514456, 1.363005962007, -14.338718658119, 6.882953175719, -53.680186185893]
         ]
-    return get_ctrl_law(xequil, uequil, K_lqr_long, K_lqr_lat)
+    return get_ctrl_law(K_lqr_long, K_lqr_lat), xequil, uequil
 
 
 def lqr_c5():
@@ -147,7 +147,7 @@ def lqr_c5():
         [29.440098852061, -4.450616941903, -6.507869808036, -33.798020117617, -12.009770619080],
         [-16.015772205246, 1.231972443870, -11.184935332346, 7.595645866493, -53.439361987931]
         ]
-    return get_ctrl_law(xequil, uequil, K_lqr_long, K_lqr_lat)
+    return get_ctrl_law(K_lqr_long, K_lqr_lat), xequil, uequil
 
 
 def lqr_c6():
@@ -159,7 +159,7 @@ def lqr_c6():
         [30.471599413636, -4.948438468208, -7.188850992173, -33.836559844553, -11.735333174435],
         [-18.369883691977, 1.306793804824, -12.292148077613, 7.422076386430, -53.500298646690]
         ]
-    return get_ctrl_law(xequil, uequil, K_lqr_long, K_lqr_lat)
+    return get_ctrl_law(K_lqr_long, K_lqr_lat), xequil, uequil
 
 
 def lqr_c7():
@@ -171,7 +171,7 @@ def lqr_c7():
         [29.240241895675, -3.860399841358, -5.422577482942, -33.692037718197, -12.732497240875],
         [-11.613159015554, 1.156769246109, -9.748445770221, 8.052738316595, -53.271789100903
             ]]
-    return get_ctrl_law(xequil, uequil, K_lqr_long, K_lqr_lat)
+    return get_ctrl_law(K_lqr_long, K_lqr_lat), xequil, uequil
 
 
 def lqr_c8():
@@ -183,7 +183,7 @@ def lqr_c8():
         [30.110808235694, -4.299460341217, -5.956605692246, -33.735283734462, -12.442932869241],
         [-14.242641313511, 1.234052394998, -10.740552158321, 7.869601727875, -53.340167056465]
         ]
-    return get_ctrl_law(xequil, uequil, K_lqr_long, K_lqr_lat)
+    return get_ctrl_law(K_lqr_long, K_lqr_lat), xequil, uequil
 
 
 def lqr_c9():
@@ -195,7 +195,7 @@ def lqr_c9():
         [29.278374814182, -3.413347309734, -4.617901300623, -33.600799444273, -13.321624967110],
         [-7.792656198484, 1.085342307537, -8.540219717970, 8.425335406127, -53.127528723211]
         ]
-    return get_ctrl_law(xequil, uequil, K_lqr_long, K_lqr_lat)
+    return get_ctrl_law(K_lqr_long, K_lqr_lat), xequil, uequil
 
 def lqr_c10():
     xequil = [850, 0.000590771859903035, 0, 0, 0.000590771859903035, 0, 0, 0, 0, 0, 0, 6000, 26.2206679625367]
@@ -206,7 +206,7 @@ def lqr_c10():
         [30.035788716498, -3.794104426691, -5.092217065976, -33.643286864005, -13.050790108866],
         [-10.238863798048, 1.161450162410, -9.506618461427, 8.254044401763, -53.194707232340]
         ]
-    return get_ctrl_law(xequil, uequil, K_lqr_long, K_lqr_lat)
+    return get_ctrl_law(K_lqr_long, K_lqr_lat), xequil, uequil
 
 def lqr_c11():
     '''
@@ -246,7 +246,7 @@ def lqr_c11():
     K_lqr_lat = np.array([[ 15.97671797,  -4.29832586, -18.64257951, -10.93219972, -1.10341436],
 	   [-11.24290724,  -0.26901378, -10.03659023,   0.69786051, -17.28532548]])
 
-    return get_ctrl_law(xequil, uequil, K_lqr_long, K_lqr_lat)
+    return get_ctrl_law(K_lqr_long, K_lqr_lat), xequil, uequil
 
 
 def lqr_c12():
@@ -288,7 +288,7 @@ def lqr_c12():
         [41.87692, -11.39725, -29.83327, -34.14429, -9.24223],
         [-26.89695, 1.13250, -31.96833, 5.84530, -53.98686]
         ]
-    return get_ctrl_law(xequil, uequil, K_lqr_long, K_lqr_lat)
+    return get_ctrl_law(K_lqr_long, K_lqr_lat), xequil, uequil
 
 def lqr_c13_tuned():
     '''
@@ -308,7 +308,7 @@ def lqr_c13_tuned():
            [  6.26175494,  -0.67336214, -81.89043418,  -2.28410996,
             -54.65306125]])
 
-    return get_ctrl_law(xequil, uequil, K_lqr_long, K_lqr_lat)
+    return get_ctrl_law(K_lqr_long, K_lqr_lat), xequil, uequil
 
 
 class FlightLimits:
