@@ -14,7 +14,7 @@ evaluation_order = ["controller", "maneuver", "plant"]
 log_file = "inv_pendulum.log"
 
 # Log Level (info/debug)
-log_level = "debug"
+log_level = "info"
 
 [components]
 
