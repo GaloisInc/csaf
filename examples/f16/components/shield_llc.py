@@ -10,10 +10,10 @@ def cond(xf16):
     q_max = np.deg2rad(90)
 
     if xf16[State.alpha] >= aoa_max:
-        print('WARNING: AOA exceeded limit! Switching to safe controller.')
+        #print('WARNING: AOA exceeded limit! Switching to safe controller.')
         ret = True
     if abs(xf16[State.q]) >= q_max:
-        print('WARNING: Pitch Rate exceeded Limit! Switching to safe controller.')
+        #print('WARNING: Pitch Rate exceeded Limit! Switching to safe controller.')
         ret = True
     return ret
 

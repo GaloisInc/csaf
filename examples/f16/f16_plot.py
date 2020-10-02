@@ -133,7 +133,7 @@ def plot_llc_shield(trajs):
     plot_component(ax[2][0], trajs, "plant", "states", 3, "roll (degrees)")
     plot_component(ax[2][0], trajs, "plant", "states", 4, "pitch (degrees)")
     plot_component(ax[2][0], trajs, "plant", "states", 5, "yaw (degrees)")
-    plot_component(ax[2][0], trajs, "plant", "states", 7, "pitch rate (degrees/s)")
+    plot_component(ax[3][0], trajs, "plant", "states", 7, "pitch rate (degrees/s)")
 
     ax[0][1].set_title("Low Level Controller")
     plot_component(ax[0][1], trajs, "shield_llc", "outputs", 0, "s0 ()")
