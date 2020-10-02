@@ -4,7 +4,7 @@ import gym
 import os
 import inspect
 
-from f16llc import clip_u, get_x_ctrl
+from f16llc import clip_u, get_x_ctrl, model_state_update
 from autopilot_helper import FlightLimits, CtrlLimits
 from helpers import lqr
 
