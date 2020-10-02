@@ -5,7 +5,7 @@ source .common.sh
 
 validate_dir
 
-EXAMPLES="{f16-shield-ap, f16-simple, f16-llc-analyze, f16-llc-nn, inv-pendulum}"
+EXAMPLES="{f16-shield, f16-simple, f16-llc-analyze, f16-llc-nn, inv-pendulum}"
 print_help() {
     printf "\033[1mCSAF\033[0m\n"
     printf "    Control System Analysis Framework (CSAF) is a middleware framework that
@@ -32,12 +32,12 @@ print_help() {
     printf "    ./run-csaf.sh -e f16-simple -n\n"
     printf "Start a jupyter notebook with f16 example:\n"
     printf "    ./run-csaf.sh -e f16-simple -j\n"
-    printf "    ./run-csaf.sh -e f16-shield-ap -j\n"
+    printf "    ./run-csaf.sh -e f16-shield -j\n"
     printf "    ./run-csaf.sh -d \${PWD}/examples/f16 -j\n"
     printf "Start jupyter notebook with your own example:\n"
     printf "    ./run-csaf.sh -j -d \${PWD}/examples/inverted-pendulum\n"
-    printf "Run f16-shield-ap with your own job config:\n"
-    printf "    ./run-csaf.sh -e f16-shield-ap -f f16_job_conf.toml\n"
+    printf "Run f16-shield with your own job config:\n"
+    printf "    ./run-csaf.sh -e f16-shield -f f16_job_conf.toml\n"
     printf "Clear generated outputs for f16 example:\n"
     printf "    ./run-csaf.sh -e f16-simple -x\n"
     printf "Start jupyter notebooks from this (CSAF root) directory (instead of ./docs/notebooks):\n"
@@ -98,8 +98,8 @@ then
             CONFIG_NAME="f16_simple_config.toml"
             CSAF_LOC=${PWD}/"examples/f16"
             ;;
-        "f16-shield-ap")
-            CONFIG_NAME="f16_shield_autopilot.toml"
+        "f16-shield")
+            CONFIG_NAME="f16_shield_config.toml"
             CSAF_LOC=${PWD}/"examples/f16"
             ;;
         "inv-pendulum")
