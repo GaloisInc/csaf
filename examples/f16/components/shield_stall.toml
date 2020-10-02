@@ -15,3 +15,6 @@ is_hybrid = false
 [topics]
   [topics.outputs]
       msg = "f16llc_output.msg"
+
+  [topics.states]
+      msg = "shield_llc_state.msg"

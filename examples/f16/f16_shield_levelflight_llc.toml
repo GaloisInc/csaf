@@ -8,7 +8,7 @@ codec_dir = "codec"
 output_dir = "output"
 
 # Order to Construct/Evaluate Components
-evaluation_order = ["autopilot", "shield_llc", "cperf", "crecov", "plant"]
+evaluation_order = ["autopilot", "cperf", "crecov", "shield_llc", "plant"]
 
 # File to Log Results
 log_file = "f16run.log"
@@ -39,6 +39,7 @@ log_level = "info"
   [components.plant]
     run_command = "python3"
     process = "f16plant.py"
+    config = "./components/plant_stall.toml"
     debug = false
     sub = [["shield_llc", "outputs"]]
     pub = 5501

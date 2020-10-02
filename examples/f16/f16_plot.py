@@ -122,6 +122,44 @@ def plot_llc(trajs):
     plot_component(ax[2], trajs, "plant", "states", 6, "ps (rad/s)")
     return fig
 
+def plot_llc_shield(trajs):
+    """
+    Plot reference tracking of LLC
+    """
+#     fig, ax = plt.subplots(figsize=(10, 6), nrows=3, ncols=1, sharex=True)
+#     ax[0].set_title("F16 LLC controller")
+#     plot_component(ax[0], trajs, "autopilot", "outputs", 0, "Nz_ref ()")
+#     plot_component(ax[0], trajs, "plant", "outputs", 0, "Nz ()")
+#     plot_component(ax[1], trajs, "autopilot", "outputs", 2, "Ny_r_ref ()")
+#     plot_component(ax[1], trajs, "plant", "outputs", 1, "Ny+r ()")
+#     plot_component(ax[2], trajs, "autopilot", "outputs", 1, "ps_ref (rad/s)")
+#     plot_component(ax[2], trajs, "plant", "states", 6, "ps (rad/s)")
+#     return fig
+    fig, ax = plt.subplots(figsize=(25, 15), nrows=4, ncols=3, sharex=True)
+    ax[0][0].set_title("F16 Plant")
+    plot_component(ax[0][0], trajs, "plant", "states", 11, "height (ft)")
+    plot_component(ax[1][0], trajs, "plant", "states", 1, "alpha (ft/s)")
+    plot_component(ax[2][0], trajs, "plant", "states", 3, "roll (degrees)")
+    plot_component(ax[2][0], trajs, "plant", "states", 4, "pitch (degrees)")
+    plot_component(ax[2][0], trajs, "plant", "states", 5, "yaw (degrees)")
+    plot_component(ax[3][0], trajs, "plant", "states", 12, "power (%)")
+
+    ax[0][1].set_title("Low Level Controller")
+    plot_component(ax[0][1], trajs, "shield_llc", "outputs", 0, "s0 ()")
+    plot_component(ax[1][1], trajs, "shield_llc", "outputs", 1, "s1 ()")
+    plot_component(ax[2][1], trajs, "shield_llc", "outputs", 2, "s2 ()")
+    plot_component(ax[3][1], trajs, "shield_llc", "outputs", 3, "s3 ()")
+
+    ax[0][2].set_title("Autopilot")
+    plot_component(ax[0][2], trajs, "autopilot", "outputs", 0, "a0 ()")
+    plot_component(ax[1][2], trajs, "autopilot", "outputs", 1, "a1 ()")
+    plot_component(ax[2][2], trajs, "autopilot", "outputs", 2, "a2 ()")
+    plot_component(ax[3][2], trajs, "autopilot", "outputs", 3, "a3 ()")
+
+    [ax[3][idx].set_xlabel('Time (s)') for idx in range(3)]
+
+    return fig
+
 
 def scale3d(pts, scale_list):
     """
