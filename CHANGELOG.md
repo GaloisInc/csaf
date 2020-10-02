@@ -12,7 +12,16 @@ Note:
 
 # Releases
 
-## Beta (2020-09-28)
+## Beta-0.2 (2020-10-01)
+
+### New Features
+* Added OpenAI Neural Network Low Level Controller for F16 example
+* Customizable jupyter notebook root directory
+
+## Bugfixes
+* Better description of the notebook examples
+
+## Beta-0.1 (2020-09-28)
 
 ### New Features
 * Parallel runners
