@@ -148,7 +148,7 @@ class System:
                 return False
         return True
 
-    def simulate_tspan(self, tspan, show_status=False, terminating_conditions=None):
+    def simulate_tspan(self, tspan, show_status=False, terminating_conditions=None, return_passed=False):
         """over a given timespan tspan, simulate the system"""
         sched = Scheduler(self.components, self.eval_order)
         s = sched.get_schedule_tspan(tspan)
@@ -176,10 +176,10 @@ class System:
             self.components[idx].receive_input()
             out = self.components[idx].send_output()
             if terminating_conditions is not None and terminating_conditions(cidx, out):
-                return dtraces
+                return dtraces if not return_passed else dtraces, False
             dtraces[cidx].append(**out)
 
-        return dtraces
+        return dtraces if not return_passed else dtraces, True
 
     def set_state(self, component_name, state):
         component = self.components[self.names.index(component_name)]
