@@ -176,10 +176,10 @@ class System:
             self.components[idx].receive_input()
             out = self.components[idx].send_output()
             if terminating_conditions is not None and terminating_conditions(cidx, out):
-                return dtraces if not return_passed else dtraces, False
+                return dtraces if not return_passed else (dtraces, False)
             dtraces[cidx].append(**out)
 
-        return dtraces if not return_passed else dtraces, True
+        return dtraces if not return_passed else (dtraces, True)
 
     def set_state(self, component_name, state):
         component = self.components[self.names.index(component_name)]
