@@ -15,7 +15,5 @@ stable_baselines==2.10.0
 tensorflow==1.15.0
 mpi4py==3.0.3
 gym==0.15.6
-modAL==0.3.6
-tqdm==4.47
 sklearn
-scikit-optimize
+modAL==0.3.6
