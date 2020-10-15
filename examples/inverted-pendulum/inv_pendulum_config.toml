@@ -8,7 +8,7 @@ codec_dir = "codec"
 output_dir = "output"
 
 # Order to Construct/Evaluate Components 
-evaluation_order = ["maneuver", "controller", "plant"]
+evaluation_order = ["controller", "plant", "maneuver"]
 
 # File to Log Results
 log_file = "inv_pendulum.log"
