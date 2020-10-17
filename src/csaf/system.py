@@ -239,6 +239,7 @@ class SystemEnv:
         # needed to use send
         yield None
 
+        # Loop over an infinite generator
         for cidx, _ in s:
             idx = self.sys.names.index(cidx)
             self.sys.components[idx].receive_input()
@@ -252,7 +253,4 @@ class SystemEnv:
 
             # evaluate terminating conditions
             if terminating_conditions is not None and terminating_conditions(cidx, out):
-                yield False
                 return
-
-        yield True
