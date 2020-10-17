@@ -1,6 +1,6 @@
 import numpy as np
 
-from . import autopilot_helper as ah
+import autopilot_helper as ah
 
 
 class GcasAutopilot():
