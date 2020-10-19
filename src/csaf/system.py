@@ -43,10 +43,10 @@ class System:
         return config
 
     @classmethod
-    def from_toml(cls, config_file: str):
+    def from_toml(cls, config_file: str, **kwargs):
         """produce a system from a toml file"""
         config = SystemConfig.from_toml(config_file)
-        return cls.from_config(config)
+        return cls.from_config(config, **kwargs)
 
     @classmethod
     def from_config(cls, config: SystemConfig, recover_port_conflicts=True):
@@ -131,7 +131,7 @@ class System:
         s = sched.get_schedule_tspan(tspan)
 
         # produce stimulus
-        input_for_first = list(set([p for p, _ in self.config._config["components"]["controller"]["sub"]]))
+        input_for_first = list(set([p for p, _ in self.config._config["components"][self.eval_order[0]]["sub"]]))
         for dname in input_for_first:
             idx = self.names.index(dname)
             self.components[idx].send_stimulus(float(tspan[0]))
@@ -148,13 +148,13 @@ class System:
                 return False
         return True
 
-    def simulate_tspan(self, tspan, show_status=False, terminating_conditions=None):
+    def simulate_tspan(self, tspan, show_status=False, terminating_conditions=None, return_passed=False):
         """over a given timespan tspan, simulate the system"""
         sched = Scheduler(self.components, self.eval_order)
         s = sched.get_schedule_tspan(tspan)
 
         # produce stimulus
-        input_for_first = list(set([p for p, _ in self.config._config["components"]["controller"]["sub"]]))
+        input_for_first = list(set([p for p, _ in self.config._config["components"][self.eval_order[0]]["sub"]]))
         for dname in input_for_first:
             idx = self.names.index(dname)
             self.components[idx].send_stimulus(float(tspan[0]))
@@ -176,10 +176,10 @@ class System:
             self.components[idx].receive_input()
             out = self.components[idx].send_output()
             if terminating_conditions is not None and terminating_conditions(cidx, out):
-                return dtraces
+                return dtraces if not return_passed else (dtraces, False)
             dtraces[cidx].append(**out)
 
-        return dtraces
+        return dtraces if not return_passed else (dtraces, True)
 
     def set_state(self, component_name, state):
         component = self.components[self.names.index(component_name)]
@@ -197,3 +197,60 @@ class System:
         for c in self.components:
             p += c.output_socks
         return p
+
+
+class SystemEnv:
+    def __init__(self, cname, sys, terminating_conditions=None):
+        """ SystemEnv exposes one component to the user during simulation, allowing step and reset
+        :param cname: component to expose
+        :param sys: CSAF system
+        """
+        self.sys: System = sys
+        self._cname = cname
+        self._iter = self.make_system_iterator(terminating_conditions=terminating_conditions)
+        next(self._iter)
+
+    def step(self, component_output):
+        """step through the simulation generator"""
+        return self._iter.send(component_output)
+
+    def reset(self):
+        """reset components and create a new sim"""
+        for c in self.sys.components:
+            c.reset()
+        self._iter = self.make_system_iterator()
+        next(self._iter)
+
+    def set_state(self, component_name, state):
+        """allow component state to be configured"""
+        self.sys.set_state(component_name, state)
+
+    def make_system_iterator(self, tstart=0.0, terminating_conditions=None):
+        """make a generator for the step implementation"""
+        sched = Scheduler(self.sys.components, self.sys.eval_order)
+        s = sched.get_scheduler()
+        input_for_first = list(set([p for p, _ in self.sys.config._config["components"][self.sys.eval_order[0]]["sub"]]))
+
+        # produce stimulus
+        for dname in input_for_first:
+            idx = self.sys.names.index(dname)
+            self.sys.components[idx].send_stimulus(tstart)
+
+        # needed to use send
+        yield None
+
+        # Loop over an infinite generator
+        for cidx, _ in s:
+            idx = self.sys.names.index(cidx)
+            self.sys.components[idx].receive_input()
+
+            # if cname, get yield for input, simulate otherwise
+            if cidx == self._cname:
+                in_buffer = yield self.sys.components[idx]._input_buffer
+                out = self.sys.components[idx].send_output(overwrite_buffer = in_buffer)
+            else:
+                out = self.sys.components[idx].send_output()
+
+            # evaluate terminating conditions
+            if terminating_conditions is not None and terminating_conditions(cidx, out):
+                return

@@ -88,7 +88,7 @@ def model_output(model, time_t, state_controller, input_f16):
     # tries to decrease the force and slows speed and maybe altitude gain?
 
     # basic speed control
-    throttle = ah.p_cntrl(kp=0.25, e=(model.xequil[0]-vt))
+    throttle = ah.p_cntrl(kp=0.25, e=(model.vt_des-vt))
     Ny_r = 0
     # New references
     return Nz, ps, Ny_r, throttle
