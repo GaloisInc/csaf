@@ -8,7 +8,7 @@ codec_dir = "codec"
 output_dir = "output"
 
 # Order to Construct/Evaluate Components
-evaluation_order = ["autopilot", "autoairspeed", "autoaltitude", "monitor", "switch", "controller", "plant"]
+evaluation_order = ["autopilot", "autoairspeed", "autoaltitude", "monitor_ap", "switch", "controller", "plant"]
 
 # File to Log Results
 log_file = "f16run.log"
@@ -53,9 +53,9 @@ log_level = "info"
     sub = [["plant", "states"], ["plant", "outputs"]]
     pub = 5505
 
-  [components.monitor]
+  [components.monitor_ap]
     run_command = "python3"
-    process = "monitor.py"
+    process = "monitor_ap.py"
     debug = false
     sub = [ ["plant", "states"],
             ["plant", "outputs"],
@@ -69,5 +69,5 @@ log_level = "info"
     sub = [ ["autopilot", "outputs"],
             ["autoairspeed", "outputs"],
             ['autoaltitude', 'outputs'],
-            ['monitor', 'outputs']]
+            ['monitor_ap', 'outputs']]
     pub = 5507

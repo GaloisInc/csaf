@@ -132,7 +132,14 @@ def _(trajs):
     plot_pendulum(trajs)
 
 
-@register_plot("f16_shield")
+@register_plot("f16_shield_gcas_pullup_llc")
+@register_plot("f16_shield_levelflight_llc")
+def _(trajs):
+    from f16_plot import plot_llc_shield
+    plot_llc_shield(trajs)
+
+
+@register_plot("f16_shield_config")
 def _(trajs):
     from f16_plot import plot_shield
     plot_shield(trajs)
