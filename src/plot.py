@@ -112,30 +112,70 @@ def plot_component(ax: plt.Axes, trajs: ctc.TimeTrace,
         ax.set_ylabel(re.search(r'\((.*?)\)',label).group(1))
     ax.legend()
 
+
+# maps keyphrases to plotting functions
+plot_registry = {}
+
+
+def register_plot(keyphrase):
+    def decorate(func):
+        if keyphrase in plot_registry:
+            raise RuntimeError(f"cannot registry two functions for same plotting keyphrase {keyphrase}")
+        plot_registry[keyphrase] = func
+        return func
+    return decorate
+
+
+@register_plot("inv_pendulum")
+def _(trajs):
+    from inv_plot import plot_pendulum
+    plot_pendulum(trajs)
+
+
+@register_plot("shield")
+@register_plot("llc")
+def _(trajs):
+    from f16_plot import plot_llc_shield
+    plot_llc_shield(trajs)
+
+
+@register_plot("f16_shield")
+def _(trajs):
+    from f16_plot import plot_shield
+    plot_shield(trajs)
+
+
+@register_plot("f16_simple")
+@register_plot("f16_llc_nn")
+def _(trajs):
+   from f16_plot import plot_simple
+   plot_simple(trajs)
+
+
+@register_plot("llc_analyze")
+def _(trajs):
+   from f16_plot import plot_llc
+   plot_llc(trajs)
+
+
 def plot_results(config_filename, trajs, filename=None):
     config_filename = os.path.basename(config_filename)
 
-    if "inv_pendulum" in config_filename:
-        from inv_plot import plot_pendulum
-        plot_pendulum(trajs)
+    # look up plot in registry
+    pfns = []
+    knames = []
+    for k in plot_registry.keys():
+        if k in config_filename:
+            pfns.append(plot_registry[k])
+            knames.append(k)
 
-    # Shield-LLC example
-    elif "f16" in config_filename and "shield" in config_filename and "llc" in config_filename:
-        from f16_plot import plot_llc_shield
-        plot_llc_shield(trajs)
-
-    elif "f16_shield" in config_filename:
-        from f16_plot import plot_shield
-        plot_shield(trajs)
-
-    elif "f16_simple" in config_filename or "f16_llc_nn" in config_filename:
-        from f16_plot import plot_simple
-        plot_simple(trajs)
-    elif "llc_analyze" in config_filename:
-        from f16_plot import plot_llc
-        plot_llc(trajs)
+    # if unique, plot
+    if len(pfns) > 1:
+        raise ValueError(f"config filename {config_filename} satisfies more than one plotting function {knames}")
+    elif len(pfns) < 1:
+        raise ValueError(f"Could not find a plotting function that satisfies {config_filename}")
     else:
-        raise NotImplementedError("Plot options for {} not implemented.".format(config_filename))
+        pfns[0](trajs)
 
     # save plot of demo
     if filename:

@@ -128,6 +128,12 @@ class Component:
             self.output_socks[output_idx].send(self.serialize(message))
         self._n_publish[output_idx] += 1
 
+    def reset(self):
+        raise NotImplementedError
+
+    def send_output(self, overwrite_buffer):
+        raise NotImplementedError
+
     @property
     def num_input_socks(self):
         return self._num_inputs
