@@ -1,22 +1,25 @@
 import sys, os
 from multiprocessing import Process, Event, Queue, JoinableQueue
 import multiprocessing
+import tqdm
 
 import csaf.system as csys
 import csaf.config as cconf
 import csaf.trace as ctc
+from csaf import csaf_logger
 
 
 class Worker(Process):
-    def __init__(self, evt, config, task_queue, result_queue):
+    def __init__(self, evt, config, task_queue, result_queue, progress_queue=None):
         super().__init__()
         self._evt = evt
         self._config = config
         self.system = None
         self._task_queue = task_queue
         self._result_queue = result_queue
+        self._progress_queue = progress_queue
 
-    def run(self):
+    def run(self, on_finish=None):
         proc_name = self.name
         self.system = csys.System.from_config(self._config)
         self._evt.set()
@@ -29,6 +32,8 @@ class Worker(Process):
             self._task_queue.task_done()
             self._result_queue.put(answer)
             self.system.reset()
+            if self._progress_queue is not None:
+                self._progress_queue.put(True)
         return
 
 
@@ -48,8 +53,9 @@ class Task(object):
             ret = getattr(system, self.system_attr)(*self.args, **self.kwargs)
             answer = [self.idx, ret]
         except Exception as exc:
+            csaf_logger.warning(f"running {self.system_attr} failed for states {self.states}")
             answer = [self.idx, exc]
-        # some ugliness to get around the unpicklable named tuple
+        # some ugliness to get around the unpickable named tuple
         if self.system_attr == "simulate_tspan" and isinstance(answer[1], dict):
             answer_picklable = {}
             for k, v in answer[1].items():
@@ -64,17 +70,30 @@ class Task(object):
         return f"id {self.idx} -- {self.system_attr}(args={self.args}, kwargs={self.kwargs})"
 
 
-def run_workgroup(n_tasks, config, initial_states, *args, fname="simulate_tspan", **kwargs):
+def run_workgroup(n_tasks, config, initial_states, *args, fname="simulate_tspan", show_status=True, **kwargs):
+    def progress_listener(q):
+        pbar = tqdm.tqdm(total = n_tasks)
+        for _ in iter(q.get, None):
+            pbar.update()
+
+    csaf_logger.info(f"starting a parallel run of {n_tasks} tasks over the method {fname}")
+
     # Establish communication queues
     tasks = JoinableQueue()
     results = Queue()
+    progress = Queue()
+
+    # Start the progress bar
+    if show_status:
+        proc = Process(target=progress_listener, args=(progress,))
+        proc.start()
 
     # Start workers
     n_workers = min(n_tasks, multiprocessing.cpu_count() * 2)
     workers = []
     for idx in range(n_workers):
         evt = Event()
-        w = Worker(evt, config, tasks, results)
+        w = Worker(evt, config, tasks, results, progress)
         w.start()
         evt.wait()
         workers.append(w)
@@ -90,6 +109,9 @@ def run_workgroup(n_tasks, config, initial_states, *args, fname="simulate_tspan"
 
     # Wait for all of the tasks to finish
     tasks.join()
+    if show_status:
+        progress.put(None)
+        proc.join()
 
     # Start printing results
     ret = [None] * n_tasks
@@ -97,6 +119,7 @@ def run_workgroup(n_tasks, config, initial_states, *args, fname="simulate_tspan"
         result = results.get()
         ret[result[0]] = result[1]
         n_tasks -= 1
+    csaf_logger.info("parallel run finished")
     return ret
 
 
