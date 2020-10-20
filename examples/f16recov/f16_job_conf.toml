@@ -1,9 +1,0 @@
-# Simple job configuration file
-tspan = [0.0, 10.0]
-show_status = true # show progress during simulation
-
-# analyze options
-analyze = false
-
-# display options
-plot = true # plot results on screen
