@@ -12,13 +12,20 @@ Note:
 
 # Releases
 
-## Beta (2020-09-28)
+## Beta-0.2 (2020-10-01)
 
 ### New Features
-* TODO
+* Added OpenAI Neural Network Low Level Controller for F16 example
+* Customizable jupyter notebook root directory
 
-### Bug Fixes
-* TODO
+## Bugfixes
+* Better description of the notebook examples
 
-### Release notes
-TODO
+## Beta-0.1 (2020-09-28)
+
+### New Features
+* Parallel runners
+* User experience improvements
+* FlightGear visualisation
+* CSAF docker image available on Dockerhub
+* Added new Jupyter notebook examples

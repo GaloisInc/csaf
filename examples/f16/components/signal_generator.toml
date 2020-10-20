@@ -9,7 +9,7 @@ is_hybrid = false
 
 [parameters]
   # step | impulse | sin
-  response_type = "impulse"
+  response_type = "step"
   # Amplitude / size of the response
   response_amplitude = 1.0
   # When does the response start? Valid for impulse | step

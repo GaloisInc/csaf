@@ -51,10 +51,21 @@ We use jupyer notebooks extensively, and in order to avoid some [common problems
 
 ## Releases
 
-When releasing a new version of the CSAF:
+To prepare a new CSAF version for release:
 
-- Merge `develop` into `master`
-- Tag with a semantic version number, such as `release-4.3`
+1. Sanity-check:
+   * are all feature or bugfix branches merged?
+   * has documentation (`README.md`, `CHANGELOG.md` etc.) been updated?
+1. Pull `master` and `develop` branches
+1. Make sure all tests pass on `develop`
+1. `git checkout master`
+1. `git merge develop`
+1. `git tag` to list all current tags
+1. `git tag release-X.Y` with appropriate new version number
+1. `git push`
+1. `git push --tags`
+
+With the new version tagged on `master` - congratulations on a new CSAF version!
 
 ## Attribution
 

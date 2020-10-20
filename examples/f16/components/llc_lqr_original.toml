@@ -1,0 +1,31 @@
+system_name = "F16 Low Level Controller"
+system_representation = "black box"
+system_solver = "Euler"
+
+sampling_frequency = 100
+
+is_discrete = false
+is_hybrid = false
+
+[parameters]
+  lqr_name = "lqr_original"
+  throttle_max = 1
+  throttle_min = 0
+  elevator_max = 25
+  elevator_min = -25
+  aileron_max = 21.5
+  aileron_min = -21.5
+  rudder_max = 30.0
+  rudder_min = -30.0
+
+[inputs]
+  msgs = [ "f16plant_state.msg", "f16plant_output.msg", "autopilot_output.msg" ]
+
+[topics]
+
+  [topics.outputs]
+    msg = "f16llc_output.msg"
+
+  [topics.states]
+    msg = "f16llc_state.msg"
+    initial = [ 0.0, 0.0, 0.0 ]

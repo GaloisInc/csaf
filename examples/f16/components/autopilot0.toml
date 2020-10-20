@@ -1,4 +1,5 @@
-system_name = "F16 GCAS Autopilot"
+# Dummy autopilot component to demo level flight; Holds all output references at 0
+system_name = "F16 Zero Autopilot"
 system_representation = "black box"
 system_solver = "Euler"
 
@@ -8,19 +9,11 @@ is_discrete = true
 is_hybrid = false
 
 [parameters]
-  NzMax = 9.0
-  vt_des = 502.0
 
 [inputs]
   msgs = [ "f16plant_state.msg", "f16plant_output.msg" ]
 
 [topics]
-  [topics.states]
-      msg = "autopilot_state.msg"
-      initial = ["Waiting"]
 
   [topics.outputs]
       msg = "autopilot_output.msg"
-
-  [topics.fdas]
-      msg = "autopilot_state.msg"
