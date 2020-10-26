@@ -3,13 +3,28 @@ IMAGE_NAME=galoisinc/csaf
 IMAGE_TAG=latest
 SCRIPT_DIR="csaf_architecture"
 
+
+# Color table
+#     0 – Black
+#     1 – Red
+#     2 – Green
+#     3 – Yellow
+#     4 – Blue
+#     5 – Magenta
+#     6 – Cyan
+#     7 – White
+
+
+red=$(tput setaf 1)
+blue=$(tput setaf 4)
+normal=$(tput sgr0)
+
 validate_dir() {
 
 	DIR=$(basename ${PWD})
 	if [ ${DIR} != ${SCRIPT_DIR} ]
 	then
-		printf "ERROR: Script must be run from the \"${SCRIPT_DIR}\" directory\n"
-		exit 1
+		printf "%40s\n" "${blue}WARNING: Script might not be running from the parent level \"${SCRIPT_DIR}\" directory. This might break paths. ${normal}"
 	fi
 }
 
