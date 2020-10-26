@@ -2,8 +2,34 @@ import collections
 import csv
 import datetime
 import warnings
+from .config import SystemConfig
 
 import numpy as np
+
+
+def get_component_io(component_name: str, trajs: dict, conf: SystemConfig):
+    """get input and output signals for a given component_name
+    :param component_name: component identifier
+    :param trajs: CSAF simulation output
+    :param conf: CSAF system configuration object
+    :returns dict: {times: <array>, inputs: <ndarray>, outputs: <ndarray>}
+    """
+    def get_most_recent(t, key, topic):
+        """get ZOH in inputs buffer"""
+        ttrace = trajs[key]
+        tidx = np.where(np.array(ttrace.times) <= t)[0]
+        tidx = 0 if len(tidx) == 0 else tidx[-1]
+        return getattr(ttrace, topic)[tidx]
+    # get the input components and topics
+    input_fields = [(p, t) for p, t in conf._config["components"][component_name]["sub"]]
+    # store inputs, outputs and times
+    times = np.array(trajs[component_name].times)
+    outputs = np.array(trajs[component_name].outputs)
+    inputs = []
+    # step through and get inputs (ZOH)
+    for t in times:
+        inputs.append(np.concatenate([get_most_recent(t, key, topic) for key, topic in input_fields]))
+    return {"times": np.array(times), "inputs": np.array(inputs), "outputs": np.array(outputs)}
 
 
 class Trace(collections.abc.Sequence):
