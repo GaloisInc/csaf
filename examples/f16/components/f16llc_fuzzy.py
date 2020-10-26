@@ -4,7 +4,7 @@ TODO: implement the TODOs
 """
 import numpy as np
 from fileops import prepend_curr_path
-import autopilot_helper as ah
+from helpers import lqr
 from f16llc import get_x_ctrl, clip_u, model_state_update
 
 
@@ -88,7 +88,7 @@ def compute_fcn(model, x_ctrl):
 
 def model_output(model, time_t, state_controller, input_all):
     """ get the reference commands for the control surfaces """
-    _, *trim_points = getattr(ah, model.lqr_name)()
+    _, *trim_points = getattr(lqr, model.lqr_name)()
 
     x_f16, _y, u_ref = input_all[:13], input_all[13:17], input_all[17:]
     x_ctrl = get_x_ctrl(trim_points, np.concatenate([x_f16, state_controller]))
