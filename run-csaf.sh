@@ -6,8 +6,8 @@ SCRIPT_DIR="csaf_architecture"
 DIR=$(basename ${PWD})
 if [ ${DIR} != ${SCRIPT_DIR} ]
 then
-	printf "ERROR: Script must be run from the \"${SCRIPT_DIR}\" directory!\n"
-	exit 1
+    printf "ERROR: Script must be run from the \"${SCRIPT_DIR}\" directory!\n"
+    exit 1
 fi
 
 source .common.sh
@@ -191,7 +191,7 @@ if [[ ${NATIVE} -eq 1 ]] ; then
     fi
 else
     if [[ ${JUPYTER} -eq 1 ]] ; then
-	 docker run ${JUPYTER_NETWORK} -it -v ${CSAF_LOC}:/csaf-system \
+     docker run ${JUPYTER_NETWORK} -it -v ${CSAF_LOC}:/csaf-system \
             -v ${PWD}/src:/app -v ${PWD}/${JUPYTER_DIR}:/notebooks \
             ${IMAGE_NAME}:${IMAGE_TAG} "jupyter" "notebook" "--port=8888" \
             "--no-browser" "--ip=0.0.0.0" "--allow-root" "--notebook-dir=/notebooks"

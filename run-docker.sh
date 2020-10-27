@@ -3,8 +3,8 @@ SCRIPT_DIR="csaf_architecture"
 DIR=$(basename ${PWD})
 if [ ${DIR} != ${SCRIPT_DIR} ]
 then
-	printf "ERROR: Script must be run from the \"${SCRIPT_DIR}\" directory!\n"
-	exit 1
+    printf "ERROR: Script must be run from the \"${SCRIPT_DIR}\" directory!\n"
+    exit 1
 fi
 
 source .common.sh
