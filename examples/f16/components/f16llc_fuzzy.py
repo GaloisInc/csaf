@@ -8,52 +8,52 @@ from helpers import lqr
 from f16llc import get_x_ctrl, clip_u, model_state_update
 
 
-def Index(x,i,d,Centers):
-    if i == 0 and x < Centers[0]:
-        Index = 1
-    elif i == d and x > Centers[d]:
-        Index = i-1
-    elif x >= Centers[i] and x <= Centers[i+1]:
-        Index = i
+def Index(x, i, d, centers):
+    if i == 0 and x < centers[0]:
+        idx = 0
+    elif i == d and x > centers[d]:
+        idx = i-1
+    elif x >= centers[i] and x <= centers[i + 1]:
+        idx = i
     else:
         # TODO: what happened here?
-        Index = Modeno(x,i+1,d,Centers)
-    return Index
+        idx = Index(x, i + 1, d, centers)
+    return idx
 
 
 def Multwolist(list1,list2):
-    ResList = []
+    res_list = []
     for j in range(0,len(list2)):
         t = [list1[i] * list2[j] for i in range(len(list1))]
-        ResList.extend(t)
-    return ResList
+        res_list.extend(t)
+    return res_list
 
 
-def ModeInput(ni,x,Centers):
-    InputM = [1,x[0]]
+def ModeInput(ni, x, centers):
+    input_m = [1,x[0]]
     for i in range(1,ni):
         b = [1,x[i]]
-        InputM = Multwolist(InputM,b)
-    return InputM
+        input_m = Multwolist(input_m,b)
+    return input_m
 
 
-def Mode(nC,x,Centers):
+def Mode(nC, x, centers):
     m = 0
     count = 1
     for j in range(0,nC):
-        index = Index(x[j],0,len(Centers[j])-1,Centers[j])
+        index = Index(x[j], 0, len(centers[j]) - 1, centers[j])
         m = m + index*count
-        count = count*(len(Centers[j])-1)
+        count = count*(len(centers[j]) - 1)
     return m
 
 
-def Inference(nC,Input,Centers,Gains):
-    ni = len(Input)
-    ResList = ModeInput(ni,Input,Centers)
-    ResInput = np.reshape(ResList, (1,2**ni))
-    m = Mode(nC,Input,Centers)
-    K = np.reshape(Gains[:,m], (2**ni,1))
-    u1 = np.dot(ResInput,K)
+def Inference(nC, input_m, centers, gains):
+    ni = len(input_m)
+    res_list = ModeInput(ni, input_m, centers)
+    res_input = np.reshape(res_list, (1,2**ni))
+    m = Mode(nC, input_m, centers)
+    K = np.reshape(gains[:, m], (2 ** ni, 1))
+    u1 = np.dot(res_input,K)
     u = [j for sub in u1 for j in sub]
     return u
 
