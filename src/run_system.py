@@ -33,6 +33,7 @@ model_conf = cconf.SystemConfig.from_toml(config_filename)
 if len(sys.argv) > 3:
     job_filename = os.path.join(csaf_dir, sys.argv[3])
     with open(job_filename, 'r') as f:
+        print("Loading job config: " + job_filename)
         job_conf = toml.load(f)
 else:
     job_conf = {}
