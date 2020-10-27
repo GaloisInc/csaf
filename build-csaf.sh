@@ -2,17 +2,12 @@
 PUBLISH=0
 SCRIPT_DIR="csaf_architecture"
 
-validate_dir() {
-
-	DIR=$(basename ${PWD})      
-	if [ ${DIR} != ${SCRIPT_DIR} ]
-	then
-		printf "ERROR: Script must be run from the \"${SCRIPT_DIR}\" directory\n"
-		exit 1
-	fi
-}
-
-validate_dir
+DIR=$(basename ${PWD})
+if [ ${DIR} != ${SCRIPT_DIR} ]
+then
+	printf "ERROR: Script must be run from the \"${SCRIPT_DIR}\" directory!\n"
+	exit 1
+fi
 
 source .common.sh
 

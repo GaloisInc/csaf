@@ -1,17 +1,6 @@
 #!/bin/bash
 IMAGE_NAME=galoisinc/csaf
 IMAGE_TAG=latest
-SCRIPT_DIR="csaf_architecture"
-
-validate_dir() {
-
-	DIR=$(basename ${PWD})
-	if [ ${DIR} != ${SCRIPT_DIR} ]
-	then
-		printf "ERROR: Script must be run from the \"${SCRIPT_DIR}\" directory\n"
-		exit 1
-	fi
-}
 
 show_error_and_exit() {
 	printf "ERROR: ${1}\n"

@@ -1,9 +1,16 @@
 #!/bin/bash
 JUPYTER=0
 JUPYTER_DIR=docs/notebooks
-source .common.sh
 
-validate_dir
+SCRIPT_DIR="csaf_architecture"
+DIR=$(basename ${PWD})
+if [ ${DIR} != ${SCRIPT_DIR} ]
+then
+	printf "ERROR: Script must be run from the \"${SCRIPT_DIR}\" directory!\n"
+	exit 1
+fi
+
+source .common.sh
 
 EXAMPLES="{f16-shield, f16-simple, f16-llc-analyze, f16-llc-nn, inv-pendulum}"
 print_help() {
