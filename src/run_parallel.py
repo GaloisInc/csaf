@@ -5,12 +5,10 @@ import tqdm
 import dill
 from numpy import nan
 
-
 import csaf.system as csys
 import csaf.config as cconf
 import csaf.trace as ctc
 from csaf import csaf_logger
-
 
 class Worker(Process):
     def __init__(self, evt, config, task_queue, result_queue, progress_queue=None):
@@ -23,7 +21,6 @@ class Worker(Process):
         self._progress_queue = progress_queue
 
     def run(self, on_finish=None):
-        proc_name = self.name
         self.system = csys.System.from_config(self._config)
         self._evt.set()
         while True:
@@ -38,7 +35,6 @@ class Worker(Process):
             if self._progress_queue is not None:
                 self._progress_queue.put(True)
         return
-
 
 class Task(object):
     def __init__(self, idx, system_attr, initial_states, *args, **kwargs):
@@ -62,7 +58,6 @@ class Task(object):
 
     def __str__(self):
         return f"id {self.idx} -- {self.system_attr}(args={self.args}, kwargs={self.kwargs})"
-
 
 def run_workgroup(n_tasks, config, initial_states, *args, fname="simulate_tspan", show_status=True, **kwargs):
     def progress_listener(q):
@@ -121,6 +116,7 @@ def run_workgroup(n_tasks, config, initial_states, *args, fname="simulate_tspan"
     return ret
 
 
+# TODO: fold this into a notebook? Or remove altogether
 if __name__ == '__main__':
     import numpy as np
     import matplotlib.pyplot as plt
