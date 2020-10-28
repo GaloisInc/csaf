@@ -2,6 +2,9 @@ import sys, os
 from multiprocessing import Process, Event, Queue, JoinableQueue
 import multiprocessing
 import tqdm
+import dill
+from numpy import nan
+
 
 import csaf.system as csys
 import csaf.config as cconf
@@ -51,19 +54,10 @@ class Task(object):
         assert hasattr(system, self.system_attr)
         try:
             ret = getattr(system, self.system_attr)(*self.args, **self.kwargs)
-            answer = [self.idx, ret]
+            answer = [self.idx, dill.dumps(ret)]
         except Exception as exc:
-            csaf_logger.warning(f"running {self.system_attr} failed for states {self.states}")
+            csaf_logger.warning(f"running {self.system_attr} failed for states {self.states}\n")
             answer = [self.idx, exc]
-        # some ugliness to get around the unpickable named tuple
-        if self.system_attr == "simulate_tspan" and isinstance(answer[1], dict):
-            answer_picklable = {}
-            for k, v in answer[1].items():
-                if isinstance(v, ctc.TimeTrace):
-                    fields = [a for a in dir(v.NT) if not a.startswith('_') and a not in ["count", "index"]]
-                    tt_dict = {fieldn: getattr(v, fieldn) for fieldn in fields}
-                    answer_picklable[k] = tt_dict
-            answer[1] = answer_picklable
         return tuple(answer)
 
     def __str__(self):
@@ -117,7 +111,11 @@ def run_workgroup(n_tasks, config, initial_states, *args, fname="simulate_tspan"
     ret = [None] * n_tasks
     while n_tasks:
         result = results.get()
-        ret[result[0]] = result[1]
+        if isinstance(result[1], Exception):
+            csaf_logger.warning(f"run_workgroup: found an exception in the results, replacing with NaN\n")
+            ret[result[0]] = nan
+        else:
+            ret[result[0]] = dill.loads(result[1])
         n_tasks -= 1
     csaf_logger.info("parallel run finished")
     return ret
