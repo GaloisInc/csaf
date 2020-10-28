@@ -9,7 +9,7 @@ before_script:
   - export PYTHONPATH=${PYTHONPATH}:${PWD}/src:${PWD}/examples/f16:${PWD}/examples/inverted-pendulum:/csaf-system
 
 f16-llc-analyze:
-  stage: test
+  stage: build
   script:
     - ./run-csaf.sh -e f16-llc-analyze -n
   artifacts:
@@ -21,7 +21,7 @@ f16-llc-analyze:
         - ./examples/f16/output/f16-run.png
 
 f16-llc-nn:
-  stage: test
+  stage: build
   script:
     - ./run-csaf.sh -e f16-llc-nn -n
   artifacts:
@@ -33,7 +33,7 @@ f16-llc-nn:
         - ./examples/f16/output/f16-llc-nn-run.png
 
 f16-shield:
-  stage: test
+  stage: build
   script:
     - ./run-csaf.sh -e f16-shield -n
   artifacts:
@@ -46,7 +46,7 @@ f16-shield:
 
 
 f16-simple:
-  stage: test
+  stage: build
   script:
     - ./run-csaf.sh -e f16-simple -n
   artifacts:
@@ -58,7 +58,7 @@ f16-simple:
         - ./examples/f16/output/f16-shield-run.png
 
 inv-pendulum:
-  stage: test
+  stage: build
   script:
     - ./run-csaf.sh -e inv-pendulum -n
   artifacts:
@@ -79,8 +79,6 @@ notebooks-build:
 
 notebooks-tests:
   stage: test
-  variables:
-    SSH_PRIVATE_KEY: $SSH_PRIVATE_KEY
   needs:
     - notebooks-build
   trigger:
