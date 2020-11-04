@@ -5,6 +5,7 @@ import tqdm
 import dill
 from numpy import nan
 
+
 import csaf.system as csys
 import csaf.config as cconf
 import csaf.trace as ctc
@@ -52,12 +53,13 @@ class Task(object):
             ret = getattr(system, self.system_attr)(*self.args, **self.kwargs)
             answer = [self.idx, dill.dumps(ret)]
         except Exception as exc:
-            csaf_logger.warning(f"running {self.system_attr} failed for states {self.states}\n")
+            csaf_logger.warning(f"running {self.system_attr} failed for states {self.states}")
             answer = [self.idx, exc]
         return tuple(answer)
 
     def __str__(self):
         return f"id {self.idx} -- {self.system_attr}(args={self.args}, kwargs={self.kwargs})"
+
 
 def run_workgroup(n_tasks, config, initial_states, *args, fname="simulate_tspan", show_status=True, **kwargs):
     def progress_listener(q):
@@ -107,7 +109,7 @@ def run_workgroup(n_tasks, config, initial_states, *args, fname="simulate_tspan"
     while n_tasks:
         result = results.get()
         if isinstance(result[1], Exception):
-            csaf_logger.warning(f"run_workgroup: found an exception in the results, replacing with NaN\n")
+            csaf_logger.warning(f"run_workgroup: found an exception in the results, replacing with NaN")
             ret[result[0]] = nan
         else:
             ret[result[0]] = dill.loads(result[1])
