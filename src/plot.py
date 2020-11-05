@@ -146,6 +146,7 @@ def _(trajs):
 
 
 @register_plot("f16_simple")
+@register_plot("f16_fuzzy")
 @register_plot("f16_llc_nn")
 def _(trajs):
    from f16_plot import plot_simple

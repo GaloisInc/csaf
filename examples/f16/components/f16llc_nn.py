@@ -1,8 +1,7 @@
 from math import pi
 import numpy as np
 import gym
-import os
-import inspect
+from fileops import prepend_curr_path, construct_path
 
 from f16llc import clip_u, get_x_ctrl, model_state_update
 from autopilot_helper import FlightLimits, CtrlLimits
@@ -116,11 +115,3 @@ class F16GCAS(gym.Env):
         self.action_space = gym.spaces.Box(self.u_low[1:4], self.u_high[1:4], dtype=np.float32)
 
 
-def construct_path(path):
-    assert(len(path) >= 1)
-    return os.path.join(path[0], *path[1:])
-
-
-def prepend_curr_path(path):
-    callers_path = inspect.stack()[1].filename
-    return os.path.join(os.path.dirname(callers_path), construct_path(path))
