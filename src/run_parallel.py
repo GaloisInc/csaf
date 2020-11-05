@@ -3,12 +3,18 @@ from multiprocessing import Process, Event, Queue, JoinableQueue
 import multiprocessing
 import tqdm
 import dill
-
+import numpy as np
 
 import csaf.system as csys
 import csaf.config as cconf
 import csaf.trace as ctc
 from csaf import csaf_logger
+
+def gen_random_state(bounds):
+    sample = np.random.rand(len(bounds))
+    ranges = np.array([b[1] - b[0] for b in bounds])
+    offset = np.array([- b[0] for b in bounds])
+    return sample * ranges - offset
 
 class Worker(Process):
     def __init__(self, evt, config, task_queue, result_queue, progress_queue=None):
