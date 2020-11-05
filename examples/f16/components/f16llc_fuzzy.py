@@ -6,56 +6,7 @@ import numpy as np
 from fileops import prepend_curr_path
 from helpers import lqr
 from f16llc import get_x_ctrl, clip_u, model_state_update
-
-
-def Index(x, i, d, centers):
-    if i == 0 and x < centers[0]:
-        idx = 0
-    elif i == d and x > centers[d]:
-        idx = i-1
-    elif x >= centers[i] and x <= centers[i + 1]:
-        idx = i
-    else:
-        # TODO: what happened here?
-        idx = Index(x, i + 1, d, centers)
-    return idx
-
-
-def Multwolist(list1,list2):
-    res_list = []
-    for j in range(0,len(list2)):
-        t = [list1[i] * list2[j] for i in range(len(list1))]
-        res_list.extend(t)
-    return res_list
-
-
-def ModeInput(ni, x, centers):
-    input_m = [1,x[0]]
-    for i in range(1,ni):
-        b = [1,x[i]]
-        input_m = Multwolist(input_m,b)
-    return input_m
-
-
-def Mode(nC, x, centers):
-    m = 0
-    count = 1
-    for j in range(0,nC):
-        index = Index(x[j], 0, len(centers[j]) - 1, centers[j])
-        m = m + index*count
-        count = count*(len(centers[j]) - 1)
-    return m
-
-
-def Inference(nC, input_m, centers, gains):
-    ni = len(input_m)
-    res_list = ModeInput(ni, input_m, centers)
-    res_input = np.reshape(res_list, (1,2**ni))
-    m = Mode(nC, input_m, centers)
-    K = np.reshape(gains[:, m], (2 ** ni, 1))
-    u1 = np.dot(res_input,K)
-    u = [j for sub in u1 for j in sub]
-    return u
+from f16_fuzzy_mode import F16ModeController
 
 
 def model_init(model):
@@ -74,22 +25,18 @@ def model_init(model):
     model.parameters["gains_aileron"] = np.load(ail_path)
     model.parameters["gains_elevator"] = np.load(ele_path)
     model.parameters["gains_rudder"] = np.load(rud_path)
+    model.parameters["ctrlr"] = F16ModeController()
 
 
 def compute_fcn(model, x_ctrl):
-    """compute 3-dim control signal from 7-dim x_ctrl signal"""
-    #TODO: implement this
-    #show that inference (added in model_init) can be accessed
-    Elevator =  Inference(len(model.centers_long), x_ctrl[0:3], model.centers_long, model.gains_elevator)
-    Aileron = Inference(len(model.centers_lat), x_ctrl[3:8], model.centers_lat, model.gains_aileron)
-    Rudder = Inference(len(model.centers_lat), x_ctrl[3:8], model.centers_lat, model.gains_rudder)
-    return np.array([Elevator,Aileron,Rudder]).flatten()
+    """compute 3-dim control signal from 8-dim x_ctrl signal"""
+    ctrlr = model.parameters["ctrlr"]
+    return np.array(ctrlr.Controller(x_ctrl)).flatten()
 
 
 def model_output(model, time_t, state_controller, input_all):
     """ get the reference commands for the control surfaces """
     _, *trim_points = getattr(lqr, model.lqr_name)()
-
     x_f16, _y, u_ref = input_all[:13], input_all[13:17], input_all[17:]
     x_ctrl = get_x_ctrl(trim_points, np.concatenate([x_f16, state_controller]))
 
