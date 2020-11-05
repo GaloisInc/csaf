@@ -90,7 +90,7 @@ def run_workgroup(n_tasks, config, initial_states, *args, fname="simulate_tspan"
 
     # Enqueue jobs
     for idx in range(n_tasks):
-        t = Task(idx, fname, initial_states[idx], *args, **kwargs, show_status=False)
+        t = Task(idx, fname, initial_states[idx], *args, **kwargs, show_status=False, return_passed=True)
         tasks.put(t)
 
     # Stop all workers
@@ -105,12 +105,11 @@ def run_workgroup(n_tasks, config, initial_states, *args, fname="simulate_tspan"
 
     # Start printing results
     ret = [None] * n_tasks
-    ok_idx = 0
     while n_tasks:
         result = results.get()
         if not isinstance(result[1], Exception):
-            ret[result[0]] = tuple([ok_idx, dill.loads(result[1]), result[2]])
-            ok_idx += 1
+            res = dill.loads(result[1])
+            ret[result[0]] = tuple([res[1], res[0], result[2]])
         n_tasks -= 1
     csaf_logger.info("parallel run finished")
     ret = [val for val in ret if val != None]
