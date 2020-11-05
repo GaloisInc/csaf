@@ -3,7 +3,6 @@ from multiprocessing import Process, Event, Queue, JoinableQueue
 import multiprocessing
 import tqdm
 import dill
-from numpy import nan
 
 
 import csaf.system as csys
@@ -51,10 +50,10 @@ class Task(object):
         assert hasattr(system, self.system_attr)
         try:
             ret = getattr(system, self.system_attr)(*self.args, **self.kwargs)
-            answer = [self.idx, dill.dumps(ret)]
+            answer = [self.idx, dill.dumps(ret), self.states]
         except Exception as exc:
             csaf_logger.warning(f"running {self.system_attr} failed for states {self.states}")
-            answer = [self.idx, exc]
+            answer = [self.idx, exc, self.states]
         return tuple(answer)
 
     def __str__(self):
@@ -106,15 +105,15 @@ def run_workgroup(n_tasks, config, initial_states, *args, fname="simulate_tspan"
 
     # Start printing results
     ret = [None] * n_tasks
+    ok_idx = 0
     while n_tasks:
         result = results.get()
-        if isinstance(result[1], Exception):
-            csaf_logger.warning(f"run_workgroup: found an exception in the results, replacing with NaN")
-            ret[result[0]] = nan
-        else:
-            ret[result[0]] = dill.loads(result[1])
+        if not isinstance(result[1], Exception):
+            ret[result[0]] = tuple([ok_idx, dill.loads(result[1]), result[2]])
+            ok_idx += 1
         n_tasks -= 1
     csaf_logger.info("parallel run finished")
+    ret = [val for val in ret if val != None]
     return ret
 
 
