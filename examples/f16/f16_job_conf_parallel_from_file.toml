@@ -18,3 +18,11 @@ initial_conditions = [  540.0, # vt [ft/s]
                         0.0, # pe [m]
                         4800.0, # h [ft]
                         90.0] # power [%]
+
+# Use parallel runner
+parallel = true
+
+# [random, fixed, from_file]
+x0 = "from_file"
+# NOTE: the path is different when running from docker vs running natively
+x0_path = "examples/f16/f16-example-x0.csv"

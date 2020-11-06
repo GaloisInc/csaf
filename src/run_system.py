@@ -12,13 +12,16 @@ import os
 import sys
 import toml
 
+
 import csaf.system as csys
 import csaf.config as cconf
 import csaf.trace as ctc
 from csaf import csaf_logger
 
+
 import plot
 import run_parallel
+
 
 def get_attribute(conf, attribute):
     val = conf.get(attribute, None)
@@ -28,7 +31,6 @@ def get_attribute(conf, attribute):
     else:
         csaf_logger.info(f"Retrieved attribute: {attribute} = {val}")
         return val
-
 
 ## build and simulate system
 csaf_dir=sys.argv[1]
@@ -65,23 +67,53 @@ if job_conf.get('parallel', False):
     # Parallel run
     csaf_logger.info(f"Running parallel simulation.")
     x0 = get_attribute(job_conf, 'x0')
-    iterations = get_attribute(job_conf, 'iterations')
 
     if x0 == "random":
+        csaf_logger.info(f"Generating random states.")
+        iterations = get_attribute(job_conf, 'iterations')
         bounds = get_attribute(job_conf, 'bounds')
 
         # define states of component to run
         # format [{"plant": <list>}, ..., {"plant" : <list>, "controller": <list>}]
-        states = [{"plant" : run_parallel.gen_random_state(bounds)} for _ in range(iterations)]
+        states = run_parallel.gen_random_states(bounds, "plant", iterations)
+    elif x0 == "fixed":
+        csaf_logger.info(f"Generating states using fixed step.")
+        bounds = get_attribute(job_conf, 'bounds')
+        # define states of component to run
+        states = run_parallel.gen_fixed_states(bounds, "plant")
+        csaf_logger.info(f"Generated {len(states)} initial states.")
+        iterations = len(states)
+    elif x0 == "from_file":
+        x0_path = get_attribute(job_conf, 'x0_path')
+        csaf_logger.info(f"Loading states from a file: {x0_path}")
+        states = run_parallel.load_states_from_file(x0_path, "plant")
+        csaf_logger.info(f"Loaded {len(states)} initial states.")
+        iterations = len(states)
+    else:
+        csaf_logger.error(f"Unknown value x0 = {x0}. Valid values are [random, fixed, from_file]")
+        raise NotImplementedError
 
-        # get terminating condition
-        termcond = job_conf.get('terminating_conditions', None)
-        print(termcond)
+    csaf_logger.debug(f"Initial states are: {states}")
 
-        # run tasks in a workgroup
-        import terminating_conditions
-        runs = run_parallel.run_workgroup(iterations, model_conf, states, tspan, terminating_conditions=termcond)
-        print(runs)
+    # get terminating condition
+    termcond = job_conf.get('terminating_conditions', None)
+    if termcond:
+        # file 'terminating_conditions' is example specific
+        from terminating_conditions import *
+        termcond = eval(termcond)
+    csaf_logger.info(f"Terminating condition is: {termcond}")
+
+    # run tasks in a workgroup
+    runs = run_parallel.run_workgroup(iterations, model_conf, states, tspan, terminating_conditions=termcond)
+
+    passed_termcond = [val for val,_,_ in runs].count(True)
+    csaf_logger.info(f"Out of {iterations}, {len(runs)} finished, and {passed_termcond} passed the terminating conditions")
+
+    # save initial conditions to a file
+    if job_conf.get('x0_save_to_file', False):
+        filename = os.path.join(model_conf.output_directory, f"{model_conf.name}-x0.csv")
+        csaf_logger.info(f"Saving inital conditions to {filename}")
+        run_parallel.save_states_to_file(filename, states)
 
 else:
     # Regular run

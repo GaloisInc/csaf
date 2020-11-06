@@ -10,11 +10,63 @@ import csaf.config as cconf
 import csaf.trace as ctc
 from csaf import csaf_logger
 
-def gen_random_state(bounds):
-    sample = np.random.rand(len(bounds))
-    ranges = np.array([b[1] - b[0] for b in bounds])
-    offset = np.array([- b[0] for b in bounds])
-    return sample * ranges - offset
+def save_states_to_file(filename, states):
+    np.savetxt(filename, [val['plant'] for val in states], delimiter=",")
+
+def load_states_from_file(filename, component_name):
+    x0s = np.loadtxt(filename, delimiter=",")
+    return [{component_name : initial_state} for initial_state in x0s]
+
+def gen_fixed_states(bounds, component_name):
+    def sanity_check(bounds):
+        # sanity check
+        for b in bounds:
+            assert(len(b) == 1 or len(b) == 3)
+            if len(b) == 3:
+                # lower bound is always first
+                lower = b[0]
+                upper = b[1] 
+                step = b[2]
+                assert(lower <= upper)
+                # the step is smaller than the bounds interval
+                assert(upper - lower > step)
+
+    def interpolate_bounds(lower, upper, step) -> np.ndarray:
+        iters = int((upper - lower)/step)
+        return np.linspace(lower, upper, iters)
+
+    sanity_check(bounds)
+
+    # create initial vector
+    x0 = np.array([b[0] for b in bounds])
+    x0s = [x0]
+    # iterate over bounds    
+    for idx, b in enumerate(bounds):
+        # ignore static values
+        if len(b) == 1:
+            continue
+        vals = interpolate_bounds(b[0],b[1],b[2])
+        new_x0s = []
+        for x in x0s:
+            for val in vals:
+                new_x0 = x.copy()
+                # ignore the value that already exists
+                if new_x0[idx] == val:
+                    continue
+                new_x0[idx] = val
+                new_x0s.append(new_x0)
+        x0s += new_x0s
+
+    return [{component_name : initial_state} for initial_state in x0s]
+
+def gen_random_states(bounds, component_name, iterations):
+    def generate_single_random_state(bounds):
+        sample = np.random.rand(len(bounds))
+        ranges = np.array([b[1] - b[0] if len(b) == 2 else b[0] for b in bounds])
+        offset = np.array([- b[0] for b in bounds])
+        return sample * ranges - offset
+
+    return [{component_name : generate_single_random_state(bounds)} for _ in range(iterations)]
 
 class Worker(Process):
     def __init__(self, evt, config, task_queue, result_queue, progress_queue=None):
