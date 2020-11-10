@@ -110,7 +110,7 @@ if job_conf.get('parallel', False):
     success_rate = float(passed_termcond)/float(iterations)
     failed_runs = iterations - len(runs)
 
-    csaf_logger.info(f"Out of {iterations}, {passed_termcond} passed the terminating conditions. {success_rate:1.2f} [%] success.")
+    csaf_logger.info(f"Out of {iterations}, {passed_termcond} passed the terminating conditions. {success_rate*100:1.2f} [%] success.")
     csaf_logger.info(f"{failed_runs} simulations failed with an exception.")
 
     # save initial conditions to a file
