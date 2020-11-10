@@ -1,5 +1,5 @@
 # System Name
-name = "f16"
+name = "f16-fuzzy"
 
 # directory to output ROSmsg codecs
 codec_dir = "codec"
