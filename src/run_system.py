@@ -107,7 +107,11 @@ if job_conf.get('parallel', False):
     runs = run_parallel.run_workgroup(iterations, model_conf, states, tspan, terminating_conditions=termcond)
 
     passed_termcond = [val for val,_,_ in runs].count(True)
-    csaf_logger.info(f"Out of {iterations}, {len(runs)} finished, and {passed_termcond} passed the terminating conditions")
+    success_rate = float(passed_termcond)/float(iterations)
+    failed_runs = iterations - len(runs)
+
+    csaf_logger.info(f"Out of {iterations}, {passed_termcond} passed the terminating conditions. {success_rate:1.2f} [%] success.")
+    csaf_logger.info(f"{failed_runs} simulations failed with an exception.")
 
     # save initial conditions to a file
     if job_conf.get('x0_save_to_file', False):
