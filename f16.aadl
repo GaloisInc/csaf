@@ -1,0 +1,198 @@
+package F16
+public
+	with CSAF_Properties, Autopilot, Plant, LLC, Msg;
+	
+	system Shield
+	end Shield;
+	
+	system implementation Shield.Flat
+		subcomponents
+			Plant : system Plant::Plant
+				{
+					CSAF_Properties::Run_Command => "python3";
+					CSAF_Properties::Process_Source => "f16plant.py";
+					CSAF_Properties::Debug => false;
+					CSAF_Properties::Pub_Port => 5501;
+				};
+			Low_Level_Controller : abstract LLC::Controller
+				{
+					CSAF_Properties::Run_Command => "python3";
+					CSAF_Properties::Process_Source => "f16llc.py";
+					CSAF_Properties::Debug => false;
+					CSAF_Properties::Pub_Port => 5502;
+				};
+			GCAS_Autopilot : abstract Autopilot::GCAS_Autopilot
+				{
+					CSAF_Properties::Run_Command => "python3";
+					CSAF_Properties::Process_Source => "autopilot.py";
+					CSAF_Properties::Debug => false;
+					CSAF_Properties::Pub_Port => 5503;
+				};
+			Fixed_Airspeed_Autopilot : abstract Autopilot::Fixed_Airspeed_Autopilot
+				{
+					CSAF_Properties::Run_Command => "python3";
+					CSAF_Properties::Process_Source => "autoairspeed.py";
+					CSAF_Properties::Debug => false;
+					CSAF_Properties::Pub_Port => 5504;
+				};
+			Fixed_Altitude_Autopilot : abstract Autopilot::Fixed_Altitude_Autopilot
+				{
+					CSAF_Properties::Run_Command => "python3";
+					CSAF_Properties::Process_Source => "autoaltitude.py";
+					CSAF_Properties::Debug => false;
+					CSAF_Properties::Pub_Port => 5505;
+				};
+			Autopilot_Monitor : abstract Autopilot::Monitor
+				{
+					CSAF_Properties::Run_Command => "python3";
+					CSAF_Properties::Process_Source => "monitor_ap.py";
+					CSAF_Properties::Debug => false;
+					CSAF_Properties::Pub_Port => 5506;
+				};
+			Autopilot_Selector : abstract Autopilot::Selector
+				{
+					CSAF_Properties::Run_Command => "python3";
+					CSAF_Properties::Process_Source => "switch.py";
+					CSAF_Properties::Debug => false;
+					CSAF_Properties::Pub_Port => 5507;
+				};
+		connections
+			P_to_LLC : feature group Plant.Pub -> Low_Level_Controller.Plant_Sub;
+			P_to_AP : feature group Plant.Pub -> GCAS_Autopilot.Plant_Sub;
+			P_to_Air : feature group Plant.Pub -> Fixed_Airspeed_Autopilot.Plant_Sub;
+			P_to_Alt : feature group Plant.Pub -> Fixed_Altitude_Autopilot.Plant_Sub;
+			P_to_AM : feature group Plant.Pub -> Autopilot_Monitor.Plant_Sub;
+			
+			AP_FDA_to_AM : port GCAS_Autopilot.FDAs -> Autopilot_Monitor.GCAS_Autopilot_FDAs;
+			AM_O_to_AS : port Autopilot_Monitor.Outputs -> Autopilot_Selector.Autopilot_Monitor_Outputs;
+			
+			AP_O_to_AS : port GCAS_Autopilot.Outputs -> Autopilot_Selector.GCAS_Autopilot_Outputs;
+			Air_O_to_AS : port Fixed_Airspeed_Autopilot.Outputs -> Autopilot_Selector.Fixed_Airspeed_Autopilot_Outputs;
+			Alt_O_to_AS : port Fixed_Altitude_Autopilot.Outputs -> Autopilot_Selector.Fixed_Altitude_Autopilot_Outputs;
+			
+			AS_O_to_LLC : port Autopilot_Selector.Outputs -> Low_Level_Controller.Autopilot_Outputs;
+			LLC_O_to_P : port Low_Level_Controller.Outputs -> Plant.Low_Level_Controller_Outputs;
+		properties
+			CSAF_Properties::Codec_Dir => "codec";
+			CSAF_Properties::Output_Dir => "output";
+			CSAF_Properties::Evaluation_Order => (
+				reference(GCAS_Autopilot),
+				reference(Fixed_Airspeed_Autopilot),
+				reference(Fixed_Altitude_Autopilot),
+				reference(Autopilot_Monitor),
+				reference(Autopilot_Selector),
+				reference(Low_Level_Controller),
+				reference(Plant)
+			);
+			CSAF_Properties::Log_File => "f16run.log";
+			CSAF_Properties::Log_Level => "info";
+	end Shield.Flat;
+	
+	system implementation Shield.Composed
+		subcomponents
+			Plant : system Plant::Plant
+				{
+					CSAF_Properties::Run_Command => "python3";
+					CSAF_Properties::Process_Source => "f16plant.py";
+					CSAF_Properties::Debug => false;
+					CSAF_Properties::Pub_Port => 5501;
+				};
+			Flight_System : system Flight_System.Composed;
+		connections
+			P_to_FS : feature group Plant.Pub -> Flight_System.Plant_Sub;
+			FS_to_P : port Flight_System.Low_Level_Controller_Outputs -> Plant.Low_Level_Controller_Outputs;
+		properties
+			CSAF_Properties::Codec_Dir => "codec";
+			CSAF_Properties::Output_Dir => "output";
+			CSAF_Properties::Evaluation_Order => (
+				reference(Flight_System.Autopilot.GCAS),
+				reference(Flight_System.Autopilot.Fixed_Airspeed),
+				reference(Flight_System.Autopilot.Fixed_Altitude),
+				reference(Flight_System.Autopilot.Monitor),
+				reference(Flight_System.Autopilot.Selector),
+				reference(Flight_System.Low_Level_Controller),
+				reference(Plant)
+			);
+			CSAF_Properties::Log_File => "f16run.log";
+			CSAF_Properties::Log_Level => "info";
+	end Shield.Composed;
+	
+	system Flight_System
+		features
+			Plant_Sub : feature group inverse of Plant::Pub;
+			Low_Level_Controller_Outputs : out data port Msg::Message.Controller_Output;
+	end Flight_System;
+	
+	system implementation Flight_System.Composed
+		subcomponents
+			Low_Level_Controller : abstract LLC::Controller
+				{
+					CSAF_Properties::Run_Command => "python3";
+					CSAF_Properties::Process_Source => "f16llc.py";
+					CSAF_Properties::Debug => false;
+					CSAF_Properties::Pub_Port => 5502;
+				};
+			Autopilot : system Autopilot_System.Composed;
+		connections
+			P_to_AP : feature group Plant_Sub -> Autopilot.Plant_Sub;
+			P_to_LLC : feature group Plant_Sub -> Low_Level_Controller.Plant_Sub;
+			AS_O_to_LLC : port Autopilot.Outputs -> Low_Level_Controller.Autopilot_Outputs;
+			LLC_O_to_P : port Low_Level_Controller.Outputs -> Low_Level_Controller_Outputs;
+	end Flight_System.Composed;
+	
+	system Autopilot_System extends Autopilot::Autopilot
+	end Autopilot_System;
+	
+	system implementation Autopilot_System.Composed
+		subcomponents
+			GCAS : system Autopilot::GCAS_Autopilot
+				{
+					CSAF_Properties::Run_Command => "python3";
+					CSAF_Properties::Process_Source => "autopilot.py";
+					CSAF_Properties::Debug => false;
+					CSAF_Properties::Pub_Port => 5503;
+				};
+			Fixed_Airspeed : system Autopilot::Fixed_Airspeed_Autopilot
+				{
+					CSAF_Properties::Run_Command => "python3";
+					CSAF_Properties::Process_Source => "autoairspeed.py";
+					CSAF_Properties::Debug => false;
+					CSAF_Properties::Pub_Port => 5504;
+				};
+			Fixed_Altitude : system Autopilot::Fixed_Altitude_Autopilot
+				{
+					CSAF_Properties::Run_Command => "python3";
+					CSAF_Properties::Process_Source => "autoaltitude.py";
+					CSAF_Properties::Debug => false;
+					CSAF_Properties::Pub_Port => 5505;
+				};
+			Monitor : system Autopilot::Monitor
+				{
+					CSAF_Properties::Run_Command => "python3";
+					CSAF_Properties::Process_Source => "monitor_ap.py";
+					CSAF_Properties::Debug => false;
+					CSAF_Properties::Pub_Port => 5506;
+				};
+			Selector : system Autopilot::Selector
+				{
+					CSAF_Properties::Run_Command => "python3";
+					CSAF_Properties::Process_Source => "switch.py";
+					CSAF_Properties::Debug => false;
+					CSAF_Properties::Pub_Port => 5507;
+				};
+		connections
+			P_to_AP : feature group Plant_Sub -> GCAS.Plant_Sub;
+			P_to_Air : feature group Plant_Sub -> Fixed_Airspeed.Plant_Sub;
+			P_to_Alt : feature group Plant_Sub -> Fixed_Altitude.Plant_Sub;
+			P_to_AM : feature group Plant_Sub -> Monitor.Plant_Sub;
+			
+			AP_FDA_to_AM : port GCAS.FDAs -> Monitor.GCAS_Autopilot_FDAs;
+			AM_O_to_AS : port Monitor.Outputs -> Selector.Autopilot_Monitor_Outputs;
+			
+			AP_O_to_AS : port GCAS.Outputs -> Selector.GCAS_Autopilot_Outputs;
+			Air_O_to_AS : port Fixed_Airspeed.Outputs -> Selector.Fixed_Airspeed_Autopilot_Outputs;
+			Alt_O_to_AS : port Fixed_Altitude.Outputs -> Selector.Fixed_Altitude_Autopilot_Outputs;
+			AS_O_to_LLC : port Selector.Outputs -> Outputs;
+	end Autopilot_System.Composed;
+	
+end F16;

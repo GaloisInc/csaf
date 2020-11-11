@@ -1,0 +1,76 @@
+package Msg
+public
+	with Base_Types;
+		
+	data Message
+	end Message;
+	
+	data implementation Message.Common
+		subcomponents
+			version_major : data Base_Types::Unsigned_32;
+			version_minor : data Base_Types::Unsigned_32;
+			
+			topic : data Base_Types::String;
+			
+			time : data Base_Types::Float_64;
+	end Message.Common;
+	
+	data implementation Message.Autopilot_Output extends Message.Common
+		subcomponents
+			delta_e : data Base_Types::Float_64;
+			delta_a : data Base_Types::Float_64;
+			delta_r : data Base_Types::Float_64;
+			throttle : data Base_Types::Float_64;
+	end Message.Autopilot_Output;
+	
+	data implementation Message.Autopilot_State extends Message.Common
+		subcomponents
+			GCAS_State : data Base_Types::String; -- Note: This could be an enum, if the states are fixed
+	end Message.Autopilot_State;
+	
+	data implementation Message.Plant_Output extends Message.Common
+		subcomponents
+			Nz : data Base_Types::Float_64;
+			Ny : data Base_Types::Float_64;
+			az : data Base_Types::Float_64;
+			ay : data Base_Types::Float_64;
+	end Message.Plant_Output;
+	
+	data implementation Message.Plant_State extends Message.Common
+		subcomponents
+			vt : data Base_Types::Float_64;
+			alpha : data Base_Types::Float_64;
+			beta : data Base_Types::Float_64;
+			phi : data Base_Types::Float_64;
+			theta : data Base_Types::Float_64;
+			psi : data Base_Types::Float_64;
+			p : data Base_Types::Float_64;
+			q : data Base_Types::Float_64;
+			r : data Base_Types::Float_64;
+			pn : data Base_Types::Float_64;
+			pe : data Base_Types::Float_64;
+			h : data Base_Types::Float_64;
+			pow : data Base_Types::Float_64;
+	end Message.Plant_State;
+	
+	data implementation Message.Monitor_Output extends Message.Common
+		subcomponents
+			selection : data Base_Types::String;
+	end Message.Monitor_Output;
+	
+	data implementation Message.Controller_Output extends Message.Common
+		subcomponents
+			delta_e : data Base_Types::Float_64;
+			delta_a : data Base_Types::Float_64;
+			delta_r : data Base_Types::Float_64;
+			throttle : data Base_Types::Float_64;
+	end Message.Controller_Output;
+	
+	data implementation Message.Controller_State
+		subcomponents
+			int1 : data Base_Types::Float_64;
+			int2 : data Base_Types::Float_64;
+			int3 : data Base_Types::Float_64;
+	end Message.Controller_State;
+	
+end Msg;
