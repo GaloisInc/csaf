@@ -10,7 +10,8 @@ from .scheduler import Scheduler
 from .model import ModelNative
 from .trace import TimeTrace
 
-
+import numpy as np
+from gym import spaces
 import socket
 import socketserver
 
@@ -208,19 +209,42 @@ class SystemEnv:
         """
         self.sys: System = sys
         self._cname = cname
+        self.action_space = spaces.Box(-1., 1., shape=(4,), dtype='float32')
+        self.observation_space = spaces.Box(-1., 1., shape=(13,), dtype='float32')  #spaces.Box(low=0, high=255, shape=(screen_height, screen_width, 3), dtype=np.uint8)
         self._iter = self.make_system_iterator(terminating_conditions=terminating_conditions)
         next(self._iter)
 
     def step(self, component_output):
         """step through the simulation generator"""
-        return self._iter.send(component_output)
+        try:
+            stuff = self._iter.send({"autopilot-states": ["Waiting"],
+                                  "autopilot-fdas": ["Waiting"],
+                                  "autopilot-outputs": component_output})
+            ob = stuff['plant-states']
+            reward = -stuff['time']
+            pouts = stuff['plant-outputs']
+            done = False
+            # Find a good stopping condition [TO DO]
+
+        except StopIteration:
+            done = True
+            ob = [0 for _ in range(13)]
+            reward = 0
+            pouts = [0 for _ in range(4)]
+        return np.asarray(ob), reward, done, {'plant-outputs': pouts}
 
     def reset(self):
         """reset components and create a new sim"""
         for c in self.sys.components:
             c.reset()
         self._iter = self.make_system_iterator()
-        next(self._iter)
+        stuff = next(self._iter)
+        # ob = stuff['plant-states']
+        # reward = -stuff['time']
+        # pouts = stuff['plant-outputs']
+        # done = False
+        # next(self._iter)
+        return np.asarray([0 for _ in range(13)])
 
     def set_state(self, component_name, state):
         """allow component state to be configured"""
