@@ -38,7 +38,6 @@ def run_experiment(args):
     eg.add('update_after', 10)
     #eg.add('ac_kwargs:activation', tf.tanh, '')
     eg.add('ac_kwargs:hidden_sizes', [(256, 256)], 'hid')
-    # eg.run(ddpg_tf1)
     eg.run(ddpg_tf1)
 
 
