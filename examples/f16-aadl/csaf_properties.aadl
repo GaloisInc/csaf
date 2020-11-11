@@ -1,0 +1,51 @@
+property set CSAF_Properties is
+	
+	--
+	-- Top-level system properties
+	--
+	
+	Codec_Dir : aadlstring applies to (system implementation);
+	
+	Output_Dir : aadlstring applies to (system implementation);
+	
+	Evaluation_Order : list of reference applies to (system implementation);
+	
+	Log_File : aadlstring applies to (system implementation);
+	
+	Log_Level : aadlstring applies to (system implementation);
+	
+	--
+	-- Subcomponent properties
+	--
+	
+	Pub_Port : aadlinteger applies to (system subcomponent);
+	
+	Run_Command : aadlstring applies to (system subcomponent);
+	
+	Process_Source : aadlstring applies to (system subcomponent);
+	
+	Debug : aadlboolean applies to (system subcomponent);
+	
+	--
+	-- Component properties
+	--
+	
+	Parameters : list of record (Name : aadlstring; Value : aadlstring;)
+		applies to (system, thread, subprogram, abstract); -- FIXME: Can be removed if we make params individual properties instead.
+		
+	Initial_Values : list of aadlreal applies to (port);
+	
+	Sampling_Frequency : aadlinteger applies to (system, thread, subprogram, abstract);
+	-- Note: ^ This could be achieved using Dispatch_Protocol => Periodic and Period => 1/f
+	
+	Is_Discrete : aadlboolean applies to (system, thread, subprogram, abstract);
+	
+	Is_Hybrid : aadlboolean applies to (system, thread, subprogram, abstract);
+	
+	System_Name : aadlstring applies to (system, thread, subprogram, abstract);
+	
+	System_Representation : aadlstring applies to (system, thread, subprogram, abstract);
+	
+	System_Solver : aadlstring applies to (system, thread, subprogram, abstract);
+	
+end CSAF_Properties;

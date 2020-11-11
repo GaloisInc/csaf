@@ -1,0 +1,109 @@
+package Autopilot
+public
+	with CSAF_Properties, CSAF_Parameters, Msg, Plant;
+	
+	abstract Autopilot
+		features
+			Plant_Sub : feature group inverse of Plant::Pub;
+			Outputs : out data port Msg::Message.Autopilot_Output;
+	end Autopilot;
+	
+	abstract GCAS_Autopilot extends Autopilot
+		features
+			FDAs : out data port Msg::Message.Autopilot_State;
+		properties
+			CSAF_Properties::System_Name => "F16 GCAS Autopilot";
+			CSAF_Properties::System_Representation => "black box";
+			CSAF_Properties::System_Solver => "Euler";
+			CSAF_Properties::Sampling_Frequency => 10;
+			CSAF_Properties::Is_Discrete => true;
+			CSAF_Properties::Is_Hybrid => false;
+			
+			-- Parameters
+			CSAF_Parameters::NzMax => 9.0;
+			CSAF_Parameters::vt_des => 502.0;
+			
+--			CSAF_Properties::Parameters => (
+--				[Name => "NzMax"; Value => "9.0";],
+--				[Name => "vt_des"; Value => "502.0";]
+--			);
+	end GCAS_Autopilot;
+	
+	abstract Fixed_Airspeed_Autopilot extends Autopilot
+		properties
+			CSAF_Properties::System_Name => "F16 Fixed Airspeed Autopilot";
+			CSAF_Properties::System_Representation => "black box";
+			CSAF_Properties::System_Solver => "Euler";
+			CSAF_Properties::Sampling_Frequency => 10;
+			CSAF_Properties::Is_Discrete => true;
+			CSAF_Properties::Is_Hybrid => false;
+			
+			-- Parameters
+			CSAF_Parameters::setpoint => 800.0;
+			CSAF_Parameters::p_gain => 0.01;
+			CSAF_Parameters::xequil => (502.0, 0.03887505597600522, 0.0, 0.0, 0.03887505597600522, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1000.0, 9.05666543872074);
+			
+--			CSAF_Properties::Parameters => (
+--				[Name => "setpoint"; Value => "800.0";],
+--				[Name => "p_gain"; Value => "0.01";],
+--				[Name => "xequil"; Value => "[502.0, 0.03887505597600522, 0.0, 0.0, 0.03887505597600522, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1000.0, 9.05666543872074]";]
+--			);
+	end Fixed_Airspeed_Autopilot;
+	
+	abstract Fixed_Altitude_Autopilot extends Autopilot
+		properties
+			CSAF_Properties::System_Name => "F16 Fixed Altitude Autopilot";
+			CSAF_Properties::System_Representation => "black box";
+			CSAF_Properties::System_Solver => "Euler";
+			CSAF_Properties::Sampling_Frequency => 10;
+			CSAF_Properties::Is_Discrete => true;
+			CSAF_Properties::Is_Hybrid => false;
+			
+			-- Parameters
+			CSAF_Parameters::setpoint => 2500.0;
+			CSAF_Parameters::xequil => (502.0, 0.03887505597600522, 0.0, 0.0, 0.03887505597600522, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1000.0, 9.05666543872074);
+			
+--			CSAF_Properties::Parameters => (
+--				[Name => "setpoint"; Value => "2500.0";],
+--				[Name => "xequil"; Value => "[502.0, 0.03887505597600522, 0.0, 0.0, 0.03887505597600522, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1000.0, 9.05666543872074]";]
+--			);
+	end Fixed_Altitude_Autopilot;
+	
+	abstract Monitor
+		features
+			GCAS_Autopilot_FDAs : in data port Msg::Message.Autopilot_State;
+			Plant_Sub : feature group inverse of Plant::Pub;
+			Outputs : out data port Msg::Message.Monitor_Output;
+		properties
+			CSAF_Properties::System_Name => "F16 Autopilot Monitor";
+			CSAF_Properties::System_Representation => "black box";
+			CSAF_Properties::System_Solver => "Euler";
+			CSAF_Properties::Sampling_Frequency => 100;
+			CSAF_Properties::Is_Discrete => true;
+			CSAF_Properties::Is_Hybrid => false;
+	end Monitor;
+	
+	abstract Selector
+		features
+			Autopilot_Monitor_Outputs : in data port Msg::Message.Monitor_Output;
+			Fixed_Airspeed_Autopilot_Outputs : in data port Msg::Message.Autopilot_Output;
+			Fixed_Altitude_Autopilot_Outputs : in data port Msg::Message.Autopilot_Output;
+			GCAS_Autopilot_Outputs : in data port Msg::Message.Autopilot_Output;
+			Outputs : out data port Msg::Message.Autopilot_Output;
+		properties
+			CSAF_Properties::System_Name => "Autopilot Selector";
+			CSAF_Properties::System_Representation => "black box";
+			CSAF_Properties::System_Solver => "Euler";
+			CSAF_Properties::Sampling_Frequency => 10;
+			CSAF_Properties::Is_Discrete => true;
+			CSAF_Properties::Is_Hybrid => false;
+			
+			-- Parameters
+			CSAF_Parameters::mapper => ("gcas", "altitude", "airspeed");
+			
+--			CSAF_Properties::Parameters => (
+--				[Name => "mapper"; Value => "[gcas, altitude, airspeed]";]
+--			);
+	end Selector;
+	
+end Autopilot;

@@ -1,0 +1,65 @@
+property set CSAF_Parameters is
+	
+	--
+	-- Autopilot parameters
+	--
+	
+	NzMax : aadlreal applies to (system, abstract);
+	vt_des : aadlreal applies to (system, abstract);
+	setpoint : aadlreal applies to (system, abstract);
+	p_gain : aadlreal applies to (system, abstract);
+	xequil : list of aadlreal applies to (system, abstract);
+	
+	--
+	-- Autopilot Selector parameters
+	--
+	
+	mapper : list of aadlstring applies to (system, abstract);
+	
+	--
+	-- Controller parameters
+	--
+	
+	lqr_name : aadlstring applies to (system, abstract);
+	throttle_max : aadlreal applies to (system, abstract);
+	throttle_min : aadlreal applies to (system, abstract);
+	elevator_max : aadlreal applies to (system, abstract);
+	elevator_min : aadlreal applies to (system, abstract);
+	aileron_max : aadlreal applies to (system, abstract);
+	aileron_min : aadlreal applies to (system, abstract);
+	rudder_max : aadlreal applies to (system, abstract);
+	rudder_min : aadlreal applies to (system, abstract);
+	
+	--
+	-- Plant parameters
+	--
+	
+	-- FIXME: Should these actually be properties? Could the names be changed to something more descriptive/reusable?
+	s : aadlreal applies to (system, abstract);
+	b : aadlreal applies to (system, abstract);
+	cbar : aadlreal applies to (system, abstract);
+	rm : aadlreal applies to (system, abstract);
+	xcgref : aadlreal applies to (system, abstract);
+	xcg : aadlreal applies to (system, abstract);
+	he : aadlreal applies to (system, abstract);
+	c1 : aadlreal applies to (system, abstract);
+	c2 : aadlreal applies to (system, abstract);
+	c3 : aadlreal applies to (system, abstract);
+	c4 : aadlreal applies to (system, abstract);
+	c5 : aadlreal applies to (system, abstract);
+	c6 : aadlreal applies to (system, abstract);
+	c7 : aadlreal applies to (system, abstract);
+	c8 : aadlreal applies to (system, abstract);
+	c9 : aadlreal applies to (system, abstract);
+	rtod : aadlreal applies to (system, abstract);
+	g : aadlreal applies to (system, abstract);
+	xcg_mult : aadlreal applies to (system, abstract);
+	cxt_mult : aadlreal applies to (system, abstract);
+	cyt_mult : aadlreal applies to (system, abstract);
+	czt_mult : aadlreal applies to (system, abstract);
+	clt_mult : aadlreal applies to (system, abstract);
+	cmt_mult : aadlreal applies to (system, abstract);
+	cnt_mult : aadlreal applies to (system, abstract);
+	model : aadlstring applies to (system, abstract);
+	
+end CSAF_Parameters;
