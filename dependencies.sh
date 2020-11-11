@@ -9,10 +9,10 @@ apt-get clean && \
     graphviz \
     python3-pyqt5 \
     pandoc \
-    libopenmpi-dev
+    libopenmpi-dev \
+    wget
 
-pip3 install -U pip
-pip3 install --upgrade pip
+python3 -m pip install --upgrade pip
 
 # Latex for notebooks
 apt-get install -y texlive-xetex texlive-fonts-recommended texlive-generic-recommended

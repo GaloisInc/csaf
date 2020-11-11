@@ -18,3 +18,4 @@ gym==0.15.6
 sklearn
 modAL==0.3.6
 scikit-optimize==0.8.1
+dill==0.3.2
