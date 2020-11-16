@@ -41,5 +41,16 @@ bounds = [    [200.0, 1000.0, 100.0], # vt [ft/s]
 # predefined terminating condition from a library
 terminating_conditions = "ground_collision"
 
+# predefined static tests
+static_tests = [
+    # Option 1:
+    # Very generic test defined in src/static_tests such as overshoot(ref_time, reference, res_time)
+    # User then specifies the required variables
+    "overshoot(trajs['autopilot'].times, np.array(getattr(trajs['autopilot'], 'outputs'))[:, 0], trajs['plant'].times, np.array(getattr(trajs['plant'], 'outputs'))[:, 0])",
+    # Option 2:
+    # have library for each example, such as examples/f16/tests.py and define a wrapper there
+    "overshoot_nz"
+]
+
 # [true|false]
 x0_save_to_file = true

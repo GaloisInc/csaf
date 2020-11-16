@@ -113,6 +113,22 @@ if job_conf.get('parallel', False):
     csaf_logger.info(f"Out of {iterations}, {passed_termcond} passed the terminating conditions. {success_rate*100:1.2f} [%] success.")
     csaf_logger.info(f"{failed_runs} simulations failed with an exception.")
 
+    # Run static tests if desired
+    static_tests = job_conf.get('static_tests', None)
+    if static_tests:
+        csaf_logger.info(f"Running static tests")
+        for t in static_tests:
+            # OPTION 1: If we go with option 1 (more generic tests) we need to include the static_test library
+            from static_tests import *
+            test_results_option_1 = [eval(t) if passed else None for passed,trajs,_ in runs]
+
+            # OPTION 2: If we have example specific test library (Option 2) we need to include it here
+            from tests import *
+            current_test_option_2 = eval(t)
+            # iterate over runs
+            test_results_option_2 = [current_test_option_2(trajs) if passed else None for passed,trajs,_ in runs]
+        # TODO: save the results in log file/display plot/print on screen
+
     # save initial conditions to a file
     if job_conf.get('x0_save_to_file', False):
         filename = os.path.join(model_conf.output_directory, f"{model_conf.name}-x0.csv")
