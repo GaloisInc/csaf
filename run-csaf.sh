@@ -103,6 +103,7 @@ then
     case $EXAMPLE_NAME in
         "f16-simple")
             CONFIG_NAME="f16_simple_config.toml"
+            CONFIG_NAME="f16_shield_gcas_pullup_llc.toml"
             CSAF_LOC=${PWD}/"examples/f16"
             ;;
         "f16-shield")
@@ -200,8 +201,10 @@ else
             ${IMAGE_NAME}:${IMAGE_TAG} "jupyter" "notebook" "--port=8888" \
             "--no-browser" "--ip=0.0.0.0" "--allow-root" "--notebook-dir=/notebooks"
     else
+        #docker run --init -it -v ${PWD}/src:/app -v ${CSAF_LOC}:/csaf-system --network host \
+        #    ${IMAGE_NAME}:${IMAGE_TAG} python3 "/app/run_system.py" "/csaf-system" ${CONFIG_NAME} ${JOB_CONFIG_PATH}
         docker run --init -it -v ${PWD}/src:/app -v ${CSAF_LOC}:/csaf-system --network host \
-            ${IMAGE_NAME}:${IMAGE_TAG} python3 "/app/run_system.py" "/csaf-system" ${CONFIG_NAME} ${JOB_CONFIG_PATH}
+            csaf-install python3 "/app/run_system.py" "/csaf-system" ${CONFIG_NAME} ${JOB_CONFIG_PATH}
     fi
 fi
 

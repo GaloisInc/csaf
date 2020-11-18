@@ -12,7 +12,7 @@ def run_experiment(args):
 
         # create a csaf configuration out of toml
         my_conf = cconf.SystemConfig.from_toml(
-            "/home/averma/csaf_architecture/examples/f16/f16_simple_config.toml")  # "/csaf-system/f16_simple_config.toml")
+            "/home/greg/Documents/csaf_architecture/examples/f16/f16_simple_config.toml")  # "/csaf-system/f16_simple_config.toml")
 
         # termination condition
         def ground_collision_condition(cname, outs):
@@ -30,12 +30,12 @@ def run_experiment(args):
     eg = ExperimentGrid("env_fn()")
     eg.add('env_fn', env_fn)
     eg.add('seed', [0])
-    eg.add('epochs', 500)
-    eg.add('gamma', 0.9)
-    eg.add('steps_per_epoch', 100)
+    eg.add('epochs', 50)     # Orig. 500
+    eg.add('gamma', 0.97)     # Increased due to long episode lengths (orig. 0.9)
+    eg.add('steps_per_epoch', 5000)
     eg.add('save_freq', 50)
-    eg.add('max_ep_len', 10)
-    eg.add('update_after', 10)
+    eg.add('max_ep_len', 2100)    # 2100: Guessing from running ./run-csaf -e f16-simple and seeing how many iterations that takes to stabilize
+    eg.add('update_after', 1000)
     #eg.add('ac_kwargs:activation', tf.tanh, '')
     eg.add('ac_kwargs:hidden_sizes', [(256, 256)], 'hid')
     eg.run(ddpg_tf1)

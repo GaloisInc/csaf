@@ -17,9 +17,7 @@ import socketserver
 
 
 class System:
-    """ System accepts a component configuration, and then configures and composes them into a controlled system
-
-    Has a scheduler to permit time simulations of the component system
+    """ System accepts a component configuration, and then configures and composes them into a controlled system Has a scheduler to permit time simulations of the component system
     """
     @staticmethod
     def check_port(port):
@@ -209,29 +207,97 @@ class SystemEnv:
         """
         self.sys: System = sys
         self._cname = cname
-        self.action_space = spaces.Box(-1., 1., shape=(4,), dtype='float32')
-        self.observation_space = spaces.Box(-1., 1., shape=(13,), dtype='float32')  #spaces.Box(low=0, high=255, shape=(screen_height, screen_width, 3), dtype=np.uint8)
+        #self.action_space = spaces.Box(-1., 1., shape=(4,), dtype='float32')
+        self.action_space = spaces.Box(np.array([-2 / 9, -1, 0, 0]), np.array([1, 1, 0, 1]))
+        #self.observation_space = spaces.Box(-1., 1., shape=(13,), dtype='float32')  #spaces.Box(low=0, high=255, shape=(screen_height, screen_width, 3), dtype=np.uint8)
+        self.observation_space = spaces.Box(
+                np.array([300 / 2500, -10 / 45, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0, 0]),
+                np.array([1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]))
         self._iter = self.make_system_iterator(terminating_conditions=terminating_conditions)
         next(self._iter)
 
     def step(self, component_output):
         """step through the simulation generator"""
+
+        # Unnormalize actions
+        #component_output[0] *= 9    # Nz \in [-2, 9]
+        ## From the plots of running f16-simple, it looks like ps_ref stays roughly in [-2.5, 0.5].
+        ## We'll start by letting it vary in [-3, 3]
+        #component_output[1] *= 3
+        #component_output[2] = 0     # Ny = 0
+        # Throttle is already in [0, 1] so we don't need to normalize it.
+        action = []
+        action.append(component_output[0] * 9)
+        action.append(component_output[1] * 3)
+        action.append(0)
+        action.append(component_output[3])
+
+        # states: [vt, alpha, beta, phi, theta, psi, p, q, r, pn, pe, h, power]
+        # actions: [Nz_ref, ps_ref, Ny_r_ref, throttle_ref]
+
         try:
             stuff = self._iter.send({"autopilot-states": ["Waiting"],
                                   "autopilot-fdas": ["Waiting"],
-                                  "autopilot-outputs": component_output})
+                                  "autopilot-outputs": np.asarray(action)})
             ob = stuff['plant-states']
-            reward = -stuff['time']
+            #reward = -stuff['time']
+            # 1st attempt: Reward = - c1 * (altitude deviation) - c2 * (pitch deviation) - 1
+            # The constant negative term helps penalize extra time taken
+            # c2 should be small so that the policy prioritizes reaching a good altitude
+            #   before leveling off.
+            reward = -5 + 0.001 * (ob[11] - 1000)
             pouts = stuff['plant-outputs']
             done = False
-            # Find a good stopping condition [TO DO]
+            # Find a good stopping condition
+            # 1st attempt: altitude is within [800, 1500] ft and pitch angle is
+            # within [0, 30] deg
+            if 800 <= ob[11] and 0 <= ob[4] and ob[4] <= 30:
+                done = True
 
         except StopIteration:
             done = True
             ob = [0 for _ in range(13)]
-            reward = 0
+            # Penalty for crashing
+            reward = -10000
             pouts = [0 for _ in range(4)]
-        return np.asarray(ob), reward, done, {'plant-outputs': pouts}
+
+        if ob[11] <= 0:
+            done = True
+            ob = [0 for _ in range(13)]
+            # Penalty for crashing
+            reward = -10000
+            pouts = [0 for _ in range(4)]
+
+        # Normalize observations - All limits are linear scalings with no offset
+        #ob[0] /= 2500    # vt \in [300, 2500]
+        #ob[1] /= 45      # alpha \in [-10, 45]
+        #ob[2] /= 30      # beta \in [-30, 30]
+        #ob[3] /= 180     # For the roll, pitch, and yaw angles (phi, theta,
+        #ob[4] /= 180     #   psi) we will just assume they fit in [-180, 180].
+        #ob[5] /= 180     #   (0 seems to be the stable position)
+        #ob[6] /= 180     # Not sure about angular rates, but I'll assume it's
+        #ob[7] /= 180     #   probably less than 180 deg / s. May be refined.
+        #ob[8] /= 180
+        #ob[9] /= 10000   # North/east displacement should be irrelevant, so
+        #ob[10] /= 10000  #   I'll just put some limit.
+        #ob[11] /= 45000  # h \in [0, 45000]
+        #ob[12] /= 20     # power \in [0, 20] (based on f16-simple)
+        res = []
+        res.append(ob[0] / 2500)
+        res.append(ob[1] / 45)
+        res.append(ob[2] / 30)
+        res.append(ob[3] / 180)
+        res.append(ob[4] / 180)
+        res.append(ob[5] / 180)
+        res.append(ob[6] / 180)
+        res.append(ob[7] / 180)
+        res.append(ob[8] / 180)
+        res.append(ob[9] / 10000)
+        res.append(ob[10] / 10000)
+        res.append(ob[11] / 45000)
+        res.append(ob[12] / 20)
+
+        return np.asarray(res), reward, done, {'plant-outputs': pouts}
 
     def reset(self):
         """reset components and create a new sim"""
