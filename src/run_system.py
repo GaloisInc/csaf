@@ -67,6 +67,7 @@ if job_conf.get('parallel', False):
     # Parallel run
     csaf_logger.info(f"Running parallel simulation.")
     x0 = get_attribute(job_conf, 'x0')
+    states = None
 
     if x0 == "random":
         csaf_logger.info(f"Generating random states.")
@@ -113,8 +114,18 @@ if job_conf.get('parallel', False):
     csaf_logger.info(f"Out of {iterations}, {passed_termcond} passed the terminating conditions. {success_rate*100:1.2f} [%] success.")
     csaf_logger.info(f"{failed_runs} simulations failed with an exception.")
 
+    # Run static tests if desired
+    static_tests = job_conf.get('static_tests', None)
+    if static_tests:
+        csaf_logger.info(f"Running static tests")
+        from tests_static import *
+        for t in static_tests:
+            z = [eval(t) if passed else None for passed,trajs,_ in runs]
+            csaf_logger.info(f"{t} evaluated.")
+            csaf_logger.info(f"Results: {z}")
+
     # save initial conditions to a file
-    if job_conf.get('x0_save_to_file', False):
+    if job_conf.get('x0_save_to_file', False) and states:
         filename = os.path.join(model_conf.output_directory, f"{model_conf.name}-x0.csv")
         csaf_logger.info(f"Saving inital conditions to {filename}")
         run_parallel.save_states_to_file(filename, states)
