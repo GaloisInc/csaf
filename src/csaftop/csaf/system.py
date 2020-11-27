@@ -208,7 +208,8 @@ class SystemEnv:
         self.sys: System = sys
         self._cname = cname
         #self.action_space = spaces.Box(-1., 1., shape=(4,), dtype='float32')
-        self.action_space = spaces.Box(np.array([-2 / 9, -1, 0, 0]), np.array([1, 1, 0, 1]))
+        #self.action_space = spaces.Box(np.array([-2 / 9, -1, 0, 0]), np.array([1, 1, 0, 1]))
+        self.action_space = spaces.Box(np.array([-2 / 9, -1, 0]), np.array([1, 1, 1]))
         #self.observation_space = spaces.Box(-1., 1., shape=(13,), dtype='float32')  #spaces.Box(low=0, high=255, shape=(screen_height, screen_width, 3), dtype=np.uint8)
         self.observation_space = spaces.Box(
                 np.array([300 / 2500, -10 / 45, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0, 0]),
@@ -230,7 +231,7 @@ class SystemEnv:
         action.append(component_output[0] * 9)
         action.append(component_output[1] * 3)
         action.append(0)
-        action.append(component_output[3])
+        action.append(component_output[2])
 
         # states: [vt, alpha, beta, phi, theta, psi, p, q, r, pn, pe, h, power]
         # actions: [Nz_ref, ps_ref, Ny_r_ref, throttle_ref]
@@ -245,14 +246,15 @@ class SystemEnv:
             # The constant negative term helps penalize extra time taken
             # c2 should be small so that the policy prioritizes reaching a good altitude
             #   before leveling off.
-            reward = -5 + 0.001 * (ob[11] - 1000)
+            reward = -5 + 0.001 * (ob[11] - 1000) - 0.1 * abs(ob[3])
             pouts = stuff['plant-outputs']
             done = False
             # Find a good stopping condition
             # 1st attempt: altitude is within [800, 1500] ft and pitch angle is
             # within [0, 30] deg
-            if 800 <= ob[11] and 0 <= ob[4] and ob[4] <= 30:
+            if 800 <= ob[11] and 0 <= ob[4] and ob[4] <= 30 and abs(ob[4] - ob[1]) <= 0.01 and abs(ob[7]) <= 1:
                 done = True
+            # TODO: Check pitch/roll/yaw rate.
 
         except StopIteration:
             done = True
@@ -297,10 +299,22 @@ class SystemEnv:
         res.append(ob[11] / 45000)
         res.append(ob[12] / 20)
 
+        # Check whether something is diverging. Sometimes we trigger some issue in
+        # the ODE solver which causes vt to grow unchecked.
+        #print("res: ", res)
+        if not self.observation_space.contains(res):
+            #print("res is outside box")
+            done = True
+            ob = [0 for _ in range(13)]
+            # Penalty for crashing
+            reward = -10000
+            pouts = [0 for _ in range(4)]
+
         return np.asarray(res), reward, done, {'plant-outputs': pouts}
 
     def reset(self):
         """reset components and create a new sim"""
+        # TODO: Try simpler initial conditions/action space (Nz only, zero roll angle)
         for c in self.sys.components:
             c.reset()
         self._iter = self.make_system_iterator()

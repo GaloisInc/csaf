@@ -260,6 +260,8 @@ def engine(thtlc, power, vt, alt):
     #XXX: amach computation uses saturation
     amach_ = amach(vt, alt)
 
+    #print(vt, alt, amach_)
+
     # XXX: Piecewise linear
     cpow = tgear(thtlc)
     # XXX:
