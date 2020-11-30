@@ -1,0 +1,22 @@
+system_name = "Can Satellite 2D"
+system_representation = "black box"
+system_solver = "Euler"
+
+sampling_frequency = 50
+
+is_discrete = false
+is_hybrid = false
+
+
+[parameters]
+    n = 0.001027
+    mc = 12
+
+[inputs]
+  msgs = [ "controller_output.msg" ]
+
+[topics]
+
+  [topics.states]
+      msg = "satplant_state.msg"
+      initial = [0.0, 0.0, 0.0, 0.0]

@@ -1,0 +1,23 @@
+system_name = "4 Aircraft Lateral Rejoin Controller" 
+system_representation = "black box"
+system_solver = "Euler"
+
+sampling_frequency = 50
+
+is_discrete = true
+is_hybrid = false
+
+
+[parameters]
+    rest_length = 10
+
+[inputs]
+  msgs = [ "dubinplant_state.msg",
+  "dubinplant_state.msg",
+  "dubinplant_state.msg",
+  "dubinplant_state.msg" ]
+
+[topics]
+
+  [topics.outputs]
+      msg = "controller_output.msg"
