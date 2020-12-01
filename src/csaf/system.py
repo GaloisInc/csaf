@@ -10,7 +10,6 @@ from .scheduler import Scheduler
 from .model import ModelNative
 from .trace import TimeTrace
 
-
 import socket
 import socketserver
 
@@ -66,10 +65,13 @@ class System:
             # TODO: better Model class selection here
             is_discrete = dconfig["config"]["is_discrete"]
             #model = ModelNative.from_filename(dconfig["process"], is_discrete=is_discrete)
-            model = ModelNative.from_config(dconfig["process"], dconfig["config"])
+            model = ModelNative.from_config(dconfig["process"],
+                                            dconfig["config"])
 
             # pub/sub parameters
-            sub_ports = [[str(config.config_dict["components"][l]["pub"]), l+"-"+t] for l, t in dconfig["sub"]]
+            sub_ports = [[
+                str(config.config_dict["components"][l]["pub"]), l + "-" + t
+            ] for l, t in dconfig["sub"]]
             if "pub" in dconfig:
                 pub_ports = [str(dconfig["pub"])]
             else:
@@ -78,8 +80,11 @@ class System:
 
             # produce serial messengers
             mss_out = dconfig['config']['topics']
-            mss_out = {f"{dname}-{t}": v['serializer'] for t, v in mss_out.items()}
-            mss_in ={}
+            mss_out = {
+                f"{dname}-{t}": v['serializer']
+                for t, v in mss_out.items()
+            }
+            mss_in = {}
             for sname, stopic in dconfig['sub']:
                 k = f"{sname}-{stopic}"
                 mss_in[k] = config.get_msg_setting(sname, stopic, 'serializer')
@@ -88,12 +93,21 @@ class System:
 
             def_buff = {}
             for tname in mss_out.topics:
-                if "initial" in config.get_component_settings(dname)["config"]["topics"][tname.split("-")[1]]:
-                    def_buff[tname] = config.get_msg_setting(dname, tname.split("-")[1], "initial")
+                if "initial" in config.get_component_settings(
+                        dname)["config"]["topics"][tname.split("-")[1]]:
+                    def_buff[tname] = config.get_msg_setting(
+                        dname,
+                        tname.split("-")[1], "initial")
 
             # sampling frequency
             sampling_frequency = dconfig['config']['sampling_frequency']
-            comp = DynamicComponent(model, topics_in, mss_out, mss_in, sampling_frequency, name=dname, default_output=def_buff)
+            comp = DynamicComponent(model,
+                                    topics_in,
+                                    mss_out,
+                                    mss_in,
+                                    sampling_frequency,
+                                    name=dname,
+                                    default_output=def_buff)
 
             # set properties
             if dconfig["debug"]:
@@ -131,7 +145,11 @@ class System:
         s = sched.get_schedule_tspan(tspan)
 
         # produce stimulus
-        input_for_first = list(set([p for p, _ in self.config._config["components"][self.eval_order[0]]["sub"]]))
+        input_for_first = list(
+            set([
+                p for p, _ in self.config._config["components"][
+                    self.eval_order[0]]["sub"]
+            ]))
         for dname in input_for_first:
             idx = self.names.index(dname)
             self.components[idx].send_stimulus(float(tspan[0]))
@@ -144,17 +162,28 @@ class System:
             idx = self.names.index(cidx)
             self.components[idx].receive_input()
             out = self.components[idx].send_output()
-            if terminating_conditions is not None and terminating_conditions(cidx, out):
+            if self.components[idx].internal_error:
+                return False
+            if terminating_conditions is not None and terminating_conditions(
+                    cidx, out):
                 return False
         return True
 
-    def simulate_tspan(self, tspan, show_status=False, terminating_conditions=None, return_passed=False):
+    def simulate_tspan(self,
+                       tspan,
+                       show_status=False,
+                       terminating_conditions=None,
+                       return_passed=False):
         """over a given timespan tspan, simulate the system"""
         sched = Scheduler(self.components, self.eval_order)
         s = sched.get_schedule_tspan(tspan)
 
         # produce stimulus
-        input_for_first = list(set([p for p, _ in self.config._config["components"][self.eval_order[0]]["sub"]]))
+        input_for_first = list(
+            set([
+                p for p, _ in self.config._config["components"][
+                    self.eval_order[0]]["sub"]
+            ]))
         for dname in input_for_first:
             idx = self.names.index(dname)
             self.components[idx].send_stimulus(float(tspan[0]))
@@ -163,7 +192,8 @@ class System:
         dnames = self.config.get_name_components
         dtraces = {}
         for dname in dnames:
-            fields = (['times'] + [f"{topic}" for topic in self.config.get_topics(dname)])
+            fields = (['times'] +
+                      [f"{topic}" for topic in self.config.get_topics(dname)])
             dtraces[dname] = TimeTrace(fields)
 
         if show_status:
@@ -176,7 +206,9 @@ class System:
             self.components[idx].receive_input()
             out = self.components[idx].send_output()
             out["times"] = t
-            if terminating_conditions is not None and terminating_conditions(cidx, out):
+            if self.components[idx].internal_error or (
+                    terminating_conditions is not None
+                    and terminating_conditions(cidx, out)):
                 return dtraces if not return_passed else (dtraces, False)
             dtraces[cidx].append(**out)
 
@@ -208,7 +240,8 @@ class SystemEnv:
         """
         self.sys: System = sys
         self._cname = cname
-        self._iter = self.make_system_iterator(terminating_conditions=terminating_conditions)
+        self._iter = self.make_system_iterator(
+            terminating_conditions=terminating_conditions)
         next(self._iter)
 
     def step(self, component_output):
@@ -230,7 +263,11 @@ class SystemEnv:
         """make a generator for the step implementation"""
         sched = Scheduler(self.sys.components, self.sys.eval_order)
         s = sched.get_scheduler()
-        input_for_first = list(set([p for p, _ in self.sys.config._config["components"][self.sys.eval_order[0]]["sub"]]))
+        input_for_first = list(
+            set([
+                p for p, _ in self.sys.config._config["components"][
+                    self.sys.eval_order[0]]["sub"]
+            ]))
 
         # produce stimulus
         for dname in input_for_first:
@@ -248,10 +285,13 @@ class SystemEnv:
             # if cname, get yield for input, simulate otherwise
             if cidx == self._cname:
                 in_buffer = yield self.sys.components[idx]._input_buffer
-                out = self.sys.components[idx].send_output(overwrite_buffer = in_buffer)
+                out = self.sys.components[idx].send_output(
+                    overwrite_buffer=in_buffer)
             else:
                 out = self.sys.components[idx].send_output()
 
             # evaluate terminating conditions
-            if terminating_conditions is not None and terminating_conditions(cidx, out):
+            if self.sys.components[idx].internal_error or (
+                    terminating_conditions is not None
+                    and terminating_conditions(cidx, out)):
                 return
