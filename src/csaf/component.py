@@ -51,6 +51,8 @@ class Component:
         self._n_publish = [0] * num_outputs
         self._n_subscribe = [0] * num_inputs
 
+        self.internal_error = False
+
         self._name = "system" if name is None else name
 
     def debug_start(self):
