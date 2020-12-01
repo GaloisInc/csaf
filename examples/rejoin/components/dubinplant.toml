@@ -9,6 +9,7 @@ is_hybrid = false
 
 
 [parameters]
+    idx = 0
     v = 10
 
 [inputs]
