@@ -143,7 +143,7 @@ class System:
             idx = self.names.index(cidx)
             self.components[idx].receive_input()
             out = self.components[idx].send_output()
-            if terminating_conditions is not None and terminating_conditions(cidx, out):
+            if self.components[idx].internal_error or (terminating_conditions is not None and terminating_conditions(cidx, out)):
                 return False
         return True
 
@@ -175,7 +175,7 @@ class System:
             self.components[idx].receive_input()
             out = self.components[idx].send_output()
             out["times"] = t
-            if terminating_conditions is not None and terminating_conditions(cidx, out):
+            if self.components[idx].internal_error or (terminating_conditions is not None and terminating_conditions(cidx, out)):
                 return dtraces if not return_passed else (dtraces, False)
             dtraces[cidx].append(**out)
 
@@ -357,5 +357,5 @@ class SystemEnv:
                 out = self.sys.components[idx].send_output()
 
             # evaluate terminating conditions
-            if terminating_conditions is not None and terminating_conditions(cidx, out):
+            if self.sys.components[idx].internal_error or (terminating_conditions is not None and terminating_conditions(cidx, out)):
                 return

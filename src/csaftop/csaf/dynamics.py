@@ -128,7 +128,12 @@ class DynamicComponent(Component):
                    return_value = self._model.get(current_time, state_vector, input_vector, getter)
                 else:
                     state_diff_fcn = lambda y, t: self._model.get_state_update(t, y, input_vector)
-                    ivp_solution = scipy.integrate.odeint(state_diff_fcn, state_vector, [current_time-update_increment, current_time])
+                    ivp_solution, info = scipy.integrate.odeint(state_diff_fcn,
+                                                          state_vector,
+                                                          [current_time-update_increment, current_time],
+                                                          full_output=True)
+                    if "Integration successful" not in info["message"]:
+                        self.internal_error = True
                     return_value = list(ivp_solution[-1])
                 self._output_buffer[tname] = return_value
 
