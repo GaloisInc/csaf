@@ -44,8 +44,11 @@ log_level = "info"
     # path to model executable
     process = "satplant.py"
 
+    # whether to print debug diagnostics
+    debug = false
+
     # subscribe to topic of a component (component name, topic name)
-    sub = [["controller", "forces0"]]
+    sub = [["controller", "outputs"]]
 
     # port to publish
     pub = 5503
@@ -58,8 +61,11 @@ log_level = "info"
     # path to model executable
     process = "satplant.py"
 
+    # whether to print debug diagnostics
+    debug = false
+
     # subscribe to topic of a component (component name, topic name)
-    sub = [["controller", "forces1"]]
+    sub = [["controller", "outputs"]]
 
     # port to publish
     pub = 5504
@@ -72,8 +78,11 @@ log_level = "info"
     # path to model executable
     process = "satplant.py"
 
+    # whether to print debug diagnostics
+    debug = false
+
     # subscribe to topic of a component (component name, topic name)
-    sub = [["controller", "forces2"]]
+    sub = [["controller", "outputs"]]
 
     # port to publish
     pub = 5505
@@ -86,8 +95,11 @@ log_level = "info"
     # path to model executable
     process = "satplant.py"
 
+    # whether to print debug diagnostics
+    debug = false
+
     # subscribe to topic of a component (component name, topic name)
-    sub = [["controller", "forces3"]]
+    sub = [["controller", "outputs"]]
 
     # port to publish
     pub = 5506

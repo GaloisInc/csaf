@@ -31,10 +31,9 @@ def model_output(model, time_t, state_ctrl, input_forces):
     """
     forces = []
     points = [np.array([0.0, 0.0])
-              ] + [input_forces[i * 4:(i + 1) * 4][:2] for i in range(0, 4)]
-    print(points)
+              ] + [np.array(input_forces[i * 4:(i + 1) * 4][:2]) for i in range(0, 4)]
     vels = [np.array([0.0, 0.0])
-            ] + [input_forces[i * 4:(i + 1) * 4][2:] for i in range(0, 4)]
+            ] + [np.array(input_forces[i * 4:(i + 1) * 4][2:]) for i in range(0, 4)]
     tri = Delaunay(points)
     graph = graph_from_simplices(tri)
     for sidx in range(len(points)):
@@ -56,4 +55,4 @@ def model_output(model, time_t, state_ctrl, input_forces):
                 f += model.kd * velp
 
         forces.append(f)
-    return tuple(np.concatenate(forces))
+    return tuple(np.concatenate(forces)[2:])

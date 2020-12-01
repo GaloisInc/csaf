@@ -9,6 +9,7 @@ is_hybrid = false
 
 
 [parameters]
+    idx = 0
     n = 0.001027
     mc = 12
 
