@@ -1,3 +1,9 @@
+"""low level flight controller
+
+gain matrices and equilibrium points are computed by running BuildLqrControllers.py
+"""
+
+# External
 import numpy as np
 
 

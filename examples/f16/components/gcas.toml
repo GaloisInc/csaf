@@ -1,0 +1,27 @@
+system_name = "F16 GCAS Autopilot"
+system_representation = "black box"
+system_solver = "Euler"
+
+sampling_frequency = 10
+
+is_discrete = true
+is_hybrid = false
+
+[parameters]
+  NzMax = 9.0
+  # move vt_des into code
+  vt_des = 500
+
+[inputs]
+  msgs = [ "f16plant_state.msg", "f16plant_output.msg" ]
+
+[topics]
+  [topics.states]
+      msg = "autopilot_state.msg"
+      initial = ["Waiting"]
+
+  [topics.outputs]
+      msg = "autopilot_output.msg"
+
+  [topics.fdas]
+      msg = "autopilot_state.msg"
