@@ -171,10 +171,11 @@ class System:
             s = tqdm.tqdm(s)
 
         # TODO collect updated topics only
-        for cidx, _ in s:
+        for cidx, t in s:
             idx = self.names.index(cidx)
             self.components[idx].receive_input()
             out = self.components[idx].send_output()
+            out["times"] = t
             if terminating_conditions is not None and terminating_conditions(cidx, out):
                 return dtraces if not return_passed else (dtraces, False)
             dtraces[cidx].append(**out)

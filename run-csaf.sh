@@ -1,11 +1,18 @@
 #!/bin/bash
 JUPYTER=0
 JUPYTER_DIR=docs/notebooks
+
+SCRIPT_DIR="csaf_architecture"
+DIR=$(basename ${PWD})
+if [ ${DIR} != ${SCRIPT_DIR} ]
+then
+    printf "ERROR: Script must be run from the \"${SCRIPT_DIR}\" directory!\n"
+    exit 1
+fi
+
 source .common.sh
 
-validate_dir
-
-EXAMPLES="{f16-shield, f16-simple, f16-llc-analyze, f16-llc-nn, inv-pendulum}"
+EXAMPLES="{f16-shield, f16-simple, f16-llc-analyze, f16-llc-nn, f16-fuzzy, inv-pendulum}"
 print_help() {
     printf "\033[1mCSAF\033[0m\n"
     printf "    Control System Analysis Framework (CSAF) is a middleware framework that
@@ -114,6 +121,10 @@ then
             CONFIG_NAME="f16_llc_analyze_config.toml"
             CSAF_LOC=${PWD}/"examples/f16"
             ;;
+        "f16-fuzzy")
+            CONFIG_NAME="f16_fuzzy_config.toml"
+            CSAF_LOC=${PWD}/"examples/f16"
+            ;;
         *)
             show_error_and_exit "Unknown example: ${EXAMPLE_NAME} Please use one of ${EXAMPLES}"
             ;;
@@ -184,7 +195,7 @@ if [[ ${NATIVE} -eq 1 ]] ; then
     fi
 else
     if [[ ${JUPYTER} -eq 1 ]] ; then
-	 docker run ${JUPYTER_NETWORK} -it -v ${CSAF_LOC}:/csaf-system \
+     docker run ${JUPYTER_NETWORK} -it -v ${CSAF_LOC}:/csaf-system \
             -v ${PWD}/src:/app -v ${PWD}/${JUPYTER_DIR}:/notebooks \
             ${IMAGE_NAME}:${IMAGE_TAG} "jupyter" "notebook" "--port=8888" \
             "--no-browser" "--ip=0.0.0.0" "--allow-root" "--notebook-dir=/notebooks"
