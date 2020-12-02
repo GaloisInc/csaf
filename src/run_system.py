@@ -104,25 +104,39 @@ if job_conf.get('parallel', False):
         termcond = eval(termcond)
     csaf_logger.info(f"Terminating condition is: {termcond}")
 
-    # run tasks in a workgroup
-    runs = run_parallel.run_workgroup(iterations, model_conf, states, tspan, terminating_conditions=termcond)
-
-    passed_termcond = [val for val,_,_ in runs].count(True)
-    success_rate = float(passed_termcond)/float(iterations)
-    failed_runs = iterations - len(runs)
-
-    csaf_logger.info(f"Out of {iterations}, {passed_termcond} passed the terminating conditions. {success_rate*100:1.2f} [%] success.")
-    csaf_logger.info(f"{failed_runs} simulations failed with an exception.")
-
     # Run static tests if desired
     static_tests = job_conf.get('static_tests', None)
     if static_tests:
         csaf_logger.info(f"Running static tests")
         from tests_static import *
         for t in static_tests:
+            # TODO: modify the generator here based on the test
+
+            # run tasks in a workgroup
+            runs = run_parallel.run_workgroup(iterations, model_conf, states, tspan, terminating_conditions=termcond)
+
+            passed_termcond = [val for val,_,_ in runs].count(True)
+            success_rate = float(passed_termcond)/float(iterations)
+            failed_runs = iterations - len(runs)
+
+            csaf_logger.info(f"Out of {iterations}, {passed_termcond} passed the terminating conditions. {success_rate*100:1.2f} [%] success.")
+            csaf_logger.info(f"{failed_runs} simulations failed with an exception.")
+
             z = [eval(t) if passed else None for passed,trajs,_ in runs]
-            csaf_logger.info(f"{t} evaluated.")
-            csaf_logger.info(f"Results: {z}")
+            test_passed = z.count(True)
+            test_success_rate = float(test_passed)/float(passed_termcond)
+            csaf_logger.info(f"{t} evaluated. {test_passed}/{passed_termcond} passed, {test_success_rate*100:1.2f} [%] success.")
+    else:
+        # Run only once
+        # run tasks in a workgroup
+        runs = run_parallel.run_workgroup(iterations, model_conf, states, tspan, terminating_conditions=termcond)
+
+        passed_termcond = [val for val,_,_ in runs].count(True)
+        success_rate = float(passed_termcond)/float(iterations)
+        failed_runs = iterations - len(runs)
+
+        csaf_logger.info(f"Out of {iterations}, {passed_termcond} passed the terminating conditions. {success_rate*100:1.2f} [%] success.")
+        csaf_logger.info(f"{failed_runs} simulations failed with an exception.")
 
     # save initial conditions to a file
     if job_conf.get('x0_save_to_file', False) and states:

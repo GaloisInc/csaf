@@ -27,9 +27,9 @@ x0 = "fixed"
 bounds = [    [200.0, 1000.0, 100.0], # vt [ft/s]
               [0.026692982, 0.047745614, 0.01], # alpha [rad]
               [0.0], # beta [rad]
-              [0.785], # phi [rad]
-              [0.1], # theta [rad]
-              [0.785], # psi [rad]
+              [0.0], # phi [rad]
+              [0.0], # theta [rad]
+              [0.0], # psi [rad]
               [0.0], # p [rad/s]
               [0.0], # q [rad/s]
               [0.0], # r [rad/s]
@@ -43,3 +43,9 @@ terminating_conditions = "ground_collision"
 
 # [true|false]
 x0_save_to_file = true
+
+# Static tests to run
+static_tests = [
+    "max_norm_deviation(trajs, 'autopilot', 0, 'plant', 0)",
+    "max_norm_deviation(trajs, 'autopilot', 0, 'plant', 0)",
+]
