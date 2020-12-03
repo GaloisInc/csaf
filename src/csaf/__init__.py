@@ -11,3 +11,5 @@ and platforms from which they were implemented.
 import logging
 
 csaf_logger = logging.getLogger("csaf")
+
+has_global_config = False

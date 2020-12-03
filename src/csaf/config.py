@@ -10,6 +10,7 @@ import toml
 
 from .rosmsg import CsafMsg, generate_serializer
 from .config_parser import SystemParser, attempt_parse_toml, join_if_not_abs
+from .config_process import resolve_port_conflicts, prepare_serializers
 from . import csaf_logger
 
 
@@ -24,6 +25,8 @@ class SystemConfig:
         toml_conf = attempt_parse_toml(toml_file)
         cfp = SystemParser(toml_path, context_str=toml_path)
         config = cfp.parse(toml_conf)
+        prepare_serializers(config)
+        resolve_port_conflicts(config)
         return cls(config)
 
     def __init__(self, config: dict):
