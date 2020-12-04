@@ -45,7 +45,27 @@ terminating_conditions = "ground_collision"
 x0_save_to_file = true
 
 # Static tests to run
-static_tests = [
-    "max_norm_deviation(trajs, 'autopilot', 0, 'plant', 0)",
-    "max_norm_deviation(trajs, 'autopilot', 0, 'plant', 0)",
-]
+[tests]
+
+# Test name
+[tests.overshoot_Nz]
+    # "global" test parameters
+    fcn_name = "max_norm_deviation"
+    # This is silly, but TOML requires arrays to contain only one type
+    reference = ['autopilot','0']
+    response = ['plant', '0']
+    # Test specific generator config
+
+    [tests.overshoot_Nz.generator_config]
+    output_idx = 0
+
+[tests.overshoot_Ny]
+    # "global" test parameters
+    fcn_name = "max_norm_deviation"
+    # This is silly, but TOML requires arrays to contain only one type
+    reference = ['autopilot','1']
+    response = ['plant', '1']
+    # Test specific generator config
+
+    [tests.overshoot_Ny.generator_config]
+    output_idx = 1

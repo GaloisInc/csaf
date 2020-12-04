@@ -105,16 +105,26 @@ if job_conf.get('parallel', False):
     csaf_logger.info(f"Terminating condition is: {termcond}")
 
     # Run static tests if desired
-    static_tests = job_conf.get('static_tests', None)
+    static_tests = job_conf.get('tests', None)
     if static_tests:
         csaf_logger.info(f"Running static tests")
         from tests_static import *
         for t in static_tests:
-            # TODO: modify the generator here based on the test
+            csaf_logger.info(f"Evaluating {t}")
+            # TODO: sanity check the values
+            test = static_tests[t]
+
+            # configure generator (require some generator config?)
+            generator_config = test.get('generator_config',None)
+            if generator_config:
+                for param_name in generator_config:
+                    #from IPython import embed; embed()
+                    model_conf.config_dict['components']['autopilot']['config']['parameters'][param_name] = generator_config[param_name]
 
             # run tasks in a workgroup
             runs = run_parallel.run_workgroup(iterations, model_conf, states, tspan, terminating_conditions=termcond)
 
+            # Filter out terminated runs
             passed_termcond = [val for val,_,_ in runs].count(True)
             success_rate = float(passed_termcond)/float(iterations)
             failed_runs = iterations - len(runs)
@@ -122,9 +132,24 @@ if job_conf.get('parallel', False):
             csaf_logger.info(f"Out of {iterations}, {passed_termcond} passed the terminating conditions. {success_rate*100:1.2f} [%] success.")
             csaf_logger.info(f"{failed_runs} simulations failed with an exception.")
 
-            z = [eval(t) if passed else None for passed,trajs,_ in runs]
+            # Evaluate tests
+            fcn_name = test['fcn_name']
+            fcn = None
+            ref_cmp = test['reference'][0]
+            ref_idx = int(test['reference'][1])
+            res_cmp = test['response'][0]
+            res_idx = int(test['response'][1])
+
+            # Use some smarter pattern here
+            if fcn_name == 'max_norm_deviation':
+                fcn = max_norm_deviation
+            else:
+                csaf_logger.error(f"Unimplemented test: {fcn_name}")
+                exit(-2)
+
+            z = [fcn(trajs,ref_cmp, ref_idx, res_cmp, res_idx) if passed else None for passed,trajs,_ in runs]
             test_passed = z.count(True)
-            test_success_rate = float(test_passed)/float(passed_termcond)
+            test_success_rate = float(test_passed)/float(passed_termcond) if passed_termcond > 0 else 0.0
             csaf_logger.info(f"{t} evaluated. {test_passed}/{passed_termcond} passed, {test_success_rate*100:1.2f} [%] success.")
     else:
         # Run only once
