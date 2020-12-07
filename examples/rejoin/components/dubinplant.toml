@@ -1,4 +1,4 @@
-system_name = "Dubin's Aircraft 2D"
+system_name = "Dubins Aircraft 2D"
 system_representation = "black box"
 system_solver = "Euler"
 

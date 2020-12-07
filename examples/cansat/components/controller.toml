@@ -1,4 +1,4 @@
-system_name = "4 Chaser Can Satellite Rejoin Controller"
+system_name = "4 Chaser CanSat Rejoin Controller"
 system_representation = "black box"
 system_solver = "Euler"
 

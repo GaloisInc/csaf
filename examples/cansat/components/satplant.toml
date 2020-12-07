@@ -1,4 +1,4 @@
-system_name = "Can Satellite 2D"
+system_name = "CanSat 2D"
 system_representation = "black box"
 system_solver = "Euler"
 
