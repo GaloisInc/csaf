@@ -7,7 +7,7 @@ before_script:
   - eval \$(ssh-agent -s)
   - mkdir -p ~/.ssh
   - chmod 700 ~/.ssh
-  - export PYTHONPATH=\${PYTHONPATH}:\${PWD}/src:\${PWD}/examples/f16:\${PWD}/examples/inverted-pendulum:/csaf-system" > $CONFIG_FILE
+  - export PYTHONPATH=\${PYTHONPATH}:\${PWD}/src:\${PWD}/examples/f16:\${PWD}/examples/inverted-pendulum:\${PWD}/examples/rejoin:\${PWD}/examples/cansat:/csaf-system" > $CONFIG_FILE
 
 FILES=`find .  -name "*.ipynb" ! -name '*checkpoint*'`
 
