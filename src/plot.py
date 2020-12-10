@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 
 import csaf.trace as ctc
 
+
 def plot_schedule(ax, t, x):
     """schedule (Gantt) chart
 
@@ -50,6 +51,7 @@ def plot_schedule(ax, t, x):
     y_labels = xu
     ax.set_yticks(y_ticks)
     ax.set_yticklabels([y.title() for y in y_labels])
+
 
 def plot_component(ax: plt.Axes, trajs: ctc.TimeTrace,
                    dname: str, fieldname: str, index: int,
@@ -157,6 +159,18 @@ def _(trajs):
 def _(trajs):
    from f16_plot import plot_llc
    plot_llc(trajs)
+
+
+@register_plot("cansat")
+def _(trajs):
+    from cansat_plot import plot_sats
+    plot_sats(trajs)
+
+
+@register_plot("rejoin")
+def _(trajs):
+    from rejoin_plot import plot_aircrafts
+    plot_aircrafts(trajs)
 
 
 def plot_results(config_filename, trajs, filename=None):

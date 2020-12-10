@@ -6,7 +6,7 @@ before_script:
   - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
   - mkdir -p ~/.ssh
   - chmod 700 ~/.ssh
-  - export PYTHONPATH=${PYTHONPATH}:${PWD}/src:${PWD}/examples/f16:${PWD}/examples/inverted-pendulum:/csaf-system
+  - export PYTHONPATH=${PYTHONPATH}:${PWD}/src:${PWD}/examples/f16:${PWD}/examples/inverted-pendulum:/csaf-system:${PWD}/examples/rejoin:${PWD}/examples/cansat
 
 f16-job-config 0 2:
   stage: test

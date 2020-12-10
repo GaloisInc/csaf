@@ -4,7 +4,20 @@ import matplotlib.animation
 from matplotlib.colors import LinearSegmentedColormap
 
 
-def plot_air(states, frames=1000, interval=50):
+def plot_aircrafts(trajs):
+    states = [np.array(trajs[f"jet{idx}"].states) for idx in range(4)]
+    # show aircraft trajectories
+    cs = ['g', 'r', 'b', 'k']
+    fig, ax = plt.subplots(figsize=(15, 7))
+    for idx in range(4):
+        plt.plot(*states[idx][:, :2].T*10, c=cs[idx])
+    ax.set_title("Aircraft Trajectories")
+    ax.set_xlabel("X (m)")
+    ax.set_ylabel("Y (m)")
+    return fig
+
+
+def plot_air_anim(states, frames=1000, interval=50):
     fig, ax = plt.subplots(figsize=(8, 8))
     ax.set_xlabel('X (m)', size=12)
     ax.set_ylabel('Y (m)', size=12)

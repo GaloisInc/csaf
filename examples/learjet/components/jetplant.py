@@ -14,7 +14,6 @@ def make_state_update(p: LearJetParams) -> typ.Callable:
                      [p.zde, p.zdt],
                      [p.mde, p.mdt],
                      [0.0,     0.0]])
-    
     Alon = np.array([[p.yv, p.yp+p.w0, p.yr-p.u0,                    p.g*np.cos(np.deg2rad(p.theta0))],
                      [p.lv, p.lp,      p.lr,                         0.0],
                      [p.nv, p.np,      p.nr,                         0.0],
