@@ -24,7 +24,7 @@ do
       EXAMPLE="cansat"
     else
     if [[ $NOTEBOOK =~ .*dubins.* ]]; then
-      EXAMPLE="dubins"
+      EXAMPLE="rejoin"
     else
       echo "Unknown example!"
       exit 1
