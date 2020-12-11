@@ -17,12 +17,26 @@ do
     BASENAME=${NOTEBOOK%.*}
     PYTHONFILE=${BASENAME}".py"
     JOBNAME=`basename ${BASENAME}`
+    if [[ $NOTEBOOK =~ .*f16.* ]] || [[ $NOTEBOOK =~ .*csaf_env_example.* ]]; then
+      EXAMPLE="f16"
+    else
+    if [[ $NOTEBOOK =~ .*cansat.* ]]; then
+      EXAMPLE="cansat"
+    else
+    if [[ $NOTEBOOK =~ .*dubins.* ]]; then
+      EXAMPLE="dubins"
+    else
+      echo "Unknown example!"
+      exit 1
+    fi
+    fi
+    fi
     echo "
 notebook_${JOBNAME}:
   stage: test
   script:
     - echo \">>> Adjust example paths\"
-    - ln -s \${PWD}/examples/f16 /csaf-system
+    - ln -s \${PWD}/examples/${EXAMPLE} /csaf-system
     - echo \">>> Testing ${NOTEBOOK}\"
     - jupyter nbconvert --to python $NOTEBOOK
     - ipython $PYTHONFILE
