@@ -2,6 +2,7 @@ import tensorflow as tf
 import numpy as np
 from spinup.utils.test_policy import load_policy_and_env
 import autopilot_helper as ah
+import autopilot
 
 class NNAutopilot():
     STATE_START= 'Waiting'
@@ -9,7 +10,7 @@ class NNAutopilot():
     STATE_DONE = 'Done'
 
 def model_init(model):
-    path = "/home/greg/Documents/csaf_architecture/models/ddpg-small-roll"
+    path = "/home/greg/Documents/csaf_architecture/models/corerl-small-roll"
     _, model.parameters["model"] = load_policy_and_env(path)
 
 def model_output(model, time_t, state_controller, input_f16):
@@ -30,11 +31,11 @@ def model_output(model, time_t, state_controller, input_f16):
     radsFromNoseLevel = round(gamma/np.pi)
     gamma_des = np.pi*radsFromNoseLevel
     if state_controller[0] == NNAutopilot.STATE_START:
-        return 0, 0, 0, 0
+        nn_action = [0, 0, 0]
     elif state_controller[0] == NNAutopilot.STATE_DONE:
         Nz, ps = state_done(gamma_des, phi_des, p_des, gamma, phi, p)
         throttle = ah.p_cntrl(kp=0.25, e=(model.vt_des-vt))
-        return Nz, ps, 0, throttle
+        nn_action = [Nz, ps, throttle]
     state = np.empty_like(input_f16[:13])
     # Normalize state
     state[0] = input_f16[0] / 2500
@@ -50,12 +51,26 @@ def model_output(model, time_t, state_controller, input_f16):
     state[10] = input_f16[10] / 10000
     state[11] = input_f16[11] / 45000
     state[12] = input_f16[12] / 20
-    action = model.model(state)
+    nn_action = model.model(state)
+    # Unnormalize action
     action_low = np.array([-2 / 9, -1, 0])
     action_high = np.array([1, 1, 1])
-    action = np.clip(action, action_low, action_high)
-    # Unnormalize action
-    return action[0] * 5, action[1] * 3, 0, action[2]
+    nn_action = np.clip(nn_action, action_low, action_high)
+    nn_action[0] *= 5
+    nn_action[1] *= 3
+
+    # Blend with symbolic controller
+    symb_state = autopilot.model_state_update(model, 2.0, ['Waiting'], input_f16)
+    s1, s2, _, s3 = autopilot.model_output(model, 2.0, symb_state, input_f16)
+    symb_action = [s1, s2, s3]
+
+    print(input_f16, "->", symb_state, ",", nn_action, ",", symb_action)
+
+    action = []
+    for i in range(3):
+        action.append(nn_action[i] * 0.5 + symb_action[i] * 0.5)
+    return action[0], action[1], 0, action[2]
+
 
 def model_state_update(model, time_t, state_controller, input_f16):
     state = state_controller[0]
@@ -66,8 +81,8 @@ def model_state_update(model, time_t, state_controller, input_f16):
     alpha = input_f16[1]           # AoA           (rad)
     h = input_f16[11]
 
-    if time_t >= 2:
-        state = NNAutopilot.STATE_ENGAGED
+    #if time_t >= 2:
+    state = NNAutopilot.STATE_ENGAGED
 
     if state == NNAutopilot.STATE_ENGAGED:
         if h >= 800 and theta >= 0 and theta <= 30 and abs(theta - alpha) <= 0.01 and abs(input_f16[7]) <= 1:

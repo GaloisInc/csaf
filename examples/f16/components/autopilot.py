@@ -28,23 +28,38 @@ def model_state_update(model, time_t, state_controller, input_f16):
     man_start = 2 # maneuver starts after 2 seconds
 
     old_state = state
-    if state == GcasAutopilot.STATE_START:
-        if time_t >= man_start:
-            state = GcasAutopilot.STATE_ROLL
+    #if state == GcasAutopilot.STATE_START:
+    #    if time_t >= man_start:
+    #        state = GcasAutopilot.STATE_ROLL
 
-    elif state == GcasAutopilot.STATE_ROLL:
-        # Determine which angle is "level" (0, 180, 360, 720, etc)
-        radsFromWingsLevel = round(phi/np.pi)
+    #elif state == GcasAutopilot.STATE_ROLL:
+    #    # Determine which angle is "level" (0, 180, 360, 720, etc)
+    #    radsFromWingsLevel = round(phi/np.pi)
 
-        # Until wings are "level" & roll rate is small
-        if abs(phi - np.pi * radsFromWingsLevel) < eps_phi and abs(p) < eps_p:
-            state = GcasAutopilot.STATE_PULL
+    #    # Until wings are "level" & roll rate is small
+    #    if abs(phi - np.pi * radsFromWingsLevel) < eps_phi and abs(p) < eps_p:
+    #        state = GcasAutopilot.STATE_PULL
 
-    elif state == GcasAutopilot.STATE_PULL:
+    #elif state == GcasAutopilot.STATE_PULL:
+    #    radsFromNoseLevel = round((theta - alpha) / (2 * np.pi))
+
+    #    if (theta - alpha) - 2 * np.pi * radsFromNoseLevel > path_goal:
+    #        state = GcasAutopilot.STATE_DONE
+
+    # Make this memoryless for Core-RL
+    if time_t >= man_start:
+        state = GcasAutopilot.STATE_ROLL
+
+    radsFromWingsLevel = round(phi/np.pi)
+
+    if abs(phi - np.pi * radsFromWingsLevel) < eps_phi and abs(p) < eps_p:
+        state = GcasAutopilot.STATE_PULL
+
         radsFromNoseLevel = round((theta - alpha) / (2 * np.pi))
 
         if (theta - alpha) - 2 * np.pi * radsFromNoseLevel > path_goal:
             state = GcasAutopilot.STATE_DONE
+
     return [state]
 
 

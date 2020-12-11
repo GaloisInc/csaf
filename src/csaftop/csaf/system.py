@@ -14,6 +14,7 @@ import numpy as np
 from gym import spaces
 import socket
 import socketserver
+import importlib
 
 
 class System:
@@ -200,7 +201,7 @@ class System:
 
 
 class SystemEnv:
-    def __init__(self, cname, sys, terminating_conditions=None):
+    def __init__(self, cname, sys, terminating_conditions=None, corerl=False, blend=0.5):
         """ SystemEnv exposes one component to the user during simulation, allowing step and reset
         :param cname: component to expose
         :param sys: CSAF system
@@ -210,11 +211,17 @@ class SystemEnv:
         #self.action_space = spaces.Box(-1., 1., shape=(4,), dtype='float32')
         #self.action_space = spaces.Box(np.array([-2 / 9, -1, 0, 0]), np.array([1, 1, 0, 1]))
         self.action_space = spaces.Box(np.array([-2 / 9, -1, 0]), np.array([1, 1, 1]))
+        #self.action_space = spaces.Box(np.array([-2 / 5, 0]), np.array([1, 1]))
         #self.observation_space = spaces.Box(-1., 1., shape=(13,), dtype='float32')  #spaces.Box(low=0, high=255, shape=(screen_height, screen_width, 3), dtype=np.uint8)
         self.observation_space = spaces.Box(
-                np.array([300 / 2500, -10 / 45, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0, 0]),
+                np.array([300 / 2500, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0, 0]),
                 np.array([1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]))
         self._iter = self.make_system_iterator(terminating_conditions=terminating_conditions)
+        self.corerl = corerl
+        self.blend = blend
+        if corerl:
+            self.autopilot_model = ModelNative.from_filename("/home/greg/Documents/csaf_architecture/examples/f16/components/autopilot.py", "/home/greg/Documents/csaf_architecture/examples/f16/components/autopilot.toml")
+            self.last_state = None
         next(self._iter)
 
     def step(self, component_output):
@@ -228,10 +235,19 @@ class SystemEnv:
         #component_output[2] = 0     # Ny = 0
         # Throttle is already in [0, 1] so we don't need to normalize it.
         action = []
-        action.append(component_output[0] * 9)
+        action.append(component_output[0] * 5)
         action.append(component_output[1] * 3)
+        #action.append(0)
         action.append(0)
         action.append(component_output[2])
+        #action.append(component_output[1])
+
+        if self.corerl and self.last_state is not None:
+            self.autopilot_state = self.autopilot_model.get_state_update(2.0, [self.autopilot_state], self.last_state)[0]
+            symb_action = self.autopilot_model.get_output(2.0, [self.autopilot_state], self.last_state)
+
+            for i in range(len(action)):
+                action[i] = self.blend * action[i] + (1 - self.blend) * symb_action[i]
 
         # states: [vt, alpha, beta, phi, theta, psi, p, q, r, pn, pe, h, power]
         # actions: [Nz_ref, ps_ref, Ny_r_ref, throttle_ref]
@@ -240,13 +256,14 @@ class SystemEnv:
             stuff = self._iter.send({"autopilot-states": ["Waiting"],
                                   "autopilot-fdas": ["Waiting"],
                                   "autopilot-outputs": np.asarray(action)})
+            #print("after step:", stuff)
             ob = stuff['plant-states']
             #reward = -stuff['time']
             # 1st attempt: Reward = - c1 * (altitude deviation) - c2 * (pitch deviation) - 1
             # The constant negative term helps penalize extra time taken
             # c2 should be small so that the policy prioritizes reaching a good altitude
             #   before leveling off.
-            reward = -5 + 0.001 * (ob[11] - 1000) - 0.1 * abs(ob[3])
+            reward = -5 + 0.001 * (ob[11] - 1000) - abs(ob[3])
             pouts = stuff['plant-outputs']
             done = False
             # Find a good stopping condition
@@ -257,18 +274,31 @@ class SystemEnv:
             # TODO: Check pitch/roll/yaw rate.
 
         except StopIteration:
+            #print("StopIteration")
             done = True
             ob = [0 for _ in range(13)]
             # Penalty for crashing
-            reward = -10000
-            pouts = [0 for _ in range(4)]
+            reward = -1000
+            reward = 0
+            pouts = [0 for _ in range(3)]
+
+        except Exception:
+            done = True
+            ob = [0 for _ in range(13)]
+            # Penalty for crashing
+            reward = -1000
+            pouts = [0 for _ in range(3)]
 
         if ob[11] <= 0:
+            print("crash:", ob[11])
             done = True
             ob = [0 for _ in range(13)]
             # Penalty for crashing
             reward = -10000
-            pouts = [0 for _ in range(4)]
+            pouts = [0 for _ in range(3)]
+
+        if self.corerl:
+            self.last_state = ob
 
         # Normalize observations - All limits are linear scalings with no offset
         #ob[0] /= 2500    # vt \in [300, 2500]
@@ -286,14 +316,14 @@ class SystemEnv:
         #ob[12] /= 20     # power \in [0, 20] (based on f16-simple)
         res = []
         res.append(ob[0] / 2500)
-        res.append(ob[1] / 45)
-        res.append(ob[2] / 30)
-        res.append(ob[3] / 180)
-        res.append(ob[4] / 180)
-        res.append(ob[5] / 180)
-        res.append(ob[6] / 180)
-        res.append(ob[7] / 180)
-        res.append(ob[8] / 180)
+        res.append(ob[1] / 3.2)
+        res.append(ob[2] / 3.2)
+        res.append(ob[3] / 3.2)
+        res.append(ob[4] / 3.2)
+        res.append(ob[5] / 3.2)
+        res.append(ob[6] / 3.2)
+        res.append(ob[7] / 3.2)
+        res.append(ob[8] / 3.2)
         res.append(ob[9] / 10000)
         res.append(ob[10] / 10000)
         res.append(ob[11] / 45000)
@@ -302,13 +332,13 @@ class SystemEnv:
         # Check whether something is diverging. Sometimes we trigger some issue in
         # the ODE solver which causes vt to grow unchecked.
         #print("res: ", res)
-        if not self.observation_space.contains(res):
-            #print("res is outside box")
-            done = True
-            ob = [0 for _ in range(13)]
-            # Penalty for crashing
-            reward = -10000
-            pouts = [0 for _ in range(4)]
+        #if not self.observation_space.contains(res):
+        #    #print("res is outside box")
+        #    done = True
+        #    ob = [0 for _ in range(13)]
+        #    # Penalty for crashing
+        #    reward = -10000
+        #    pouts = [0 for _ in range(4)]
 
         return np.asarray(res), reward, done, {'plant-outputs': pouts}
 
@@ -324,6 +354,11 @@ class SystemEnv:
         # pouts = stuff['plant-outputs']
         # done = False
         # next(self._iter)
+
+        if self.corerl:
+            self.autopilot_state = "Waiting"
+            self.last_state = None
+
         return np.asarray([0 for _ in range(13)])
 
     def set_state(self, component_name, state):
@@ -357,5 +392,7 @@ class SystemEnv:
                 out = self.sys.components[idx].send_output()
 
             # evaluate terminating conditions
+            if self.sys.components[idx].internal_error:
+                print("system iterator: internal error in component", self.sys.components[idx]._name)
             if self.sys.components[idx].internal_error or (terminating_conditions is not None and terminating_conditions(cidx, out)):
                 return

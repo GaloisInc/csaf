@@ -68,6 +68,7 @@ class DynamicComponent(Component):
         self._input_buffer: dict = {}
         self.current_time = 0
         self.init_state_buffer()
+        self.internal_error = False
 
     def receive_input(self):
         """receive all necessary topics for a DynamicComponent"""

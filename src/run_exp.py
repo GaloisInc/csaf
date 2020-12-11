@@ -23,7 +23,8 @@ def run_experiment(args):
         my_system = csys.System.from_config(my_conf)
 
         # create an environment from the system, allowing us to act as the controller
-        my_env = csys.SystemEnv("autopilot", my_system, terminating_conditions=ground_collision_condition)
+        #my_env = csys.SystemEnv("autopilot", my_system, terminating_conditions=ground_collision_condition)
+        my_env = csys.SystemEnv("autopilot", my_system, corerl=True)
         # import safety_gym  # registers custom envs to gym env registry
         return my_env #gym.make(args.env_name)
 
