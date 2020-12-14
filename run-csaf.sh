@@ -12,7 +12,7 @@ fi
 
 source .common.sh
 
-EXAMPLES="{f16-shield, f16-simple, f16-llc-analyze, f16-llc-nn, f16-fuzzy, inv-pendulum}"
+EXAMPLES="{f16-shield, f16-simple, f16-llc-analyze, f16-llc-nn, f16-fuzzy, inv-pendulum, cansat, rejoin}"
 print_help() {
     printf "\033[1mCSAF\033[0m\n"
     printf "    Control System Analysis Framework (CSAF) is a middleware framework that
@@ -124,6 +124,14 @@ then
         "f16-fuzzy")
             CONFIG_NAME="f16_fuzzy_config.toml"
             CSAF_LOC=${PWD}/"examples/f16"
+            ;;
+        "cansat" )
+            CONFIG_NAME="cansat_rejoin_config.toml"
+            CSAF_LOC=${PWD}/"examples/cansat"
+            ;;
+        "rejoin" )
+            CONFIG_NAME="rejoin_config.toml"
+            CSAF_LOC=${PWD}/"examples/rejoin"
             ;;
         *)
             show_error_and_exit "Unknown example: ${EXAMPLE_NAME} Please use one of ${EXAMPLES}"
