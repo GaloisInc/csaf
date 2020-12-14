@@ -71,7 +71,7 @@ filename = job_conf.get('plot_filename', None)
 if job_conf.get('parallel', False):
     # Parallel run
     csaf_logger.info(f"Running parallel simulation.")
-    x0 = get_attribute(job_conf, 'x0')
+    x0 = job_conf.get('x0')
     states = None
 
     iterations = get_attribute(job_conf, 'iterations')
