@@ -1,8 +1,6 @@
 from .parser import ConfigParser
 
-import os
 import numpy as np
-import importlib
 import pathlib
 import sys
 import typing as typ
@@ -78,7 +76,7 @@ class ParallelParser(ConfigParser):
     valid_fields = [
         "tspan", "show_status", "plot", "initial_conditions", "parallel", "x0",
         "x0_path", "bounds", "terminating_conditions", "x0_save_to_file",
-        "tests", "plot_filename", "iterations", "x0_component_name"
+        "tests", "plot_filename", "iterations", "x0_component_name", "component_under_test"
     ]
 
     required_fields = ["initial_conditions"]
@@ -91,10 +89,11 @@ class ParallelParser(ConfigParser):
         "x0": "fixed",
         "x0_component_name": "plant",
         "x0_save_to_file": True,
+        "component_under_test": "plant",
         "bounds": None,
         "plot_filename": None,
         "iterations": 100,
-        "tests" : {},
+        "tests": {},
         "terminating_conditions": None
     }
 
@@ -126,9 +125,10 @@ class ParallelParser(ConfigParser):
     @_("x0_save_to_file")
     def _(self, xstf: bool) -> str:
         return xstf
-        #return os.path.join(model_conf.output_directory, f"{model_conf.name}-x0.csv")
 
-    @_("x0", depends_on=("bounds", "iterations", "bounds", "x0_path", "x0_component_name"))
+    @_("x0",
+       depends_on=("bounds", "iterations", "bounds", "x0_path",
+                   "x0_component_name", "component_under_test"))
     def _(self, x0: str) -> typ.Sequence[typ.Dict]:
         acceptable_x = {"fixed", "random", "from_file"}
         if x0 not in acceptable_x:
@@ -136,17 +136,22 @@ class ParallelParser(ConfigParser):
                         f"x0 {x0} not an acceptable value {acceptable_x}",
                         error=AssertionError)
         if x0 == "random":
-            # TODO: do not hard code plant!
-            return gen_random_states(self.bounds, "plant", self.iterations)
+            self.logger("info", "Generating random states")
+            return gen_random_states(self.bounds, self.component_under_test, self.iterations)
         elif x0 == "fixed":
-            return gen_fixed_states(self.bounds, "plant")
+            self.logger("info", "Generating states using fixed step.")
+            return gen_fixed_states(self.bounds, self.component_under_test)
         elif x0 == "from_file":
             pathx0 = (pathlib.Path(self.base_dir) / self.x0_path).resolve()
-            states = load_states_from_file(str(pathx0), "plant")
+            self.logger("info", "Loading states from a file: {pathx0}")
+            states = load_states_from_file(str(pathx0), self.component_under_test)
             self._config["iterations"] = len(states)
+            self.logger("info", f"Loaded {len(states)} initial states.")
             return states
         else:
-            pass
+            self.logger("error",
+                        f"Unknown value x0 = {x0}. Valid values are {acceptable_x}",
+                        error=ValueError)
 
     @_("bounds")
     def _(self, bounds: typ.Union[None, typ.Sequence[typ.Sequence[float]]]):
@@ -182,7 +187,7 @@ class ParallelParser(ConfigParser):
                             f"{tname} field is not a component map",
                             error=ValueError)
             tpr = TestParser(self.base_dir,
-                                  context_str=self.context_str + f"<{tname}>")
+                             context_str=self.context_str + f"<{tname}>")
             tests[tname] = tpr.parse(tconf)
         return tests
 
@@ -190,9 +195,7 @@ class ParallelParser(ConfigParser):
 class TestParser(ConfigParser):
     valid_fields = ["fcn_name", "reference", "response", "generator_config"]
 
-    required_fields = [
-        "fcn_name", "reference", "response", "generator_config"
-    ]
+    required_fields = ["fcn_name", "reference", "response", "generator_config"]
 
     @_("generator_config")
     def _(self, params: dict) -> dict:
@@ -201,7 +204,8 @@ class TestParser(ConfigParser):
     @_("fcn_name", depends_on=("generator_config", ))
     def _(self, fcn_name: str) -> str:
         # TODO: this is hard-coded
-        pypath = str(pathlib.Path(__file__).parent.absolute() / "../tests_static.py")
+        pypath = str(
+            pathlib.Path(__file__).parent.absolute() / "../tests_static.py")
         # update python path to include module directory
         mod_path = str(pathlib.Path(pypath).parent.resolve())
         if mod_path not in sys.path:
@@ -210,8 +214,7 @@ class TestParser(ConfigParser):
 
     @_("reference")
     @_("response")
-    def _(
-        self, sig_select: typ.Sequence[typ.Union[str, int]]
-    ) -> typ.Sequence[typ.Union[str, int]]:
+    def _(self, sig_select: typ.Sequence[typ.Union[str, int]]
+          ) -> typ.Sequence[typ.Union[str, int]]:
         # TODO: check?
         return sig_select

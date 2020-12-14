@@ -17,7 +17,7 @@ import pathlib
 import csaf.system as csys
 import csaf.config as cconf
 import csaf.trace as ctc
-import csaf.test_parser as ctp
+import csaf.parser_test as ctp
 from csaf import csaf_logger
 
 
@@ -78,11 +78,11 @@ if job_conf.get('parallel', False):
     bounds = job_conf['bounds']
     states = x0
 
-    csaf_logger.debug(f"Initial states are: {states}")
+    csaf_logger.debug(f"Number of initial states are: {len(states)}")
 
     # get terminating condition
     termcond = job_conf.get('terminating_conditions', None)
-    csaf_logger.info(f"Terminating condition is: {termcond}")
+    csaf_logger.info(f"Terminating condition is: {termcond.__name__}")
 
     # Run static tests if desired
     static_tests = job_conf.get('tests', None)
