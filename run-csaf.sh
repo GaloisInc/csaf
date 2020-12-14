@@ -12,7 +12,7 @@ fi
 
 source .common.sh
 
-EXAMPLES="{f16-shield, f16-simple, f16-llc-analyze, f16-llc-nn, f16-fuzzy, inv-pendulum, cansat, rejoin}"
+EXAMPLES="{f16-shield, f16-simple, f16-llc-analyze, f16-llc-nn, f16-fuzzy, f16-noise, inv-pendulum, cansat, rejoin}"
 print_help() {
     printf "\033[1mCSAF\033[0m\n"
     printf "    Control System Analysis Framework (CSAF) is a middleware framework that
@@ -123,6 +123,10 @@ then
             ;;
         "f16-fuzzy")
             CONFIG_NAME="f16_fuzzy_config.toml"
+            CSAF_LOC=${PWD}/"examples/f16"
+            ;;
+        "f16-noise" )
+            CONFIG_NAME="f16_sensor_noise.toml"
             CSAF_LOC=${PWD}/"examples/f16"
             ;;
         "cansat" )

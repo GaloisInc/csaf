@@ -1,0 +1,31 @@
+system_name = "F16 Plant Sensor Noise Model"
+system_representation = "black box"
+system_solver = "Euler"
+
+sampling_frequency = 100
+
+is_discrete = false
+is_hybrid = false
+
+[parameters]
+  scales = [    10.0, # vt [ft/s]
+                0.1, # alpha [rad]
+                0.1, # beta [rad]
+                0.1, # phi [rad]
+                0.1, # theta [rad]
+                0.05, # psi [rad]
+                0.05, # p [rad/s]
+                0.05, # q [rad/s]
+                0.05, # r [rad/s]
+                0.05, # pn [m]
+                0.05, # pe [m]
+                100.0, # h [ft]
+                0.05] # power [%]
+
+[inputs]
+  msgs = [ "f16plant_state.msg" ]
+
+[topics]
+
+  [topics.outputs]
+      msg = "f16plant_state.msg"
