@@ -12,6 +12,7 @@ import os
 import sys
 import toml
 import pathlib
+import collections
 
 
 import csaf.system as csys
@@ -82,7 +83,7 @@ if job_conf.get('parallel', False):
 
     # get terminating condition
     termcond = job_conf.get('terminating_conditions', None)
-    csaf_logger.info(f"Terminating condition is: {termcond.__name__}")
+    csaf_logger.info(f"Terminating condition is: {termcond.__name__ if isinstance(termcond, collections.Callable) else termcond}")
 
     # Run static tests if desired
     static_tests = job_conf.get('tests', None)
