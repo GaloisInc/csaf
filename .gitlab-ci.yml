@@ -8,20 +8,25 @@ before_script:
   - chmod 700 ~/.ssh
   - export PYTHONPATH=${PYTHONPATH}:${PWD}/src:${PWD}/examples/f16:${PWD}/examples/inverted-pendulum:${PWD}/examples/rejoin:${PWD}/examples/cansat:/csaf-system
 
-f16-job-config 0 2:
+f16-job-config 0 3:
   stage: test
   script:
     - ./run-csaf.sh -e f16-shield -f f16_job_conf_parallel_random.toml -n
 
-f16-job-config 1 2:
+f16-job-config 1 3:
   stage: test
   script:
     - ./run-csaf.sh -e f16-shield -f f16_job_conf_parallel_fixed.toml -n
 
-f16-job-config 2 2:
+f16-job-config 2 3:
   stage: test
   script:
     - ./run-csaf.sh -e f16-shield -f f16_job_conf_parallel_from_file.toml -n
+
+f16-job-config 3 3:
+  stage: test
+  script:
+    - ./run-csaf.sh -e f16-llc-analyze -f f16_job_conf_parallel_fixed.toml -n
 
 f16-llc-analyze:
   stage: test
