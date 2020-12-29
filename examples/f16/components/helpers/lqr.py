@@ -1,4 +1,4 @@
-"""low level flight controller
+"""LQR control for low level flight controller
 
 gain matrices and equilibrium points are computed by running BuildLqrControllers.py
 """
