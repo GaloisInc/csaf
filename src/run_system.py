@@ -11,11 +11,14 @@ cart inverted pendulum (CIP)
 import os
 import sys
 import toml
+import pathlib
+import collections
 
 
 import csaf.system as csys
 import csaf.config as cconf
 import csaf.trace as ctc
+import csaf.parser_test as ctp
 from csaf import csaf_logger
 
 
@@ -31,6 +34,7 @@ def get_attribute(conf, attribute):
     else:
         csaf_logger.info(f"Retrieved attribute: {attribute} = {val}")
         return val
+
 
 ## build and simulate system
 csaf_dir=sys.argv[1]
@@ -49,9 +53,11 @@ model_conf.plot_config()
 # Optional job configuration
 if len(sys.argv) > 3:
     job_filename = os.path.join(csaf_dir, sys.argv[3])
-    with open(job_filename, 'r') as f:
-        csaf_logger.info(f"Loading job config: {job_filename}")
-        job_conf = toml.load(f)
+    csaf_logger.info(f"Loading job config: {job_filename}")
+    bdir = str(pathlib.Path(job_filename).parent.resolve())
+    parser = ctp.ParallelParser(bdir, context_str=job_filename)
+    job_conf = toml.load(job_filename)
+    job_conf = parser.parse(job_conf)
 else:
     job_conf = {}
 
@@ -66,55 +72,72 @@ filename = job_conf.get('plot_filename', None)
 if job_conf.get('parallel', False):
     # Parallel run
     csaf_logger.info(f"Running parallel simulation.")
-    x0 = get_attribute(job_conf, 'x0')
+    x0 = job_conf.get('x0')
+    states = None
 
-    if x0 == "random":
-        csaf_logger.info(f"Generating random states.")
-        iterations = get_attribute(job_conf, 'iterations')
-        bounds = get_attribute(job_conf, 'bounds')
+    iterations = get_attribute(job_conf, 'iterations')
+    bounds = job_conf['bounds']
+    states = x0
 
-        # define states of component to run
-        # format [{"plant": <list>}, ..., {"plant" : <list>, "controller": <list>}]
-        states = run_parallel.gen_random_states(bounds, "plant", iterations)
-    elif x0 == "fixed":
-        csaf_logger.info(f"Generating states using fixed step.")
-        bounds = get_attribute(job_conf, 'bounds')
-        # define states of component to run
-        states = run_parallel.gen_fixed_states(bounds, "plant")
-        csaf_logger.info(f"Generated {len(states)} initial states.")
-        iterations = len(states)
-    elif x0 == "from_file":
-        x0_path = get_attribute(job_conf, 'x0_path')
-        csaf_logger.info(f"Loading states from a file: {x0_path}")
-        states = run_parallel.load_states_from_file(x0_path, "plant")
-        csaf_logger.info(f"Loaded {len(states)} initial states.")
-        iterations = len(states)
-    else:
-        csaf_logger.error(f"Unknown value x0 = {x0}. Valid values are [random, fixed, from_file]")
-        raise NotImplementedError
-
-    csaf_logger.debug(f"Initial states are: {states}")
+    csaf_logger.debug(f"Number of initial states are: {len(states)}")
 
     # get terminating condition
     termcond = job_conf.get('terminating_conditions', None)
-    if termcond:
-        # file 'terminating_conditions' is example specific
-        from terminating_conditions import *
-        termcond = eval(termcond)
-    csaf_logger.info(f"Terminating condition is: {termcond}")
+    csaf_logger.info(f"Terminating condition is: {termcond.__name__ if isinstance(termcond, collections.Callable) else termcond}")
 
-    # run tasks in a workgroup
-    runs = run_parallel.run_workgroup(iterations, model_conf, states, tspan, terminating_conditions=termcond)
+    # Run static tests if desired
+    static_tests = job_conf.get('tests', None)
+    if static_tests:
+        csaf_logger.info(f"Running static tests")
+        from tests_static import *
+        for t in static_tests:
+            csaf_logger.info(f"Evaluating {t}")
+            # TODO: sanity check the values
+            test = static_tests[t]
 
-    passed_termcond = [val for val,_,_ in runs].count(True)
-    success_rate = float(passed_termcond)/float(iterations)
-    failed_runs = iterations - len(runs)
+            # configure generator (require some generator config?)
+            generator_config = test.get('generator_config',None)
+            if generator_config:
+                for param_name in generator_config:
+                    #from IPython import embed; embed()
+                    model_conf.config_dict['components']['autopilot']['config']['parameters'][param_name] = generator_config[param_name]
 
-    csaf_logger.info(f"Out of {iterations}, {passed_termcond} passed the terminating conditions. {success_rate*100:1.2f} [%] success.")
-    csaf_logger.info(f"{failed_runs} simulations failed with an exception.")
+            # run tasks in a workgroup
+            runs = run_parallel.run_workgroup(iterations, model_conf, states, tspan, terminating_conditions=termcond)
+
+            # Filter out terminated runs
+            passed_termcond = [val for val,_,_ in runs].count(True)
+            success_rate = float(passed_termcond)/float(iterations)
+            failed_runs = iterations - len(runs)
+
+            csaf_logger.info(f"Out of {iterations}, {passed_termcond} passed the terminating conditions. {success_rate*100:1.2f} [%] success.")
+            csaf_logger.info(f"{failed_runs} simulations failed with an exception.")
+
+            # Evaluate tests
+            fcn = test['fcn_name']
+            ref_cmp = test['reference'][0]
+            ref_idx = int(test['reference'][1])
+            res_cmp = test['response'][0]
+            res_idx = int(test['response'][1])
+
+            z = [fcn(trajs,ref_cmp, ref_idx, res_cmp, res_idx) if passed else None for passed,trajs,_ in runs]
+            test_passed = z.count(True)
+            test_success_rate = float(test_passed)/float(passed_termcond) if passed_termcond > 0 else 0.0
+            csaf_logger.info(f"{t} evaluated. {test_passed}/{passed_termcond} passed, {test_success_rate*100:1.2f} [%] success.")
+    else:
+        # Run only once
+        # run tasks in a workgroup
+        runs = run_parallel.run_workgroup(iterations, model_conf, states, tspan, terminating_conditions=termcond)
+
+        passed_termcond = [val for val,_,_ in runs].count(True)
+        success_rate = float(passed_termcond)/float(iterations)
+        failed_runs = iterations - len(runs)
+
+        csaf_logger.info(f"Out of {iterations}, {passed_termcond} passed the terminating conditions. {success_rate*100:1.2f} [%] success.")
+        csaf_logger.info(f"{failed_runs} simulations failed with an exception.")
 
     # save initial conditions to a file
-    if job_conf.get('x0_save_to_file', False):
+    if job_conf.get('x0_save_to_file', False) and states:
         filename = os.path.join(model_conf.output_directory, f"{model_conf.name}-x0.csv")
         csaf_logger.info(f"Saving inital conditions to {filename}")
         run_parallel.save_states_to_file(filename, states)

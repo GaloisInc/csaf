@@ -23,6 +23,7 @@ initial_conditions = [  540.0, # vt [ft/s]
 parallel = true
 
 # [random, fixed, from_file]
+x0_component_name = "plant"
 x0 = "from_file"
 # NOTE: the path is different when running from docker vs running natively
-x0_path = "examples/f16/f16-example-x0.csv"
+x0_path = "f16-example-x0.csv"

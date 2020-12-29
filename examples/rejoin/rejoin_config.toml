@@ -1,0 +1,105 @@
+# System Name
+name = "Dubin's Aircraft 2D System"
+
+# directory to output ROSmsg codecs
+codec_dir = "codec"
+
+# directory to send CSAF output
+output_dir = "output"
+
+# Order to Construct/Evaluate Components
+evaluation_order = ["controller", "jet0", "jet1", "jet2", "jet3"]
+
+# File to Log Results
+log_file = "jetsat_sys.log"
+
+# Log Level (info/debug)
+log_level = "info"
+
+[components]
+
+  [components.controller]
+    # environment to run under
+    run_command = "python3"
+
+    # path to model executable
+    process = "controller.py"
+
+    # whether to print debug diagnostics
+    debug = false
+
+    # subscribe to topic of a component (component name, topic name)
+    sub = [["jet0", "states"],
+    ["jet1", "states"],
+    ["jet2", "states"],
+    ["jet3", "states"]]
+
+    # port to publish
+    pub = 5502
+
+  [components.jet0]
+    # environment to run under
+    run_command = "python3"
+
+    # path to model executable
+    process = "dubinplant.py"
+
+    # whether to print debug diagnostics
+    debug = false
+
+    # subscribe to topic of a component (component name, topic name)
+    sub = [["controller", "outputs"]]
+
+    # port to publish
+    pub = 5503
+
+
+  [components.jet1]
+    # environment to run under
+    run_command = "python3"
+
+    # path to model executable
+    process = "dubinplant.py"
+
+    # whether to print debug diagnostics
+    debug = false
+
+    # subscribe to topic of a component (component name, topic name)
+    sub = [["controller", "outputs"]]
+
+    # port to publish
+    pub = 5504
+
+
+  [components.jet2]
+    # environment to run under
+    run_command = "python3"
+
+    # path to model executable
+    process = "dubinplant.py"
+
+    # whether to print debug diagnostics
+    debug = false
+
+    # subscribe to topic of a component (component name, topic name)
+    sub = [["controller", "outputs"]]
+
+    # port to publish
+    pub = 5505
+
+
+  [components.jet3]
+    # environment to run under
+    run_command = "python3"
+
+    # path to model executable
+    process = "dubinplant.py"
+
+    # whether to print debug diagnostics
+    debug = false
+
+    # subscribe to topic of a component (component name, topic name)
+    sub = [["controller", "outputs"]]
+
+    # port to publish
+    pub = 5506

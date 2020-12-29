@@ -1,0 +1,17 @@
+system_name = "Learjet Controller Model"
+system_representation = "black box"
+system_solver = "Euler"
+
+sampling_frequency = 100
+
+is_discrete = true
+is_hybrid = false
+
+[parameters]
+
+[inputs]
+  msgs = [ "jetplant_state.msg", "jetplant_output.msg" ]
+
+[topics]
+  [topics.outputs]
+      msg = "controller_output.msg"

@@ -27,9 +27,9 @@ x0 = "fixed"
 bounds = [    [200.0, 1000.0, 100.0], # vt [ft/s]
               [0.026692982, 0.047745614, 0.01], # alpha [rad]
               [0.0], # beta [rad]
-              [0.785], # phi [rad]
-              [3.14], # theta [rad]
-              [0.785], # psi [rad]
+              [0.0], # phi [rad]
+              [0.0], # theta [rad]
+              [0.0], # psi [rad]
               [0.0], # p [rad/s]
               [0.0], # q [rad/s]
               [0.0], # r [rad/s]
@@ -43,3 +43,29 @@ terminating_conditions = "ground_collision"
 
 # [true|false]
 x0_save_to_file = true
+
+# Static tests to run
+[tests]
+
+# Test name
+[tests.overshoot_Nz]
+    # "global" test parameters
+    fcn_name = "max_norm_deviation"
+    # This is silly, but TOML requires arrays to contain only one type
+    reference = ['autopilot','0']
+    response = ['plant', '0']
+    # Test specific generator config
+
+    [tests.overshoot_Nz.generator_config]
+    output_idx = 0
+
+[tests.overshoot_Ny]
+    # "global" test parameters
+    fcn_name = "max_norm_deviation"
+    # This is silly, but TOML requires arrays to contain only one type
+    reference = ['autopilot','1']
+    response = ['plant', '1']
+    # Test specific generator config
+
+    [tests.overshoot_Ny.generator_config]
+    output_idx = 1
