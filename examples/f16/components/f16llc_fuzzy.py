@@ -4,9 +4,11 @@ TODO: implement the TODOs
 """
 import numpy as np
 from fileops import prepend_curr_path
-from helpers import lqr
-from f16llc import get_x_ctrl, clip_u, model_state_update
+from helpers import lqr, llc_helper as lh
+from f16llc import model_state_update
 from f16_fuzzy_mode import F16ModeController
+
+
 
 
 def model_init(model):
@@ -25,30 +27,46 @@ def model_init(model):
     model.parameters["gains_aileron"] = np.load(ail_path)
     model.parameters["gains_elevator"] = np.load(ele_path)
     model.parameters["gains_rudder"] = np.load(rud_path)
-    model.parameters["ctrlr"] = F16ModeController()
+    #model.parameters["ctrlr"] = F16ModeController()
+    ctrlr = F16ModeController()
+
+    def compute_fcn(x_ctrl):
+        """compute 3-dim control signal from 8-dim x_ctrl signal"""
+        print('x')
+        return np.array(ctrlr.Controller(x_ctrl)).flatten()
+
+    _, xequil, uequil = getattr(lqr, model.lqr_name)()
+    model.parameters['llc'] = lh.FeedbackController(lh.CtrlLimits(), model, compute_fcn, xequil, uequil)
 
 
-def compute_fcn(model, x_ctrl):
-    """compute 3-dim control signal from 8-dim x_ctrl signal"""
-    ctrlr = model.parameters["ctrlr"]
-    return np.array(ctrlr.Controller(x_ctrl)).flatten()
-
-
-def model_output(model, time_t, state_controller, input_all):
+def model_output(model, t, state_controller, input_all):
+    assert len(input_all) == 21
+    #TODO: hard coded indices!
     """ get the reference commands for the control surfaces """
-    _, *trim_points = getattr(lqr, model.lqr_name)()
-    x_f16, _y, u_ref = input_all[:13], input_all[13:17], input_all[17:]
-    x_ctrl = get_x_ctrl(trim_points, np.concatenate([x_f16, state_controller]))
+    return model.parameters['llc'].output(t, np.array(state_controller), np.array(input_all))
 
-    # Initialize control vectors
-    u_deg = np.zeros((4,))  # throt, ele, ail, rud
-    u_deg[1:4] = compute_fcn(model, x_ctrl)
 
-    # Set throttle as directed from output of getOuterLoopCtrl(...)
-    u_deg[0] = u_ref[3]
+# def compute_fcn(model, x_ctrl):
+#     """compute 3-dim control signal from 8-dim x_ctrl signal"""
+#     ctrlr = model.parameters["ctrlr"]
+#     return np.array(ctrlr.Controller(x_ctrl)).flatten()
 
-    # Add in equilibrium control
-    u_deg[0:4] += trim_points[1]
-    u_deg = clip_u(model, u_deg)
 
-    return u_deg
+# def model_output(model, time_t, state_controller, input_all):
+#     """ get the reference commands for the control surfaces """
+#     _, *trim_points = getattr(lqr, model.lqr_name)()
+#     x_f16, _y, u_ref = input_all[:13], input_all[13:17], input_all[17:]
+#     x_ctrl = get_x_ctrl(trim_points, np.concatenate([x_f16, state_controller]))
+
+#     # Initialize control vectors
+#     u_deg = np.zeros((4,))  # throt, ele, ail, rud
+#     u_deg[1:4] = compute_fcn(model, x_ctrl)
+
+#     # Set throttle as directed from output of getOuterLoopCtrl(...)
+#     u_deg[0] = u_ref[3]
+
+#     # Add in equilibrium control
+#     u_deg[0:4] += trim_points[1]
+#     u_deg = clip_u(model, u_deg)
+
+#     return u_deg
