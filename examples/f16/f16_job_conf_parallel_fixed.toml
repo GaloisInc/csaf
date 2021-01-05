@@ -47,25 +47,35 @@ x0_save_to_file = true
 # Static tests to run
 [tests]
 
-# Test name
+# Tests
 [tests.overshoot_Nz]
-    # "global" test parameters
-    fcn_name = "max_norm_deviation"
-    # This is silly, but TOML requires arrays to contain only one type
-    reference = ['autopilot','0']
-    response = ['plant', '0']
-    # Test specific generator config
+    test_type = "StaticRunTest"
+    [tests.overshoot_Nz.parameters]
+        # "global" test parameters
+        fcn_name = "max_norm_deviation"
+        # This is silly, but TOML requires arrays to contain only one type
+        reference = ['autopilot','0']
+        response = ['plant', '0']
+        # Test specific generator config
 
-    [tests.overshoot_Nz.generator_config]
-    output_idx = 0
+        [tests.overshoot_Nz.parameters.generator_config]
+            output_idx = 0
 
 [tests.overshoot_Ny]
-    # "global" test parameters
-    fcn_name = "max_norm_deviation"
-    # This is silly, but TOML requires arrays to contain only one type
-    reference = ['autopilot','1']
-    response = ['plant', '1']
-    # Test specific generator config
+    test_type = "StaticRunTest"
+    [tests.overshoot_Ny.parameters]
+        # "global" test parameters
+        fcn_name = "max_norm_deviation"
+        # This is silly, but TOML requires arrays to contain only one type
+        reference = ['autopilot','1']
+        response = ['plant', '1']
+        # Test specific generator config
 
-    [tests.overshoot_Ny.generator_config]
-    output_idx = 1
+        [tests.overshoot_Ny.parameters.generator_config]
+        output_idx = 1
+
+[tests.falsify_gcas]
+    test_type = "BayesianFalsifier"
+    [tests.falsify_gcas.parameters]
+        # number of calls for the attack function
+        n_calls = 20

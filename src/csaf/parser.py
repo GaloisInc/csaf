@@ -114,12 +114,15 @@ class ConfigParser(metaclass=ConfigParserMeta):
 
     defaults_fields = None
 
-    def __init__(self, base_dir, context_str='', parent_conf={}):
+    def __init__(self, base_dir, context_str='', parent_conf = {}):
         self.base_dir = str(pathlib.Path(base_dir).resolve())
         self.context_str = context_str
         self.parent_conf = parent_conf
+        if not hasattr(self, "_field_name_methods"):
+            self._field_name_methods = {}
+        self._config = None
 
-    def logger(self, log_type_name: str, msg: str, error: Exception = None):
+    def logger(self, log_type_name: str, msg: str, error: typ.Type[Exception] = None):
         msg_full = f"{self.context_str + (': ' if self.context_str else '')}{msg}"
         if hasattr(self, "sys_logger"):
             getattr(self.sys_logger, log_type_name)(msg_full)
@@ -127,20 +130,6 @@ class ConfigParser(metaclass=ConfigParserMeta):
             getattr(csaf_logger, log_type_name)(msg_full)
         if error is not None:
             raise error(msg_full)
-
-    @property
-    def eval_order(self) -> list:
-        dep_graph = {}
-        for k, v in self._field_name_methods.items():
-            assert isinstance(v[1], tuple)
-            dep_graph[k] = set(v[1])
-        try:
-            return toposort_flatten(dep_graph)
-        except CircularDependencyError as exc:
-            self.logger(
-                "error",
-                f"DEV ERROR: configuration parser has circular dependency <{exc}>",
-                error=CircularDependencyError)
 
     def parse(self, cconf: dict) -> dict:
         """parse a dict from a TOML parse"""
@@ -179,6 +168,19 @@ class ConfigParser(metaclass=ConfigParserMeta):
     def __getattr__(self, name: str):
         if name in self.valid_fields:
             return self._config[name]
-        else:
-            raise AttributeError(f"{name} is not a valid field")
+        return self.__getattribute__(name)
+
+    @property
+    def eval_order(self) -> list:
+        dep_graph = {}
+        for k, v in self._field_name_methods.items():
+            assert isinstance(v[1], tuple)
+            dep_graph[k] = set(v[1])
+        try:
+            return toposort_flatten(dep_graph)
+        except CircularDependencyError as exc:
+            self.logger(
+                "error",
+                f"DEV ERROR: configuration parser has circular dependency <{exc}>",
+                error=CircularDependencyError)
 

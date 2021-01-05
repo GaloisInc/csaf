@@ -193,28 +193,8 @@ class ParallelParser(ConfigParser):
 
 
 class TestParser(ConfigParser):
-    valid_fields = ["fcn_name", "reference", "response", "generator_config"]
+    valid_fields = ["test_type", "parameters"]
 
-    required_fields = ["fcn_name", "reference", "response", "generator_config"]
+    required_fields = ["test_type"]
 
-    @_("generator_config")
-    def _(self, params: dict) -> dict:
-        return params
-
-    @_("fcn_name", depends_on=("generator_config", ))
-    def _(self, fcn_name: str) -> str:
-        # TODO: this is hard-coded
-        pypath = str(
-            pathlib.Path(__file__).parent.absolute() / "../tests_static.py")
-        # update python path to include module directory
-        mod_path = str(pathlib.Path(pypath).parent.resolve())
-        if mod_path not in sys.path:
-            sys.path.insert(0, mod_path)
-        return getattr(__import__("tests_static"), fcn_name)
-
-    @_("reference")
-    @_("response")
-    def _(self, sig_select: typ.Sequence[typ.Union[str, int]]
-          ) -> typ.Sequence[typ.Union[str, int]]:
-        # TODO: check?
-        return sig_select
+    fields_defaults = {"parameters": {}}
