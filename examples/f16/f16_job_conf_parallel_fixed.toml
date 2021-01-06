@@ -75,7 +75,7 @@ x0_save_to_file = true
         output_idx = 1
 
 [tests.falsify_gcas]
-    test_type = "BayesianFalsifier"
+    test_type = "BayesianFalsifierTest"
     [tests.falsify_gcas.parameters]
         # number of calls for the attack function
         n_calls = 20

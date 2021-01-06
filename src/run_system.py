@@ -69,13 +69,14 @@ if job_conf.get('parallel', False):
         for t in static_tests:
             csaf_logger.info(f"Evaluating {t}")
             test = static_tests[t]
-            test = StaticRunTest({**test, **job_conf}, model_conf)
-            test.execute()
+            #test = StaticRunTest(bdir)
+            tester = test["_test_object"]
+            tester.execute(model_conf)
     else:
         # Run only once
         # run tasks in a workgroup
         test = RunSystemParallelTest(job_conf, model_conf)
-        runs, _ = test.execute()
+        runs, _ = test.execute(model_conf)
 
     # save initial conditions to a file
     states = job_conf['x0']
@@ -86,9 +87,11 @@ if job_conf.get('parallel', False):
 
 else:
     # Regular run
+    bdir = str(pathlib.Path(config_filename).parent.resolve())
     csaf_logger.info(f"Running a single simulation.")
-    test = RunSystemTest({}, model_conf)
-    trajs = test.execute()
+    test = RunSystemTest(bdir)
+    test.parse({})
+    trajs = test.execute(model_conf)
     filename = os.path.join(model_conf.output_directory, f"{model_conf.name}-run.png")
     if do_plot:
         plot.plot_results(config_filename, trajs, filename)

@@ -109,6 +109,7 @@ class ParallelParser(ConfigParser):
     def _(self, fcn_name: typ.Union[str, None]) -> typ.Callable:
         if fcn_name is None:
             return None
+        #FIXME: hard-coded
         pypath = str(pathlib.Path(self.base_dir) / "terminating_conditions.py")
         # update python path to include module directory
         mod_path = str(pathlib.Path(pypath).parent.resolve())
@@ -179,16 +180,21 @@ class ParallelParser(ConfigParser):
             bn.append((minv, maxv, step))
         return tuple(bn)
 
-    @_("tests")
+    @_("tests", depends_on=("x0", "bounds", "tspan", "iterations", "terminating_conditions"))
     def _(self, tests: dict) -> dict:
         for tname, tconf in tests.items():
             if not isinstance(tconf, dict):
                 self.logger("error",
                             f"{tname} field is not a component map",
                             error=ValueError)
-            tpr = TestParser(self.base_dir,
+            #FIXME: pretend that tpr is correct
+            tcls = getattr(__import__("tests_static"), tconf["test_type"])
+            tpr = tcls(self.base_dir,
                              context_str=self.context_str + f"<{tname}>")
-            tests[tname] = tpr.parse(tconf)
+            # TODO: check for parameters
+            preconf = {k: v for k, v in self._config.items() if k in tpr.valid_fields}
+            tests[tname] = tpr.parse({**preconf, **tconf.get("parameters", {})})
+            tests[tname]["_test_object"] = tpr
         return tests
 
 

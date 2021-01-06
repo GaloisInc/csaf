@@ -108,11 +108,11 @@ class ConfigParser(metaclass=ConfigParserMeta):
     def _(self, field_value):
         return field_value
     """
-    valid_fields = None
+    valid_fields = []
 
-    required_fields = None
+    required_fields = []
 
-    defaults_fields = None
+    defaults_fields = {}
 
     def __init__(self, base_dir, context_str='', parent_conf = {}):
         self.base_dir = str(pathlib.Path(base_dir).resolve())
