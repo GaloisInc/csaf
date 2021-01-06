@@ -57,7 +57,6 @@ x0_save_to_file = true
         reference = ['autopilot','0']
         response = ['plant', '0']
         # Test specific generator config
-
         [tests.overshoot_Nz.parameters.generator_config]
             output_idx = 0
 
@@ -77,5 +76,6 @@ x0_save_to_file = true
 [tests.falsify_gcas]
     test_type = "BayesianFalsifierTest"
     [tests.falsify_gcas.parameters]
+        reward_fcn = "reward_func"
         # number of calls for the attack function
         n_calls = 20
