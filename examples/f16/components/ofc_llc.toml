@@ -8,6 +8,7 @@ is_discrete = false
 is_hybrid = false
 
 [parameters]
+    sampling_frequency = 100
     lqr_name = "lqr_original"
     xequil = [502.0, 0.03887505597600522, 0.0, 0.0, 0.03887505597600522, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1000.0, 9.05666543872074]
     uequil = [0.13946204864060271, -0.7495784725828754, 0.0, 0.0]

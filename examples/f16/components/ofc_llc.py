@@ -37,7 +37,7 @@ class DaTaControlF16(lh.FeedbackController):
         self.uequil = np.array([0.13946204864060271, -0.7495784725828754, 0.0, 0.0])
 
         self.step_size = 0.01
-        self.step_size = 0.01#self.sampling_period
+        self.sampling_period = 0.01#self.sampling_period
         self.model = model
 
         # Parameters for DaTaControl
@@ -198,5 +198,5 @@ def model_output(model, t, state_controller, input_all):
 
 def model_state_update(model, t, state_controller, input_all):
     """ get the derivatives of the integrators in the low-level controller """
-    #return llc.step(t, 1/model.sampling_frequency, state_controller, input_all)
-    return model.parameters['llc']._der(t, np.array(state_controller), np.array(input_all))
+    return model.parameters['llc'].step(t, 1/model.parameters['sampling_frequency'], state_controller, input_all)
+    #return model.parameters['llc']._der(t, np.array(state_controller), np.array(input_all))
