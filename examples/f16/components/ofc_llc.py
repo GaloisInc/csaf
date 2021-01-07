@@ -5,8 +5,7 @@ import numpy as np
 from f16_uncertain_plant import *
 from DaTaReachControl import DaTaControl
 from DaTaReachControl import OPTIMISTIC_GRB, IDEALISTIC_GRB, IDEALISTIC_APG
-
-from f16.f16lib.limits import CtrlLimits
+from f16plant import subf16df
 from helpers import llc_helper as lh
 
 # seed = np.random.randint(0,2000)
@@ -29,18 +28,17 @@ def buildObjective(setpoints, target_index):
     return Qtarget, Rtarget, Starget, qtarget, rtarget
 
 class DaTaControlF16(lh.FeedbackController):
-    def __init__(self, ctrlLimits, model, f16Dyn):
-        # super() will populate self.sampling_period
+    def __init__(self, ctrlLimits, model):
         super().__init__(ctrlLimits, model, None, None, None)
         # Save the F16 plant to be used for computing the state derivatives
-        self.f16Dyn = f16Dyn
         # Save the equilibrium points
         self.xequil = np.array([502.0, 0.03887505597600522, 0.0, 0.0, 0.03887505597600522, 0.0, 0.0, 0.0, \
                            0.0, 0.0, 0.0, 1000.0, 9.05666543872074])
         self.uequil = np.array([0.13946204864060271, -0.7495784725828754, 0.0, 0.0])
 
-        # self.step_size = 0.01
-        self.step_size = self.sampling_period
+        self.step_size = 0.01
+        self.step_size = 0.01#self.sampling_period
+        self.model = model
 
         # Parameters for DaTaControl
         maxData = 10
@@ -118,7 +116,7 @@ class DaTaControlF16(lh.FeedbackController):
         u_deg[0] = u_ref[3]
         # add in equilibrium control
         u_deg[0:4] += self.uequil
-        u_deg = clip_u(u_deg, self.ctrlLimits)
+        u_deg = lh.clip_u(self.model, u_deg)
         u_deg[0] = min(max(u_deg[0], self.uRange_lb[0]), self.uRange_ub[0])
 
         # if self.synth_control.canDoApprox[0] and self.synth_control.canDoApprox[0]:
@@ -171,7 +169,10 @@ class DaTaControlF16(lh.FeedbackController):
         # print('thrust: ', xdot3[1]-xdot1[1])
         # print('ail: ', xdot4[1]-xdot1[1])
         # Compute the derivative of alpha, q and int_Nz based on the current control value
-        xder, output = self.f16Dyn.subf16df(t, x_f16, u_deg, None)
+
+        #XXX: Why is adjust_cy None!!?
+        xder, output = subf16df(self.model, t, x_f16, u_deg, None)
+
         self.lastDerivative = xder
         self.lastDerivativeIntNz = output[0]
         self.lastDerivativeIntPs = x_f16[6]*np.cos(x_f16[1]) + x_f16[8]*np.sin(x_f16[1])
@@ -185,8 +186,7 @@ class DaTaControlF16(lh.FeedbackController):
 
 def model_init(model):
     """load trained model"""
-    ctrl_fn, xequil, uequil = getattr(lqr, model.lqr_name)()
-    model.parameters['llc'] = lh.FeedbackController(lh.CtrlLimits(), model, ctrl_fn, xequil, uequil)
+    model.parameters['llc'] = DaTaControlF16(lh.CtrlLimits(), model)
 
 
 def model_output(model, t, state_controller, input_all):

@@ -1,4 +1,4 @@
-system_name = "F16 Fuzzy Logic Low Level Controller"
+system_name = "F16 Fuzzy On-the-Fly-Control"
 system_representation = "black box"
 system_solver = "Euler"
 
