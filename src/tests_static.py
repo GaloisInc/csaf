@@ -46,57 +46,6 @@ def max_norm_deviation(trajs, reference_component, reference_index,
     return max_dev <= threshold
 
 
-class RunSystemTest(cst.SystemTest):
-    """test that ones one system simulation"""
-    valid_fields = ["initial_conditions",
-                    "show_status",
-                    "tspan"]
-
-    required_fields = []
-
-    defaults_fields = {"initial_conditions": None,
-                       "show_status": True,
-                       "tspan": (0.0, 10.0)}
-
-    def execute(self, system_conf):
-        system = csys.System.from_config(system_conf)
-        x0 = self.initial_conditions
-        if x0:
-            # TODO: bad hard coding
-            system.set_state("plant", x0)
-        trajs = system.simulate_tspan(self.tspan, show_status=self.show_status)
-        system.unbind()
-        return trajs
-
-
-class RunSystemParallelTest(cst.SystemTest):
-    """test that runs one or more system configurations in parallel"""
-    valid_fields = ["iterations",
-                       "fcn_name",
-                       "tspan",
-                       "x0",
-                       "terminating_conditions"]
-
-    required_fields = ["iterations",
-                       "fcn_name",
-                       "tspan",
-                       "x0",
-                       "terminating_conditions"]
-
-    defaults_fields = {"tspan" : (0.0, 10.0),
-                       "terminating_conditions": None}
-
-    def execute(self, system_conf):
-        runs = run_parallel.run_workgroup(self.iterations, system_conf, self.x0, self.tspan, self.terminating_conditions)
-        # Filter out terminated runs
-        passed_termcond = [val for val,_,_ in runs].count(True)
-        success_rate = float(passed_termcond)/float(self.iterations)
-        failed_runs = self.iterations - len(runs)
-        self.logger("info", f"Out of {self.iterations}, {passed_termcond} passed the terminating conditions. {success_rate*100:1.2f} [%] success.")
-        self.logger("info", f"{failed_runs} simulations failed with an exception.")
-        return runs, passed_termcond
-
-
 def attack(func,
            space,
            acq_func="EI",
@@ -125,16 +74,70 @@ def attack(func,
     return func.get_collector()
 
 
+class RunSystemTest(cst.SystemTest):
+    """test that ones one system simulation"""
+    valid_fields = ["initial_conditions",
+                    "show_status",
+                    "tspan"]
+
+    required_fields = []
+
+    defaults_fields = {"initial_conditions": None,
+                       "show_status": True,
+                       "tspan": (0.0, 10.0)}
+
+    def execute(self, system_conf):
+        system = csys.System.from_config(system_conf)
+        x0 = self.initial_conditions
+        if x0:
+            # TODO: bad hard coding
+            system.set_state("plant", x0)
+        trajs = system.simulate_tspan(self.tspan, show_status=self.show_status)
+        system.unbind()
+        return trajs
+
+
+class RunSystemParallelTest(cst.SystemTest):
+    """test that runs one or more system configurations in parallel"""
+    valid_fields = ["iterations",
+                    "tspan",
+                    "x0",
+                    "terminating_conditions"]
+
+    required_fields = ["iterations",
+                       "tspan",
+                       "x0",
+                       "terminating_conditions"]
+
+    defaults_fields = {"tspan" : (0.0, 10.0),
+                       "terminating_conditions": None}
+
+    def execute(self, system_conf):
+        runs = run_parallel.run_workgroup(self.iterations,
+                                          system_conf,
+                                          self.x0,
+                                          self.tspan,
+                                          terminating_conditions=self.terminating_conditions)
+        # Filter out terminated runs
+        passed_termcond = [val for val,_,_ in runs].count(True)
+        success_rate = float(passed_termcond)/float(self.iterations)
+        failed_runs = self.iterations - len(runs)
+        self.logger("info", f"Out of {self.iterations}, {passed_termcond} passed the terminating conditions. {success_rate*100:1.2f} [%] success.")
+        self.logger("info", f"{failed_runs} simulations failed with an exception.")
+        return runs, passed_termcond
+
+
 class StaticRunTest(RunSystemParallelTest):
     """test that evaluates traces from system simulations"""
     valid_fields = ["iterations",
-                       "tspan",
-                       "x0",
-                       "terminating_conditions",
-                       "generator_config",
-                       "reference",
-                       "response",
-                       "fcn_name"]
+                    "tspan",
+                    "x0",
+                    "test_methods_file",
+                    "terminating_conditions",
+                    "generator_config",
+                    "reference",
+                    "response",
+                    "fcn_name"]
 
     required_fields = ["iterations",
                        "tspan",
@@ -144,6 +147,10 @@ class StaticRunTest(RunSystemParallelTest):
                        "reference",
                        "response",
                        "fcn_name"]
+
+    @_("fcn_name")
+    def _(self, fcn_name: str):
+        return globals()[fcn_name]
 
     def execute(self, system_conf):
         # configure generator (require some generator config?)
@@ -193,19 +200,6 @@ class BayesianFalsifierTest(RunSystemTest):
                        "terminating_conditions",
                        "show_status",
                        "tspan"]
-
-    @_("reward_fcn")
-    def _(self, fcn_name):
-        import pathlib, sys
-        if fcn_name is None:
-            return None
-        #FIXME: hard-coded
-        pypath = str(pathlib.Path(self.base_dir) / "terminating_conditions.py")
-        mod_path = str(pathlib.Path(pypath).parent.resolve())
-        if mod_path not in sys.path:
-            sys.path.insert(0, mod_path)
-        # TODO: this is hard-coded
-        return getattr(__import__("terminating_conditions"), fcn_name)
 
     def execute(self, system_conf):
         def simulate(initial_conditions):

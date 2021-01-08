@@ -110,7 +110,7 @@ class Task(object):
             ret = getattr(system, self.system_attr)(*self.args, **self.kwargs)
             answer = [self.idx, dill.dumps(ret), self.states]
         except Exception as exc:
-            csaf_logger.warning(f"running {self.system_attr} failed for states {self.states}")
+            csaf_logger.warning(f"running {self.system_attr} failed for states {self.states}\n<{exc}>")
             answer = [self.idx, exc, self.states]
         return tuple(answer)
 

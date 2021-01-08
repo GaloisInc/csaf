@@ -4,6 +4,7 @@ import numpy as np
 import pathlib
 import sys
 import typing as typ
+import collections
 
 
 def save_states_to_file(filename, states):
@@ -34,6 +35,8 @@ def gen_fixed_states(bounds, component_name):
         iters = int((upper - lower) / step)
         return np.linspace(lower, upper, iters)
 
+    bounds = bounds[component_name]
+
     sanity_check(bounds)
 
     # create initial vector
@@ -60,6 +63,7 @@ def gen_fixed_states(bounds, component_name):
 
 
 def gen_random_states(bounds, component_name, iterations):
+    bounds = bounds[component_name]
     def generate_single_random_state(bounds):
         sample = np.random.rand(len(bounds))
         ranges = np.array(
@@ -76,7 +80,8 @@ class ParallelParser(ConfigParser):
     valid_fields = [
         "tspan", "show_status", "plot", "initial_conditions", "parallel", "x0",
         "x0_path", "bounds", "terminating_conditions", "x0_save_to_file",
-        "tests", "plot_filename", "iterations", "x0_component_name", "component_under_test"
+        "tests", "plot_filename", "iterations", "x0_component_name", "component_under_test",
+        "test_methods_file"
     ]
 
     required_fields = ["initial_conditions"]
@@ -105,18 +110,23 @@ class ParallelParser(ConfigParser):
     def _(self, tspan: typ.List[float]) -> typ.Tuple:
         return tuple(tspan)
 
-    @_("terminating_conditions")
-    def _(self, fcn_name: typ.Union[str, None]) -> typ.Callable:
+    @_("test_methods_file")
+    def _(self, py_fname):
+        if isinstance(py_fname, str):
+            pypath = str(pathlib.Path(self.base_dir) / py_fname)
+            # update python path to include module directory
+            mod_path = str(pathlib.Path(pypath).parent.resolve())
+            if mod_path not in sys.path:
+                sys.path.insert(0, mod_path)
+            return __import__(pathlib.Path(py_fname).stem)
+        else:
+            return py_fname
+
+    @_("terminating_conditions", depends_on = ("test_methods_file",))
+    def _(self, fcn_name: typ.Union[str, None, typ.Callable]) -> typ.Callable:
         if fcn_name is None:
             return None
-        #FIXME: hard-coded
-        pypath = str(pathlib.Path(self.base_dir) / "terminating_conditions.py")
-        # update python path to include module directory
-        mod_path = str(pathlib.Path(pypath).parent.resolve())
-        if mod_path not in sys.path:
-            sys.path.insert(0, mod_path)
-        # TODO: this is hard-coded
-        return getattr(__import__("terminating_conditions"), fcn_name)
+        return getattr(self.test_methods_file, fcn_name)
 
     @_("x0_component_name")
     def _(self, name: str) -> str:
@@ -128,8 +138,12 @@ class ParallelParser(ConfigParser):
         return xstf
 
     @_("x0",
-       depends_on=("bounds", "iterations", "bounds", "x0_path",
-                   "x0_component_name", "component_under_test"))
+       depends_on=("bounds",
+                   "iterations",
+                   "bounds",
+                   "x0_path",
+                   "x0_component_name",
+                   "component_under_test"))
     def _(self, x0: str) -> typ.Sequence[typ.Dict]:
         acceptable_x = {"fixed", "random", "from_file"}
         if x0 not in acceptable_x:
@@ -141,7 +155,10 @@ class ParallelParser(ConfigParser):
             return gen_random_states(self.bounds, self.component_under_test, self.iterations)
         elif x0 == "fixed":
             self.logger("info", "Generating states using fixed step.")
-            return gen_fixed_states(self.bounds, self.component_under_test)
+            states = gen_fixed_states(self.bounds, self.component_under_test)
+            self._config["iterations"] = len(states)
+            self.logger("info", f"Generated {len(states)} fixed initial states.")
+            return states
         elif x0 == "from_file":
             pathx0 = (pathlib.Path(self.base_dir) / self.x0_path).resolve()
             self.logger("info", "Loading states from a file: {pathx0}")
@@ -155,43 +172,48 @@ class ParallelParser(ConfigParser):
                         error=ValueError)
 
     @_("bounds")
-    def _(self, bounds: typ.Union[None, typ.Sequence[typ.Sequence[float]]]):
-        bn = []
+    def _(self, bounds):
+        b_new = {}
         if bounds is None:
             return None
-        for b in bounds:
-            if len(b) not in [1, 2, 3]:
-                self.logger("error",
-                            f"bound {b} must be length 1, 2, or 3",
-                            error=AssertionError)
-            minv = b[0]
-            if len(b) > 1:
-                if b[0] > b[1]:
+        for pname, pbound in bounds.items():
+            bn = []
+            for b in pbound:
+                if len(b) not in [1, 2, 3]:
                     self.logger("error",
-                                f"lower bound is greater than upper bound {b}",
+                                f"bound {b} must be length 1, 2, or 3",
                                 error=AssertionError)
-                maxv = b[1]
-            else:
-                maxv = minv
-            if len(bounds) == 3:
-                step = b[2]
-            else:
-                step = (maxv - minv) / 10.0
-            bn.append((minv, maxv, step))
-        return tuple(bn)
+                minv = b[0]
+                if len(b) > 1:
+                    if b[0] > b[1]:
+                        self.logger("error",
+                                    f"lower bound is greater than upper bound {b}",
+                                    error=AssertionError)
+                    maxv = b[1]
+                else:
+                    maxv = minv
+                if len(b) == 3:
+                    step = b[2]
+                else:
+                    step = (maxv - minv) / 10.0
+                bn.append((minv, maxv, step))
+            b_new[pname] = tuple(bn)
+        return b_new
 
-    @_("tests", depends_on=("x0", "bounds", "tspan", "iterations", "terminating_conditions"))
+    @_("tests", depends_on=("x0",
+                            "bounds",
+                            "tspan",
+                            "iterations",
+                            "terminating_conditions"))
     def _(self, tests: dict) -> dict:
         for tname, tconf in tests.items():
             if not isinstance(tconf, dict):
                 self.logger("error",
                             f"{tname} field is not a component map",
                             error=ValueError)
-            #FIXME: pretend that tpr is correct
             tcls = getattr(__import__("tests_static"), tconf["test_type"])
             tpr = tcls(self.base_dir,
                              context_str=self.context_str + f"<{tname}>")
-            # TODO: check for parameters
             preconf = {k: v for k, v in self._config.items() if k in tpr.valid_fields}
             tests[tname] = tpr.parse({**preconf, **tconf.get("parameters", {})})
             tests[tname]["_test_object"] = tpr

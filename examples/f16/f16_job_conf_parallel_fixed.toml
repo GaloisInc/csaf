@@ -1,81 +1,75 @@
-# Simple job configuration file
+# description of overshoot tests using fixed initial conditions
 
-# simulation options
-tspan = [0.0, 10.0]
-show_status = true # show progress during simulation
-plot = true # plot results on screen
+# control output during tests
+plot = true
+show_status = true
 
-initial_conditions = [  540.0, # vt [ft/s]
-                        0.037027160081059704, # alpha [rad]
-                        0.0, # beta [rad]
-                        0.1, # phi [rad]
-                        -0.1, # theta [rad]
-                        -0.1, # psi [rad]
-                        0.0, # p [rad/s]
-                        0.0, # q [rad/s]
-                        0.0, # r [rad/s]
-                        0.0, # pn [m]
-                        0.0, # pe [m]
-                        4800.0, # h [ft]
-                        90.0] # power [%]
+# where the test methods are located
+test_methods_file = "terminating_conditions.py"
 
-# Use parallel runner
-parallel = true
-
-# [random, fixed, from_file]
-x0 = "fixed"
-bounds = [    [200.0, 1000.0, 100.0], # vt [ft/s]
-              [0.026692982, 0.047745614, 0.01], # alpha [rad]
-              [0.0], # beta [rad]
-              [0.0], # phi [rad]
-              [0.0], # theta [rad]
-              [0.0], # psi [rad]
-              [0.0], # p [rad/s]
-              [0.0], # q [rad/s]
-              [0.0], # r [rad/s]
-              [0.0], # pn [m]
-              [0.0], # pe [m]
-              [500.0], # h [ft]
-              [9.0]] # power [%]
-
-# predefined terminating condition from a library
+# name of terminating conditions function
 terminating_conditions = "ground_collision"
 
+# default timespan to use in the tests
+tspan = [0.0, 10.0]
+
+# collections of initial states for tests
+# [random, fixed, from_file]
+x0 = "fixed"
 # [true|false]
 x0_save_to_file = true
 
-# Static tests to run
+# default initial conditions to use in the tests
+[initial_conditions]
+plant = [  540.0, # vt [ft/s]
+    0.037027160081059704, # alpha [rad]
+    0.0, # beta [rad]
+    0.1, # phi [rad]
+    -0.1, # theta [rad]
+    -0.1, # psi [rad]
+    0.0, # p [rad/s]
+    0.0, # q [rad/s]
+    0.0, # r [rad/s]
+    0.0, # pn [m]
+    0.0, # pe [m]
+    4800.0, # h [ft]
+    90.0] # power [%]
+
+# default bounds (defines region of state space to consider)
+[bounds]
+plant = [    [200.0, 1000.0, 100.0], # vt [ft/s]
+    [0.026692982, 0.047745614, 0.01], # alpha [rad]
+    [0.0], # beta [rad]
+    [0.0], # phi [rad]
+    [0.0], # theta [rad]
+    [0.0], # psi [rad]
+    [0.0], # p [rad/s]
+    [0.0], # q [rad/s]
+    [0.0], # r [rad/s]
+    [0.0], # pn [m]
+    [0.0], # pe [m]
+    [500.0], # h [ft]
+    [9.0]] # power [%]
+
+# description of tests
 [tests]
-
-# Tests
+# test to evaluate look at Nz outputs
 [tests.overshoot_Nz]
-    test_type = "StaticRunTest"
-    [tests.overshoot_Nz.parameters]
-        # "global" test parameters
-        fcn_name = "max_norm_deviation"
-        # This is silly, but TOML requires arrays to contain only one type
-        reference = ['autopilot','0']
-        response = ['plant', '0']
-        # Test specific generator config
-        [tests.overshoot_Nz.parameters.generator_config]
-            output_idx = 0
+test_type = "StaticRunTest"
+[tests.overshoot_Nz.parameters]
+fcn_name = "max_norm_deviation"
+reference = ["autopilot", "0"]
+response = ["plant", "0"]
+[tests.overshoot_Nz.parameters.generator_config]
+output_idx = 0
 
+# test to evaluate at Ny outputs
 [tests.overshoot_Ny]
-    test_type = "StaticRunTest"
-    [tests.overshoot_Ny.parameters]
-        # "global" test parameters
-        fcn_name = "max_norm_deviation"
-        # This is silly, but TOML requires arrays to contain only one type
-        reference = ['autopilot','1']
-        response = ['plant', '1']
-        # Test specific generator config
+test_type = "StaticRunTest"
+[tests.overshoot_Ny.parameters]
+fcn_name = "max_norm_deviation"
+reference = ["autopilot", "1"]
+response = ["plant", "1"]
+[tests.overshoot_Ny.parameters.generator_config]
+output_idx = 1
 
-        [tests.overshoot_Ny.parameters.generator_config]
-        output_idx = 1
-
-[tests.falsify_gcas]
-    test_type = "BayesianFalsifierTest"
-    [tests.falsify_gcas.parameters]
-        reward_fcn = "reward_func"
-        # number of calls for the attack function
-        n_calls = 20

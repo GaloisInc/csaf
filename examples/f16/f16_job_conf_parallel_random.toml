@@ -5,41 +5,47 @@ tspan = [0.0, 10.0]
 show_status = true # show progress during simulation
 plot = true # plot results on screen
 
-initial_conditions = [  540.0, # vt [ft/s]
-                        0.037027160081059704, # alpha [rad]
-                        0.0, # beta [rad]
-                        0.1, # phi [rad]
-                        -0.1, # theta [rad]
-                        -0.1, # psi [rad]
-                        0.0, # p [rad/s]
-                        0.0, # q [rad/s]
-                        0.0, # r [rad/s]
-                        0.0, # pn [m]
-                        0.0, # pe [m]
-                        4800.0, # h [ft]
-                        90.0] # power [%]
-
 # Use parallel runner
 parallel = true
 
 # [random, fixed, from_file]
 x0 = "random"
 
-# number of iterations
-iterations = 10
-bounds = [    [200.0, 1000.0], # vt [ft/s]
-              [0.026692982, 0.047745614], # alpha [rad]
-              [0.0], # beta [rad]
-              [0.785], # phi [rad]
-              [-3.14, 3.14], # theta [rad]
-              [-0.785, 0.785], # psi [rad]
-              [0.0], # p [rad/s]
-              [-0.5, 0.5], # q [rad/s]
-              [0.0], # r [rad/s]
-              [0.0], # pn [m]
-              [0.0], # pe [m]
-              [500.0, 8000.0], # h [ft]
-              [9.0]] # power [%]
+# where the test methods are located
+test_methods_file = "terminating_conditions.py"
 
 # predefined terminating condition from a library
 terminating_conditions = "ground_collision"
+
+# number of iterations
+iterations = 10
+
+[initial_conditions]
+    plant = [  540.0, # vt [ft/s]
+        0.037027160081059704, # alpha [rad]
+        0.0, # beta [rad]
+        0.1, # phi [rad]
+        -0.1, # theta [rad]
+        -0.1, # psi [rad]
+        0.0, # p [rad/s]
+        0.0, # q [rad/s]
+        0.0, # r [rad/s]
+        0.0, # pn [m]
+        0.0, # pe [m]
+        4800.0, # h [ft]
+        90.0] # power [%]
+
+[bounds]
+    plant = [    [200.0, 1000.0], # vt [ft/s]
+                  [0.026692982, 0.047745614], # alpha [rad]
+                  [0.0], # beta [rad]
+                  [0.785], # phi [rad]
+                  [-3.14, 3.14], # theta [rad]
+                  [-0.785, 0.785], # psi [rad]
+                  [0.0], # p [rad/s]
+                  [-0.5, 0.5], # q [rad/s]
+                  [0.0], # r [rad/s]
+                  [0.0], # pn [m]
+                  [0.0], # pe [m]
+                  [500.0, 8000.0], # h [ft]
+                  [9.0]] # power [%]

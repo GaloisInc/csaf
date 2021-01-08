@@ -48,9 +48,10 @@ class ConfigParserMetaDict(dict):
         if hasattr(value, 'field_name_spec'):
             if "_field_name_methods" not in self:
                 self["_field_name_methods"] = {}
+            depends = getattr(value, 'field_name_spec')[1]
+            assert isinstance(depends, tuple), f"{depends} must be a tuple"
             self["_field_name_methods"][(getattr(
-                value, 'field_name_spec'))[0]] = value, getattr(
-                    value, 'field_name_spec')[1]
+                value, 'field_name_spec'))[0]] = value, depends
         else:
             super().__setitem__(key, value)
 

@@ -75,7 +75,8 @@ if job_conf.get('parallel', False):
     else:
         # Run only once
         # run tasks in a workgroup
-        test = RunSystemParallelTest(job_conf, model_conf)
+        test = RunSystemParallelTest(bdir)
+        test.parse({k: v for k,v in job_conf.items() if k in test.valid_fields})
         runs, _ = test.execute(model_conf)
 
     # save initial conditions to a file
