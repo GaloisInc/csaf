@@ -90,8 +90,8 @@ class RunSystemTest(cst.SystemTest):
         system = csys.System.from_config(system_conf)
         x0 = self.initial_conditions
         if x0:
-            # TODO: bad hard coding
-            system.set_state("plant", x0)
+            for cname, ic in x0:
+                system.set_state(cname, ic)
         trajs = system.simulate_tspan(self.tspan, show_status=self.show_status)
         system.unbind()
         return trajs
@@ -206,12 +206,13 @@ class BayesianFalsifierTest(RunSystemTest):
             system = csys.System.from_config(system_conf)
             x0 = initial_conditions
             if x0:
-                # TODO: bad hard coding
-                system.set_state("plant", x0)
+                for cname, ic in x0:
+                    system.set_state(cname, ic)
             trajs, passed = system.simulate_tspan(self.tspan, show_status=self.show_status, return_passed = True, terminating_conditions=self.terminating_conditions)
             system.unbind()
             return self.reward_fcn(trajs)
         ret = attack(simulate, list(zip(*[b[:-1] for b in self.bounds])))
+        return ret
 
 
 
