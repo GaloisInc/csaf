@@ -55,7 +55,7 @@ def model_output(model, time_t, state_controller, input_f16):
     action_high = np.array([1, 1, 1])
     action = np.clip(action, action_low, action_high)
     # Unnormalize action
-    return action[0] * 5, action[1] * 3, 0, action[2]
+    return action[0] * 5, action[1] * 3, 0, action[2] * 30
 
 def model_state_update(model, time_t, state_controller, input_f16):
     state = state_controller[0]
@@ -70,7 +70,7 @@ def model_state_update(model, time_t, state_controller, input_f16):
         state = NNAutopilot.STATE_ENGAGED
 
     if state == NNAutopilot.STATE_ENGAGED:
-        if h >= 800 and theta >= 0 and theta <= 30 and abs(theta - alpha) <= 0.01 and abs(input_f16[7]) <= 1:
+        if h >= 800 and theta >= 0 and theta <= 30 and abs(theta - alpha) <= 0.01 and abs(input_f16[7]) <= 1 and abs(phi) <= 0.01:
             state = NNAutopilot.STATE_DONE
 
     return [state]

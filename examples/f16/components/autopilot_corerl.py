@@ -4,6 +4,8 @@ from spinup.utils.test_policy import load_policy_and_env
 import autopilot_helper as ah
 import autopilot
 
+blend = 0.3
+
 class NNAutopilot():
     STATE_START= 'Waiting'
     STATE_ENGAGED = 'Engaged'
@@ -58,17 +60,18 @@ def model_output(model, time_t, state_controller, input_f16):
     nn_action = np.clip(nn_action, action_low, action_high)
     nn_action[0] *= 5
     nn_action[1] *= 3
+    nn_action[2] *= 30
 
     # Blend with symbolic controller
     symb_state = autopilot.model_state_update(model, 2.0, ['Waiting'], input_f16)
     s1, s2, _, s3 = autopilot.model_output(model, 2.0, symb_state, input_f16)
     symb_action = [s1, s2, s3]
 
-    print(input_f16, "->", symb_state, ",", nn_action, ",", symb_action)
+    #print(input_f16, "->", symb_state, ",", nn_action, ",", symb_action)
 
     action = []
     for i in range(3):
-        action.append(nn_action[i] * 0.5 + symb_action[i] * 0.5)
+        action.append(nn_action[i] * blend + symb_action[i] * (1 - blend))
     return action[0], action[1], 0, action[2]
 
 

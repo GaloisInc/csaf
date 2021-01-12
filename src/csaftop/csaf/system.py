@@ -210,7 +210,7 @@ class SystemEnv:
         self._cname = cname
         #self.action_space = spaces.Box(-1., 1., shape=(4,), dtype='float32')
         #self.action_space = spaces.Box(np.array([-2 / 9, -1, 0, 0]), np.array([1, 1, 0, 1]))
-        self.action_space = spaces.Box(np.array([-2 / 9, -1, 0]), np.array([1, 1, 1]))
+        self.action_space = spaces.Box(np.array([-2 / 9, -1, -1]), np.array([1, 1, 1]))
         #self.action_space = spaces.Box(np.array([-2 / 5, 0]), np.array([1, 1]))
         #self.observation_space = spaces.Box(-1., 1., shape=(13,), dtype='float32')  #spaces.Box(low=0, high=255, shape=(screen_height, screen_width, 3), dtype=np.uint8)
         self.observation_space = spaces.Box(
@@ -239,7 +239,7 @@ class SystemEnv:
         action.append(component_output[1] * 3)
         #action.append(0)
         action.append(0)
-        action.append(component_output[2])
+        action.append(component_output[2] * 30)
         #action.append(component_output[1])
 
         if self.corerl and self.last_state is not None:
@@ -269,7 +269,7 @@ class SystemEnv:
             # Find a good stopping condition
             # 1st attempt: altitude is within [800, 1500] ft and pitch angle is
             # within [0, 30] deg
-            if 800 <= ob[11] and 0 <= ob[4] and ob[4] <= 30 and abs(ob[4] - ob[1]) <= 0.01 and abs(ob[7]) <= 1:
+            if 800 <= ob[11] and 0 <= ob[4] and ob[4] <= 30 and abs(ob[4] - ob[1]) <= 0.01 and abs(ob[7]) <= 1 and abs(ob[3]) <= 0.01:
                 done = True
             # TODO: Check pitch/roll/yaw rate.
 
