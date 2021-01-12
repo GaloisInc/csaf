@@ -87,11 +87,11 @@ class Worker(Process):
                 self._task_queue.task_done()
                 break
             answer = next_task(self.system)
+            if self._progress_queue is not None:
+                self._progress_queue.put(True)
             self._task_queue.task_done()
             self._result_queue.put(answer)
             self.system.reset()
-            if self._progress_queue is not None:
-                self._progress_queue.put(True)
         return
 
 class Task(object):
@@ -161,6 +161,7 @@ def run_workgroup(n_tasks, config, initial_states, *args, fname="simulate_tspan"
         progress.put(None)
         proc.join()
 
+
     # Start printing results
     ret = [None] * n_tasks
     while n_tasks:
@@ -169,6 +170,7 @@ def run_workgroup(n_tasks, config, initial_states, *args, fname="simulate_tspan"
             res = dill.loads(result[1])
             ret[result[0]] = tuple([res[1], res[0], result[2]])
         n_tasks -= 1
+
     csaf_logger.info("parallel run finished")
     ret = [val for val in ret if val != None]
     return ret

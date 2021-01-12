@@ -5,6 +5,10 @@ def ground_collision(cname, outs) -> bool:
         return cname == "plant" and outs["states"][11] <= 0.0
 
 
+def low_airspeed(cname, outs) -> bool:
+        return cname == "plant" and outs["states"][0] <= 200.0
+
+
 def reward_func(trajs):
         import numpy as np
 

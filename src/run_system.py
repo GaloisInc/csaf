@@ -67,11 +67,11 @@ if job_conf.get('parallel', False):
         csaf_logger.info(f"Running static tests")
         from tests_static import *
         for t in static_tests:
-            csaf_logger.info(f"Evaluating {t}")
+            csaf_logger.info(f"Evaluating Test <{t}>")
             test = static_tests[t]
-            #test = StaticRunTest(bdir)
             tester = test["_test_object"]
             tester.execute(model_conf)
+            csaf_logger.info(f"Finished Test <{t}>")
     else:
         # Run only once
         # run tasks in a workgroup

@@ -53,7 +53,7 @@ x0_save_to_file = true
 
 # description of tests
 [tests]
-# test to evaluate look at Nz outputs
+    # test to evaluate look at Nz outputs
     [tests.overshoot_Nz]
         test_type = "StaticRunTest"
         [tests.overshoot_Nz.parameters]
@@ -73,3 +73,19 @@ x0_save_to_file = true
         [tests.overshoot_Ny.parameters.generator_config]
             output_idx = 1
 
+    # attempt to find a case where ground collision occurs
+    [tests.falsify_gcas]
+        test_type = "BayesianFalsifierTest"
+        [tests.falsify_gcas.parameters]
+            n_calls = 10
+            component = "plant"
+            reward_fcn = "reward_func"
+
+    # attempt to find a case where low airspeed occurs
+    [tests.falsify_airspeed]
+        test_type = "BayesianFalsifierTest"
+        [tests.falsify_airspeed.parameters]
+            n_calls = 10
+            terminating_conditions = "low_airspeed"
+            component = "plant"
+            reward_fcn = "reward_func"

@@ -94,6 +94,8 @@ class ParallelParser(ConfigParser):
         "x0": "fixed",
         "x0_component_name": "plant",
         "x0_save_to_file": True,
+        "x0_path": "x0.csv",
+        "test_methods_file": "terminating_conditions.py",
         "component_under_test": "plant",
         "bounds": None,
         "plot_filename": None,
@@ -108,6 +110,13 @@ class ParallelParser(ConfigParser):
 
     @_("tspan")
     def _(self, tspan: typ.List[float]) -> typ.Tuple:
+        if len(tspan) != 2:
+            self.logger("error", f"tspan provided must be length 2 (got {tspan} instead)",
+                        error=ValueError)
+        if tspan[1] <= tspan[0]:
+            self.logger("error",
+                        f"tspan provided must be in the form (tmin, tmax), where tmax > tmin (got {tspan} instead)",
+                        error=ValueError)
         return tuple(tspan)
 
     @_("test_methods_file")
@@ -215,6 +224,8 @@ class ParallelParser(ConfigParser):
             tpr = tcls(self.base_dir,
                              context_str=self.context_str + f"<{tname}>")
             preconf = {k: v for k, v in self._config.items() if k in tpr.valid_fields}
+            methods = {f: self._field_name_methods[f] for f in tconf.get('parameters', {}) if f in self._field_name_methods}
+            tpr._field_name_methods = {**methods, **tpr._field_name_methods}
             tests[tname] = tpr.parse({**preconf, **tconf.get("parameters", {})})
             tests[tname]["_test_object"] = tpr
         return tests

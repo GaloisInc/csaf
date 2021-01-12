@@ -64,14 +64,12 @@ def attack(func,
     dimensions = np.array(space).T
     dimensions[:, 0] -= 1e-5
 
-    gp_minimize(func, dimensions,
+    return gp_minimize(func, dimensions,
                 acq_func=acq_func,
                 n_calls=n_calls,
                 n_random_starts=n_random_starts,
                 noise=0,
                 n_jobs=1)
-
-    return func.get_collector()
 
 
 class RunSystemTest(cst.SystemTest):
@@ -142,6 +140,7 @@ class StaticRunTest(RunSystemParallelTest):
     required_fields = ["iterations",
                        "tspan",
                        "x0",
+                       "test_methods_file",
                        "terminating_conditions",
                        "generator_config",
                        "reference",
@@ -150,6 +149,8 @@ class StaticRunTest(RunSystemParallelTest):
 
     @_("fcn_name")
     def _(self, fcn_name: str):
+        """function to analyze signals exists in this file.
+        FIXME?"""
         return globals()[fcn_name]
 
     def execute(self, system_conf):
@@ -186,33 +187,46 @@ class StaticRunTest(RunSystemParallelTest):
 class BayesianFalsifierTest(RunSystemTest):
     """test attempts to falsify a condition using bayesian optimization"""
     valid_fields = ["n_calls",
+                    "component",
                     "initial_conditions",
                     "bounds",
+                    "test_methods_file",
                     "terminating_conditions",
                     "reward_fcn",
                     "show_status",
                     "tspan"]
 
     required_fields = ["n_calls",
+                       "component",
                        "initial_conditions",
                        "reward_fcn",
                        "bounds",
+                       "test_methods_file",
                        "terminating_conditions",
                        "show_status",
                        "tspan"]
 
+    @_("reward_fcn", depends_on = ("test_methods_file",))
+    def _(self, fcn_name):
+        return getattr(self.test_methods_file, fcn_name)
+
     def execute(self, system_conf):
+        x_false = []
         def simulate(initial_conditions):
             system = csys.System.from_config(system_conf)
-            x0 = initial_conditions
-            if x0:
-                for cname, ic in x0:
-                    system.set_state(cname, ic)
-            trajs, passed = system.simulate_tspan(self.tspan, show_status=self.show_status, return_passed = True, terminating_conditions=self.terminating_conditions)
+            system.set_state(self.component, initial_conditions)
+            trajs, passed = system.simulate_tspan(self.tspan,
+                                                  show_status=self.show_status,
+                                                  return_passed = True,
+                                                  terminating_conditions=self.terminating_conditions)
             system.unbind()
+            if not passed:
+                x_false.append(trajs[self.component])
             return self.reward_fcn(trajs)
-        ret = attack(simulate, list(zip(*[b[:-1] for b in self.bounds])))
-        return ret
-
-
-
+        ret = attack(simulate, list(zip(*[b[:-1] for b in self.bounds[self.component]])),
+                     n_calls=self.n_calls)
+        if len(x_false) > 0:
+            self.logger("info", f"Falsified! Number of false states: {len(x_false)}")
+            self.logger("info", f"Solver Minimimum: {self.component}<{ret['x']}>")
+        else:
+            self.logger("info", f"Could not falsify the terminating conditions!")

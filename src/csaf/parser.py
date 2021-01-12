@@ -119,6 +119,11 @@ class ConfigParser(metaclass=ConfigParserMeta):
         self.base_dir = str(pathlib.Path(base_dir).resolve())
         self.context_str = context_str
         self.parent_conf = parent_conf
+        for vf in self.valid_fields:
+            if vf not in self.required_fields and vf not in self.defaults_fields.keys():
+                self.logger("error",
+                            f"test init failed. valid field {vf} is neither required or provided a default value",
+                            error=ValueError)
         if not hasattr(self, "_field_name_methods"):
             self._field_name_methods = {}
         self._config = None
