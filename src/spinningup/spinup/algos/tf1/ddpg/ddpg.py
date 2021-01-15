@@ -2,6 +2,7 @@ import numpy as np
 import tensorflow as tf
 import gym
 import time
+import skopt
 from spinup.algos.tf1.ddpg import core
 from spinup.algos.tf1.ddpg.core import get_vars
 from spinup.utils.logx import EpochLogger
@@ -38,12 +39,108 @@ class ReplayBuffer:
                     done=self.done_buf[idxs])
 
 
+def symbolic_policy(params, input_f16):
+    Nz_des = 5
+
+    # Pull out important variables for ease of use
+    phi = input_f16[3]             # Roll angle    (rad)
+    p = input_f16[6]               # Roll rate     (rad/sec)
+    theta = input_f16[4]           # Pitch angle   (rad)
+    alpha = input_f16[1]           # AoA           (rad)
+    vt = input_f16[0]
+    # Note: pathAngle = theta - alpha
+    gamma = theta-alpha
+
+    # Determine which angle is "level" (0, 180, 360, 720, etc)
+    radsFromWingsLevel = round(phi/np.pi)
+    phi_des = np.pi*radsFromWingsLevel
+    p_des = 0
+
+    # Determine "which" angle is level (0, 360, 720, etc)
+    radsFromNoseLevel = round(gamma/np.pi)
+    gamma_des = np.pi*radsFromNoseLevel
+
+    eps_phi = np.deg2rad(5)   # Max roll angle magnitude before pulling g's
+    eps_p = np.deg2rad(1)     # Max roll rate magnitude before pulling g's
+    path_goal = np.deg2rad(0) # Final desired path angle
+    man_start = 2 # maneuver starts after 2 seconds
+
+    state = "Roll"
+
+    radsFromWingsLevel = round(phi/np.pi)
+
+    if state == "Roll" and abs(phi - np.pi * radsFromWingsLevel) < eps_phi and abs(p) < eps_p:
+        state = "Pull"
+
+    radsFromNoseLevel = round((theta - alpha) / (2 * np.pi))
+
+    if state == "Pull" and (theta - alpha) - 2 * np.pi * radsFromNoseLevel > path_goal:
+        state = "Done"
+
+    if state == "Start":
+        Nz = 0
+        ps = 0
+    elif state == "Roll":
+        Nz = 0
+        ps = -(phi - phi_des) * params[0] - p * params[1]
+    elif state == "Pull":
+        Nz = Nz_des
+        ps = 0
+    else:
+        Nz = params[2] * (gamma_des - gamma) + params[3] * (p_des - p)
+        ps = params[4] * (phi_des - phi) + params[5] * (p_des - p)
+
+    # XXX: Because Nz and throttle control are different, what if Nz_des
+    # tries to decrease the force and slows speed and maybe altitude gain?
+
+    # basic speed control
+    throttle = params[6] * (502.0 - vt)
+    # New references
+    return Nz, ps, throttle
+
+
+def update_propel_policy(act, env, old_policy, act_noise):
+    pairs = []
+    o = env.reset()
+    bounds = [skopt.space.Real(0.0, 5.0),
+              skopt.space.Real(0.0, 5.0),
+              skopt.space.Real(0.0, 5.0),
+              skopt.space.Real(0.0, 5.0),
+              skopt.space.Real(0.0, 5.0),
+              skopt.space.Real(0.0, 5.0),
+              skopt.space.Real(0.0, 5.0)]
+    for _ in range(100):
+        a = act(o, act_noise, old_policy)
+        pairs.append((o, a))
+        o2, r, d, _ = env.step(a)
+        o = o2
+    for i in range(5):
+        # Collect trajectories
+        # Imitate by Bayesian optimization
+        def loss(ps):
+            print(i, ":", ps)
+            res = 0.0
+            for inp, outp in pairs:
+                y = np.array(list(symbolic_policy(ps, inp)))
+                res += np.linalg.norm(outp - y)
+            return res / len(pairs)
+        params = skopt.gp_minimize(loss, bounds, acq_func="PI", n_calls=100).x
+        o = env.reset()
+        for _ in range(100):
+            a = act(o, act_noise, lambda o: symbolic_policy(params, o))
+            pairs.append((o, a))
+            o2, r, d, _ = env.step(a)
+            o = o2
+    print("Parameters for symbolic policy:", params)
+    return lambda o: symbolic_policy(params, o)
+
 
 def ddpg(env_fn, actor_critic=core.mlp_actor_critic, ac_kwargs=dict(), seed=0, 
          steps_per_epoch=4000, epochs=100, replay_size=int(1e6), gamma=0.99, 
          polyak=0.995, pi_lr=1e-3, q_lr=1e-3, batch_size=100, start_steps=10000, 
          update_after=1000, update_every=50, act_noise=0.1, num_test_episodes=10, 
-         max_ep_len=1000, logger_kwargs=dict(), save_freq=1):
+         max_ep_len=1000, logger_kwargs=dict(), save_freq=1, propel=True,
+         projections=7, propel_lambda=0.5):
     """
     Deep Deterministic Policy Gradient (DDPG)
 
@@ -148,7 +245,7 @@ def ddpg(env_fn, actor_critic=core.mlp_actor_critic, ac_kwargs=dict(), seed=0,
     # Main outputs from computation graph
     with tf.variable_scope('main'):
         pi, q, q_pi = actor_critic(x_ph, a_ph, **ac_kwargs)
-    
+
     # Target networks
     with tf.variable_scope('target'):
         # Note that the action placeholder going to actor_critic here is 
@@ -190,9 +287,12 @@ def ddpg(env_fn, actor_critic=core.mlp_actor_critic, ac_kwargs=dict(), seed=0,
     # Setup model saving
     logger.setup_tf_saver(sess, inputs={'x': x_ph, 'a': a_ph}, outputs={'pi': pi, 'q': q})
 
-    def get_action(o, noise_scale):
+    def get_action(o, noise_scale, propel_policy=None):
         a = sess.run(pi, feed_dict={x_ph: o.reshape(1, -1)})[0]
         a += noise_scale * np.random.randn(act_dim)
+        if propel_policy is not None:
+            pa = np.array(propel_policy(o))
+            a = propel_lambda * pa + (1 - propel_lambda) * a
         return np.clip(a, -act_limit, act_limit)
 
     def test_agent():
@@ -202,7 +302,7 @@ def ddpg(env_fn, actor_critic=core.mlp_actor_critic, ac_kwargs=dict(), seed=0,
             # exit()
             while not(d or (ep_len == max_ep_len)):
                 # Take deterministic actions at test time (noise_scale=0)
-                o, r, d, _ = test_env.step(get_action(o, 0))
+                o, r, d, _ = test_env.step(get_action(o, 0, propel_policy if propel else None))
                 ep_ret += r
                 ep_len += 1
             logger.store(TestEpRet=ep_ret, TestEpLen=ep_len)
@@ -212,6 +312,10 @@ def ddpg(env_fn, actor_critic=core.mlp_actor_critic, ac_kwargs=dict(), seed=0,
     start_time = time.time()
     o, ep_ret, ep_len = env.reset(), 0, 0
 
+    if propel:
+        propel_policy = None
+        steps_per_projection = total_steps // projections
+
     # Main loop: collect experience in env and update/log each epoch
     for t in range(total_steps):
         # print("here", t)
@@ -219,7 +323,7 @@ def ddpg(env_fn, actor_critic=core.mlp_actor_critic, ac_kwargs=dict(), seed=0,
         # from a uniform distribution for better exploration. Afterwards, 
         # use the learned policy (with some noise, via act_noise). 
         if t > start_steps:
-            a = get_action(o, act_noise)
+            a = get_action(o, act_noise, propel_policy if propel else None)
         else:
             a = env.action_space.sample()
 
@@ -264,6 +368,9 @@ def ddpg(env_fn, actor_critic=core.mlp_actor_critic, ac_kwargs=dict(), seed=0,
                 outs = sess.run([pi_loss, train_pi_op, target_update], feed_dict)
                 logger.store(LossPi=outs[0])
 
+        if (t+1) % steps_per_projection == 0:
+            update_propel_policy(get_action, env, propel_policy, act_noise)
+
         # End of epoch wrap-up
         if (t+1) % steps_per_epoch == 0:
             epoch = (t+1) // steps_per_epoch
@@ -288,6 +395,7 @@ def ddpg(env_fn, actor_critic=core.mlp_actor_critic, ac_kwargs=dict(), seed=0,
             logger.log_tabular('LossQ', average_only=True)
             logger.log_tabular('Time', time.time()-start_time)
             logger.dump_tabular()
+
 
 if __name__ == '__main__':
     import argparse
