@@ -150,6 +150,7 @@ def _(trajs):
 @register_plot("f16_llc_nn")
 @register_plot("f16_nn_autopilot")
 @register_plot("f16_corerl_autopilot")
+@register_plot("f16_propel_autopilot")
 def _(trajs):
    from f16_plot import plot_simple
    plot_simple(trajs)

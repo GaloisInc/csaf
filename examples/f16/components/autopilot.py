@@ -103,7 +103,8 @@ def model_output(model, time_t, state_controller, input_f16):
     # tries to decrease the force and slows speed and maybe altitude gain?
 
     # basic speed control
-    throttle = ah.p_cntrl(kp=0.25, e=(model.vt_des-vt))
+    throttle = ah.p_cntrl(kp=0, e=(model.vt_des-vt))
+    #throttle = ah.p_cntrl(kp=0.25, e=(model.vt_des-vt))
     Ny_r = 0
     # New references
     return Nz, ps, Ny_r, throttle
@@ -113,8 +114,8 @@ def state_roll(phi_des, phi, p):
     # Determine which angle is "level" (0, 180, 360, 720, etc)
 
     # PD Control until phi == phi_des
-    K_prop = 4#000
-    K_der = K_prop * 0.3
+    K_prop = 0 #4#000
+    K_der = 0 #K_prop * 0.3
 
     ps = -(phi - phi_des) * K_prop - p * K_der
     return ps
@@ -128,8 +129,8 @@ def state_pull(Nz_des):
 def state_done(gamma_des, phi_des, p_des, gamma, phi, p):
     # steady-level hold
     # Set Proportional-Derivative control gains for roll
-    K_prop = 1
-    K_der = K_prop*0.3
+    K_prop = 0 #1
+    K_der = 0 #K_prop*0.3
     e_ps, ed_ps = phi_des - phi, p_des-p
     # PD Control on phi using roll rate
     ps = ah.pd_cntrl(K_prop, K_der, e_ps, ed_ps)
@@ -140,8 +141,8 @@ def state_done(gamma_des, phi_des, p_des, gamma, phi, p):
     #./rundemo.py --test-id=dc --endtime=19.4 --animate
     #K_prop2 = 78
 
-    K_prop2 = 2
-    K_der2 = K_prop*0.3
+    K_prop2 = 0 #2
+    K_der2 = 0 #K_prop*0.3
     #XXX: Why is roll rate (p) being used here? Should be q, the pitch rate
     e_nz, ed_nz = gamma_des-gamma, p_des-p
     # PD Control on theta using Nz

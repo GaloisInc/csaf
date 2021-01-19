@@ -99,7 +99,10 @@ def symbolic_policy(params, input_f16):
     return Nz, ps, throttle
 
 
-def update_propel_policy(act, env, old_policy, act_noise):
+def update_propel_policy(act, env, old_policy, act_noise, random=False):
+    if random:
+        params = 5 * np.random.random_sample(size=(7,)).tolist()
+        return lambda o: symbolic_policy(params, o)
     pairs = []
     o = env.reset()
     bounds = [skopt.space.Real(0.0, 5.0),
@@ -113,7 +116,10 @@ def update_propel_policy(act, env, old_policy, act_noise):
         a = act(o, act_noise, old_policy)
         pairs.append((o, a))
         o2, r, d, _ = env.step(a)
-        o = o2
+        if d:
+            o = env.reset()
+        else:
+            o = o2
     for i in range(5):
         # Collect trajectories
         # Imitate by Bayesian optimization
@@ -130,7 +136,10 @@ def update_propel_policy(act, env, old_policy, act_noise):
             a = act(o, act_noise, lambda o: symbolic_policy(params, o))
             pairs.append((o, a))
             o2, r, d, _ = env.step(a)
-            o = o2
+            if d:
+                o = env.reset()
+            else:
+                o = o2
     print("Parameters for symbolic policy:", params)
     return lambda o: symbolic_policy(params, o)
 
@@ -140,7 +149,7 @@ def ddpg(env_fn, actor_critic=core.mlp_actor_critic, ac_kwargs=dict(), seed=0,
          polyak=0.995, pi_lr=1e-3, q_lr=1e-3, batch_size=100, start_steps=10000, 
          update_after=1000, update_every=50, act_noise=0.1, num_test_episodes=10, 
          max_ep_len=1000, logger_kwargs=dict(), save_freq=1, propel=True,
-         projections=7, propel_lambda=0.5):
+         projections=10, propel_lambda=0.3):
     """
     Deep Deterministic Policy Gradient (DDPG)
 
@@ -313,7 +322,7 @@ def ddpg(env_fn, actor_critic=core.mlp_actor_critic, ac_kwargs=dict(), seed=0,
     o, ep_ret, ep_len = env.reset(), 0, 0
 
     if propel:
-        propel_policy = None
+        propel_policy = update_propel_policy(get_action, env, None, act_noise, random=True)
         steps_per_projection = total_steps // projections
 
     # Main loop: collect experience in env and update/log each epoch
