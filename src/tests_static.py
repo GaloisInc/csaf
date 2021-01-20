@@ -111,16 +111,17 @@ class RunSystemParallelTest(cst.SystemTest):
                        "terminating_conditions": None}
 
     def execute(self, system_conf):
-        runs = run_parallel.run_workgroup(self.iterations,
+        iterations = self.iterations if self.iterations else len(self.x0)
+        runs = run_parallel.run_workgroup(iterations,
                                           system_conf,
                                           self.x0,
                                           self.tspan,
                                           terminating_conditions=self.terminating_conditions)
         # Filter out terminated runs
         passed_termcond = [val for val,_,_ in runs].count(True)
-        success_rate = float(passed_termcond)/float(self.iterations)
-        failed_runs = self.iterations - len(runs)
-        self.logger("info", f"Out of {self.iterations}, {passed_termcond} passed the terminating conditions. {success_rate*100:1.2f} [%] success.")
+        success_rate = float(passed_termcond)/float(iterations)
+        failed_runs = iterations - len(runs)
+        self.logger("info", f"Out of {iterations}, {passed_termcond} passed the terminating conditions. {success_rate*100:1.2f} [%] success.")
         self.logger("info", f"{failed_runs} simulations failed with an exception.")
         return runs, passed_termcond
 
@@ -137,15 +138,16 @@ class StaticRunTest(RunSystemParallelTest):
                     "response",
                     "fcn_name"]
 
-    required_fields = ["iterations",
-                       "tspan",
+    required_fields = ["tspan",
                        "x0",
-                       "test_methods_file",
                        "terminating_conditions",
                        "generator_config",
                        "reference",
                        "response",
                        "fcn_name"]
+
+    defaults_fields = {"test_methods_file": None,
+                       "iterations": None}
 
     @_("fcn_name")
     def _(self, fcn_name: str):
@@ -181,52 +183,53 @@ class StaticRunTest(RunSystemParallelTest):
         self.logger("info", f"evaluated. "
                          f"{test_passed}/{passed_termcond} passed, "
                          f"{test_success_rate*100:1.2f} [%] success.")
-        return test_success_rate
+
+        # FIXME: this is arbitrary
+        if test_success_rate > 0.8:
+            return True
+        else:
+            return False
 
 
 class BayesianFalsifierTest(RunSystemTest):
     """test attempts to falsify a condition using bayesian optimization"""
     valid_fields = ["n_calls",
-                    "component",
-                    "initial_conditions",
-                    "bounds",
-                    "test_methods_file",
-                    "terminating_conditions",
-                    "reward_fcn",
+                    "region",
+                    "property",
+                    "reward",
                     "show_status",
                     "tspan"]
 
-    required_fields = ["n_calls",
-                       "component",
-                       "initial_conditions",
-                       "reward_fcn",
-                       "bounds",
-                       "test_methods_file",
-                       "terminating_conditions",
-                       "show_status",
-                       "tspan"]
+    required_fields = ["reward",
+                       "region",
+                       "property"]
 
-    @_("reward_fcn", depends_on = ("test_methods_file",))
-    def _(self, fcn_name):
-        return getattr(self.test_methods_file, fcn_name)
+    defaults_fields = {"n_calls": 10,
+                       "show_status": True,
+                       "tspan": (0.0, 20.0)}
 
     def execute(self, system_conf):
         x_false = []
+        assert len(self.region) == 1, f"For now Bayesian falsifier can only test one component"
+        component = list(self.region.keys())[0]
+
         def simulate(initial_conditions):
             system = csys.System.from_config(system_conf)
-            system.set_state(self.component, initial_conditions)
+            system.set_state(component, initial_conditions)
             trajs, passed = system.simulate_tspan(self.tspan,
                                                   show_status=self.show_status,
                                                   return_passed = True,
-                                                  terminating_conditions=self.terminating_conditions)
+                                                  terminating_conditions=self.property)
             system.unbind()
             if not passed:
-                x_false.append(trajs[self.component])
-            return self.reward_fcn(trajs)
-        ret = attack(simulate, list(zip(*[b[:-1] for b in self.bounds[self.component]])),
+                x_false.append(trajs[component])
+                return -1.0
+            return self.reward(trajs)
+
+        ret = attack(simulate, list(zip(*[b[:-1] for b in self.region[component]])),
                      n_calls=self.n_calls)
         if len(x_false) > 0:
             self.logger("info", f"Falsified! Number of false states: {len(x_false)}")
-            self.logger("info", f"Solver Minimimum: {self.component}<{ret['x']}>")
+            self.logger("info", f"Solver Minimimum: {component}<{ret['x']}>")
         else:
             self.logger("info", f"Could not falsify the terminating conditions!")

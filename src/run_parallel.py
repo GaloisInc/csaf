@@ -120,9 +120,8 @@ class Task(object):
 
 def run_workgroup(n_tasks, config, initial_states, *args, fname="simulate_tspan", show_status=True, **kwargs):
     def progress_listener(q):
-        pbar = tqdm.tqdm(total = n_tasks)
-        for _ in iter(q.get, None):
-            pbar.update()
+        for _ in tqdm.tqdm(iter(q.get, None), total=n_tasks):
+            pass
 
     csaf_logger.info(f"starting a parallel run of {n_tasks} tasks over the method {fname}")
 

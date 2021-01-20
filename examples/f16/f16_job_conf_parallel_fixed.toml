@@ -48,7 +48,7 @@ x0_save_to_file = true
         [0.0], # r [rad/s]
         [0.0], # pn [m]
         [0.0], # pe [m]
-        [500.0], # h [ft]
+        [2000.0], # h [ft]
         [9.0]] # power [%]
 
 # description of tests
@@ -73,19 +73,3 @@ x0_save_to_file = true
         [tests.overshoot_Ny.parameters.generator_config]
             output_idx = 1
 
-    # attempt to find a case where ground collision occurs
-    [tests.falsify_gcas]
-        test_type = "BayesianFalsifierTest"
-        [tests.falsify_gcas.parameters]
-            n_calls = 10
-            component = "plant"
-            reward_fcn = "reward_func"
-
-    # attempt to find a case where low airspeed occurs
-    [tests.falsify_airspeed]
-        test_type = "BayesianFalsifierTest"
-        [tests.falsify_airspeed.parameters]
-            n_calls = 10
-            terminating_conditions = "low_airspeed"
-            component = "plant"
-            reward_fcn = "reward_func"
