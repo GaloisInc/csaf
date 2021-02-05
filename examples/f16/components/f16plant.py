@@ -1,8 +1,8 @@
-import enum
 import numpy as np
-import f16plant_helper as ph
-from stevens_dyn import stevens_f16
-from morelli_dyn import morelli_f16
+import helpers.f16plant_helper as ph
+from helpers.variables import State, Ctrlinput, Output, state_vector
+from helpers.stevens_dyn import stevens_f16
+from helpers.morelli_dyn import morelli_f16
 
 
 def model_output(model, time_t, state_f16, input_controller):
@@ -11,19 +11,6 @@ def model_output(model, time_t, state_f16, input_controller):
 
 def model_state_update(model, time_t, state_f16, input_controller):
     return subf16df(model, time_t, state_f16, input_controller)[0]
-
-
-states = ['vt', 'alpha', 'beta', 'phi', 'theta', 'psi', 'p', 'q', 'r', 'pn', 'pe', 'h', 'power']
-
-
-State = enum.IntEnum('State', states, start=0)
-
-
-def state_vector(**x):
-    l = [0]*len(State)
-    for k, d in x.items():
-        l[getattr(State, k)] = d
-    return l
 
 
 def subf16df(model, t, x, u, adjust_cy=True):
