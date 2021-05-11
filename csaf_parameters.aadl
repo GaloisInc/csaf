@@ -1,0 +1,64 @@
+property set CSAF_Parameters is
+	
+	--
+	-- Autopilot parameters
+	--
+	
+	NzMax : aadlreal applies to (all);
+	vt_des : aadlreal applies to (all);
+	setpoint : aadlreal applies to (all);
+	p_gain : aadlreal applies to (all);
+	xequil : list of aadlreal applies to (all);
+	
+	--
+	-- Autopilot Selector parameters
+	--
+	
+	mapper : list of aadlstring applies to (all);
+	
+	--
+	-- Controller parameters
+	--
+	
+	lqr_name : aadlstring applies to (all);
+	throttle_max : aadlreal applies to (all);
+	throttle_min : aadlreal applies to (all);
+	elevator_max : aadlreal applies to (all);
+	elevator_min : aadlreal applies to (all);
+	aileron_max : aadlreal applies to (all);
+	aileron_min : aadlreal applies to (all);
+	rudder_max : aadlreal applies to (all);
+	rudder_min : aadlreal applies to (all);
+	
+	--
+	-- Plant parameters
+	--
+	
+	s : aadlreal applies to (all);
+	b : aadlreal applies to (all);
+	cbar : aadlreal applies to (all);
+	rm : aadlreal applies to (all);
+	xcgref : aadlreal applies to (all);
+	xcg : aadlreal applies to (all);
+	he : aadlreal applies to (all);
+	c1 : aadlreal applies to (all);
+	c2 : aadlreal applies to (all);
+	c3 : aadlreal applies to (all);
+	c4 : aadlreal applies to (all);
+	c5 : aadlreal applies to (all);
+	c6 : aadlreal applies to (all);
+	c7 : aadlreal applies to (all);
+	c8 : aadlreal applies to (all);
+	c9 : aadlreal applies to (all);
+	rtod : aadlreal applies to (all);
+	g : aadlreal applies to (all);
+	xcg_mult : aadlreal applies to (all);
+	cxt_mult : aadlreal applies to (all);
+	cyt_mult : aadlreal applies to (all);
+	czt_mult : aadlreal applies to (all);
+	clt_mult : aadlreal applies to (all);
+	cmt_mult : aadlreal applies to (all);
+	cnt_mult : aadlreal applies to (all);
+	model : aadlstring applies to (all);
+	
+end CSAF_Parameters;
