@@ -176,9 +176,10 @@ class System:
             self.components[idx].receive_input()
             out = self.components[idx].send_output()
             out["times"] = t
-            if terminating_conditions is not None and terminating_conditions(cidx, out):
-                return dtraces if not return_passed else (dtraces, False)
             dtraces[cidx].append(**out)
+
+            if terminating_conditions is not None and terminating_conditions(dtraces):
+                return dtraces if not return_passed else (dtraces, False)
 
         return dtraces if not return_passed else (dtraces, True)
 
