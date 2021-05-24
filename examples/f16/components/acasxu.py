@@ -257,7 +257,6 @@ class AcasXuAutopilot():
         if rv and self.stdout:
             print(f"transition {premode} -> {self.mode} at time {t}")
 
-        print(self.mode)
         return self.mode
 
     def update_nn_command(self, t, ownship_index, ownship_state, intruder_index, intruder_state, stdout=False):
