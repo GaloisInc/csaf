@@ -5,8 +5,7 @@ from acasxu import *
 
 def model_init(model):
     """load trained model"""
-    #init = np.zeros(16*2)
-    model.parameters['auto'] = None #AcasXuAutopilot(init)
+    model.parameters['auto'] = None
 
 
 def get_auto(model, f16_state):
@@ -19,7 +18,6 @@ def get_auto(model, f16_state):
 def model_output(model, time_t, state_controller, input_f16):
     # TODO: address the extraction better
     input_f16 = input_f16[:13] + [0, 0, 0] + input_f16[13+4:(13+4+13)] + [0, 0, 0]
-    print(input_f16)
     auto = get_auto(model, input_f16)
     return auto.get_u_ref(time_t, input_f16)[:4]
 
