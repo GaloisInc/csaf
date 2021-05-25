@@ -12,7 +12,8 @@ setpoint = 2500.0
 xequil = [502.0, 0.03887505597600522, 0.0, 0.0, 0.03887505597600522, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1000.0, 9.05666543872074]
 
 [inputs]
-msgs = [ "f16plant_state.msg", "f16plant_output.msg", "f16plant_state.msg", "f16plant_output.msg"]
+msgs = [ "f16plant_state.msg", "f16llc_state.msg",
+    "f16plant_state.msg", "f16llc_state.msg"]
 
 [topics]
 [topics.states]
