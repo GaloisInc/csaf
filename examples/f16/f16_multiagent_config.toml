@@ -51,7 +51,7 @@ log_level = "info"
       # whether to print debug diagnostics
       debug = false
       # subscribe to topic of a component (component name, topic name)
-      sub = [["planta", "states"], ["planta", "outputs"], ["plantb", "states"], ["plantb", "outputs"]]
+      sub = [["planta", "states"], ["controllera", "states"], ["plantb", "states"], ["controllerb", "states"]]
       # port to publish
       pub = 5503
 
@@ -87,6 +87,6 @@ log_level = "info"
         # whether to print debug diagnostics
         debug = false
         # subscribe to topic of a component (component name, topic name)
-        sub = [["plantb", "states"], ["plantb", "outputs"], ["planta", "states"], ["planta", "outputs"]]
+        sub = [["plantb", "states"], ["controllerb", "states"], ["planta", "states"], ["controllera", "states"]]
         # port to publish
         pub = 5506
