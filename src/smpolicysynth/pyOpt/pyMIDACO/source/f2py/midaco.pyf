@@ -1,0 +1,62 @@
+!    -*- f90 -*-
+! Note: the context of this file is case sensitive.
+
+python module midaco__user__routines
+    interface midaco_user_interface
+        subroutine objfun(l,n,m,x,f,g)
+            integer intent(in) :: l
+            integer intent(in) :: n
+            integer intent(in) :: m
+            double precision dimension(l*n),intent(in),depend(l,n) :: x
+            double precision dimension(l),intent(in,out),depend(l) :: f
+            double precision dimension(l*m),intent(in,out),depend(l,m) :: g
+        end subroutine objfun
+    end interface midaco_user_interface
+end python module midaco__user__routines
+python module midaco ! in 
+    interface  ! in :midaco
+        subroutine midaco_wrap(l,n,nint,m,me,x,xl,xu,f,g,param,maxeval,maxtime,ifail,neval,iprint,printeval,iout1,iout2,ifile1,ifile2,license_key,liw,iw,lrw,rw,objfun)
+            use midaco__user__routines
+            integer intent(in) :: l
+            integer intent(in) :: n
+            integer intent(in) :: nint
+            integer intent(in) :: m
+            integer intent(in) :: me
+            double precision dimension(l*n),intent(inout),depend(l,n) :: x
+            double precision dimension(n),intent(in),depend(n) :: xl
+            double precision dimension(n),intent(in),depend(n) :: xu
+            double precision dimension(l),intent(inout),depend(l) :: f
+            double precision dimension(l*m),intent(inout),depend(l,m) :: g
+            double precision dimension(9),intent(in) :: param
+            integer intent(in) :: maxeval
+            integer intent(in) :: maxtime
+            integer intent(inout) :: ifail
+            integer intent(inout) :: neval
+            integer intent(in) :: iprint
+            integer intent(in) :: printeval
+            integer intent(in) :: iout1
+            integer intent(in) :: iout2
+            character*(*) intent(in) :: ifile1
+            character*(*) intent(in) :: ifile2
+            character*60 intent(in) :: license_key
+            integer intent(in) :: liw
+            integer dimension(liw),intent(in,out),depend(liw) :: iw
+            integer intent(in) :: lrw
+            double precision dimension(lrw),intent(inout),depend(lrw) :: rw
+            external objfun
+        end subroutine midaco_wrap
+        subroutine openunit(unitnum,filename,filestatus,fileaction,ierror)
+            integer intent(in) :: unitnum
+            character*(*) intent(in) :: filename
+            character*(*) intent(in) :: filestatus
+            character*(*) intent(in) :: fileaction
+            integer intent(out) :: ierror
+        end subroutine openunit
+        subroutine pyflush(unitnum)
+            integer :: unitnum
+        end subroutine pyflush
+        subroutine closeunit(unitnum)
+            integer intent(in) :: unitnum
+        end subroutine closeunit
+    end interface 
+end python module midaco

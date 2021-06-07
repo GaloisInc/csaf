@@ -1,0 +1,12 @@
+
+Numpy
+Matplotlib
+Scipy
+Pyopt
+ 	- swig
+		- autotools-dev, automake, bison, byacc, 	
+	- c/fortran compiler
+Gym
+Mujoco
+
+

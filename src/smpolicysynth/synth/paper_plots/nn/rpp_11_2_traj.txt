@@ -1,0 +1,85 @@
+Args are Namespace(alg='ppo2', env='CarRetrievalTest-v0', env_type=None, eval=False, gamestate=None, log_path=None, network=None, num_env=None, num_timesteps=0.0, play=False, reward_scale=1.0, save_path=None, save_video_interval=0, save_video_length=200, seed=None, traj=True)
+Logging to /tmp/openai-2019-09-23-19-15-55-342169
+WARNING:tensorflow:From /scratch/jinala/RLbaselines/baselines/run.py:126: The name tf.ConfigProto is deprecated. Please use tf.compat.v1.ConfigProto instead.
+
+WARNING:tensorflow:From /scratch/jinala/RLbaselines/baselines/common/tf_util.py:53: The name tf.get_default_session is deprecated. Please use tf.compat.v1.get_default_session instead.
+
+WARNING:tensorflow:From /scratch/jinala/RLbaselines/baselines/common/tf_util.py:70: The name tf.InteractiveSession is deprecated. Please use tf.compat.v1.InteractiveSession instead.
+
+2019-09-23 19:15:55.393339: I tensorflow/core/platform/cpu_feature_guard.cc:142] Your CPU supports instructions that this TensorFlow binary was not compiled to use: AVX2 FMA
+2019-09-23 19:15:55.405822: I tensorflow/core/platform/profile_utils/cpu_utils.cc:94] CPU Frequency: 2200030000 Hz
+2019-09-23 19:15:55.409167: I tensorflow/compiler/xla/service/service.cc:168] XLA service 0x55f6f2821500 executing computations on platform Host. Devices:
+2019-09-23 19:15:55.409285: I tensorflow/compiler/xla/service/service.cc:175]   StreamExecutor device (0): <undefined>, <undefined>
+WARNING:tensorflow:From /scratch/jinala/RLbaselines/baselines/common/misc_util.py:58: The name tf.set_random_seed is deprecated. Please use tf.compat.v1.set_random_seed instead.
+
+WARNING:tensorflow:From /scratch/jinala/RLbaselines/baselines/common/mpi_adam_optimizer.py:11: The name tf.train.AdamOptimizer is deprecated. Please use tf.compat.v1.train.AdamOptimizer instead.
+
+WARNING:tensorflow:From /scratch/jinala/RLbaselines/baselines/ppo2/model.py:34: The name tf.variable_scope is deprecated. Please use tf.compat.v1.variable_scope instead.
+
+WARNING:tensorflow:From /scratch/jinala/RLbaselines/baselines/common/input.py:57: to_float (from tensorflow.python.ops.math_ops) is deprecated and will be removed in a future version.
+Instructions for updating:
+Use `tf.cast` instead.
+WARNING:tensorflow:From /scratch/jinala/RLbaselines/baselines/common/models.py:94: flatten (from tensorflow.python.layers.core) is deprecated and will be removed in a future version.
+Instructions for updating:
+Use keras.layers.flatten instead.
+WARNING:tensorflow:Entity <bound method Flatten.call of <tensorflow.python.layers.core.Flatten object at 0x7f643cc90550>> could not be transformed and will be executed as-is. Please report this to the AutgoGraph team. When filing the bug, set the verbosity to 10 (on Linux, `export AUTOGRAPH_VERBOSITY=10`) and attach the full output. Cause: converting <bound method Flatten.call of <tensorflow.python.layers.core.Flatten object at 0x7f643cc90550>>: AttributeError: module 'gast' has no attribute 'Num'
+WARNING:tensorflow:Entity <bound method Flatten.call of <tensorflow.python.layers.core.Flatten object at 0x7f643cc90550>> could not be transformed and will be executed as-is. Please report this to the AutgoGraph team. When filing the bug, set the verbosity to 10 (on Linux, `export AUTOGRAPH_VERBOSITY=10`) and attach the full output. Cause: converting <bound method Flatten.call of <tensorflow.python.layers.core.Flatten object at 0x7f643cc90550>>: AttributeError: module 'gast' has no attribute 'Num'
+WARNING:tensorflow:Entity <bound method Flatten.call of <tensorflow.python.layers.core.Flatten object at 0x7f643cc90550>> could not be transformed and will be executed as-is. Please report this to the AutgoGraph team. When filing the bug, set the verbosity to 10 (on Linux, `export AUTOGRAPH_VERBOSITY=10`) and attach the full output. Cause: converting <bound method Flatten.call of <tensorflow.python.layers.core.Flatten object at 0x7f643cc90550>>: AttributeError: module 'gast' has no attribute 'Num'
+WARNING:tensorflow:Entity <bound method Flatten.call of <tensorflow.python.layers.core.Flatten object at 0x7f642c024588>> could not be transformed and will be executed as-is. Please report this to the AutgoGraph team. When filing the bug, set the verbosity to 10 (on Linux, `export AUTOGRAPH_VERBOSITY=10`) and attach the full output. Cause: converting <bound method Flatten.call of <tensorflow.python.layers.core.Flatten object at 0x7f642c024588>>: AttributeError: module 'gast' has no attribute 'Num'
+WARNING:tensorflow:Entity <bound method Flatten.call of <tensorflow.python.layers.core.Flatten object at 0x7f642c024320>> could not be transformed and will be executed as-is. Please report this to the AutgoGraph team. When filing the bug, set the verbosity to 10 (on Linux, `export AUTOGRAPH_VERBOSITY=10`) and attach the full output. Cause: converting <bound method Flatten.call of <tensorflow.python.layers.core.Flatten object at 0x7f642c024320>>: AttributeError: module 'gast' has no attribute 'Num'
+WARNING:tensorflow:Entity <bound method Flatten.call of <tensorflow.python.layers.core.Flatten object at 0x7f642c024320>> could not be transformed and will be executed as-is. Please report this to the AutgoGraph team. When filing the bug, set the verbosity to 10 (on Linux, `export AUTOGRAPH_VERBOSITY=10`) and attach the full output. Cause: converting <bound method Flatten.call of <tensorflow.python.layers.core.Flatten object at 0x7f642c024320>>: AttributeError: module 'gast' has no attribute 'Num'
+WARNING:tensorflow:From /scratch/jinala/anaconda3/lib/python3.7/site-packages/tensorflow/python/ops/math_grad.py:1250: add_dispatch_support.<locals>.wrapper (from tensorflow.python.ops.array_ops) is deprecated and will be removed in a future version.
+Instructions for updating:
+Use tf.where in 2.0, which has the same broadcast rule as np.where
+2019-09-23 19:15:57.103512: W tensorflow/compiler/jit/mark_for_compilation_pass.cc:1412] (One-time warning): Not using XLA:CPU for cluster because envvar TF_XLA_FLAGS=--tf_xla_cpu_global_jit was not set.  If you want XLA:CPU, either set that envvar, or use experimental_jit_scope to enable XLA:CPU.  To confirm that XLA is active, pass --vmodule=xla_compilation_cache=1 (as a proper command-line flag, not via TF_XLA_FLAGS) or set the envvar XLA_FLAGS=--xla_hlo_profile.
+env_type: car_retrieval_test
+Training ppo2 on car_retrieval_test:CarRetrievalTest-v0 with arguments 
+{'load_path': 'car_retrieval_results/qhxjx/model.pkl', 'network': 'mlp'}
+{'load_path': 'car_retrieval_results/qhxjx/model.pkl', 'network': 'mlp'}
+Getting traj from trained model
+S:[1.0102711688694062, 5.2, 1.5768385659194832, 11.2]:[1.257989764213562, 5.0]
+S:[0.9763907469819465, 5.321150730420368, 1.5900976803978466, 11.2]:[-0.4821280539035797, 4.329055309295654]
+S:[0.9881499250707552, 5.274393951935487, 1.5857558505257656, 11.2]:[-0.8625770211219788, 2.2274553775787354]
+S:[0.9991377759204954, 5.1888389502852, 1.5818731277018472, 11.2]:[1.2878646850585938, 5.0]
+S:[0.96382877334304, 5.312690590594063, 1.595447121527233, 11.2]:[0.4665672481060028, 2.400681257247925]
+S:[0.957020778720211, 5.358847942979871, 1.5977144119515383, 11.2]:[-0.7514721751213074, 5.0]
+S:[0.9787658483455002, 5.286915639757975, 1.5897939535498222, 11.2]:[-1.0588715076446533, 5.0]
+S:[1.0086022699753714, 5.185319002799161, 1.578633530041516, 11.2]:[2.0138919353485107, 5.0]
+S:[0.9540157036993022, 5.3791692389476005, 1.5998597947357538, 11.2]:[1.4859436750411987, 5.0]
+S:[0.9107124524325282, 5.521313934535146, 1.6155215257420377, 11.2]:[-4.911562442779541, 1.9394619464874268]
+S:[0.9805233652234916, 5.035144321387103, 1.5963197987861915, 11.2]:[3.574955940246582, -0.7802690267562866]
+S:[0.9853670857700699, 5.392607100034489, 1.5907338613594102, 11.2]:[-1.9182664155960083, -5.0]
+S:[0.9385203297183193, 5.206588708848393, 1.6109522404972467, 11.2]:[-0.981560468673706, -5.0]
+S:[0.9164784812373641, 5.110939524574966, 1.6212978116551464, 11.2]:[5.0, 5.0]
+S:[0.7605493953522368, 5.586003857244793, 1.673997423589797, 11.2]:[-1.178737759590149, -3.1859114170074463]
+S:[0.7534528437711844, 5.4683438979787224, 1.681669378995377, 11.2]:[0.39503729343414307, 5.0]
+S:[0.7388911392657572, 5.505065845012266, 1.6858330414081157, 11.2]:[0.14545536041259766, 5.0]
+S:[0.7334731714129831, 5.518564668778575, 1.6873661296176274, 11.2]:[0.6452672481536865, 5.0]
+S:[0.7093462721606391, 5.578411063388991, 1.6941671963319953, 11.2]:[-0.7395760416984558, 3.563624620437622]
+S:[0.73172397742487, 5.507920173753161, 1.6887539386330215, 11.2]:[-0.1454167664051056, 5.0]
+S:[0.7371799027688895, 5.494440810335044, 1.6872212572013534, 11.2]:[0.30645981431007385, 5.0]
+S:[0.7257253186820687, 5.52286560024223, 1.6904513198588946, 11.2]:[-0.6688678860664368, 5.0]
+S:[0.7509259301358713, 5.460907778520801, 1.6834015042526445, 11.2]:[1.1135197877883911, 5.0]
+S:[0.7097005833439839, 5.5643472968870995, 1.695137916392245, 11.2]:[1.1905333995819092, 5.0]
+S:[0.6643290888349649, 5.6744160265119055, 1.7076860460228864, 11.2]:[5.0, 5.0]
+S:[0.46799254330799755, 6.134255086282318, 1.760385657957537, 11.2]:[-5.0, -5.0]
+S:[0.4295020135081785, 5.6357388085985, 1.8130852698921875, 11.2]:[5.0, -3.6065807342529297]
+S:[0.4015662649027728, 6.1349577925623064, 1.776023069440498, 11.2]:[-5.0, -5.0]
+S:[0.37087562749044767, 5.63590059666666, 1.8287226813751485, 11.2]:[5.0, 5.0]
+S:[0.12045390265422418, 6.068669541636202, 1.881422293309799, 11.2]:[-5.0, -5.0]
+S:[0.14243648445647827, 5.569153009279858, 1.9341219052444496, 11.2]:[2.5335867404937744, 5.0]
+S:[-0.006822760046568649, 5.773877936063184, 1.9608257128498092, 11.2]:[-5.0, -5.0]
+S:[0.05471221415934145, 5.277678936719697, 2.01352532478446, 11.2]:[5.0, 5.0]
+S:[-0.2709678567127664, 5.657063295169988, 2.0662249367191103, 11.2]:[5.0, 5.0]
+S:[-0.6161799402040813, 6.018765683068638, 2.118924548653761, 11.2]:[5.0, 5.0]
+S:[-0.9799655182348509, 6.3617817952511695, 2.1716241605884115, 11.2]:[5.0, -5.0]
+S:[-1.1439634097679257, 6.834121388735249, 2.118924548653761, 11.2]:[5.0, -5.0]
+S:[-1.2828530295588927, 7.3144438569941475, 2.0662249367191103, 11.2]:[5.0, -5.0]
+S:[-1.3962487358007991, 7.801415533589306, 2.01352532478446, 11.2]:[5.0, -5.0]
+S:[-1.483835673250167, 8.293684289847755, 1.9608257128498092, 11.2]:[5.0, -5.0]
+S:[-1.545370647456077, 8.789883289191243, 1.9081261009151587, 11.2]:[5.0, -5.0]
+S:[-1.5806828000154372, 9.288634782303419, 1.855426488980508, 11.2]:[5.0, -5.0]
+S:[-1.5896740829795173, 9.788553932597404, 1.8027268770458575, 11.2]:[5.0, -5.0]
+S:[-1.5723195310945115, 10.288252661361918, 1.750027265111207, 11.2]:[5.0, -5.0]
+S:[-1.5286673311202215, 10.786343501909508, 1.6973276531765564, 11.2]:[5.0, -5.0]
+S:[-1.4588386880343904, 11.281443452025433, 1.6446280412419059, 11.2]:[5.0, -5.0]
