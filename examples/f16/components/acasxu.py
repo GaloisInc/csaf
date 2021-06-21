@@ -61,7 +61,7 @@ class AcasXuAutopilot():
     '''AcasXu autopilot'''
 
     def __init__(self, init, num_aircraft_acasxu=1, stop_on_coc=False,
-                 hardcoded_u_seq=None, stdout=True):
+                 hardcoded_u_seq=None, stdout=False):
         'waypoints is a list of 3-tuples'
 
         init = np.array(init, dtype=float)
