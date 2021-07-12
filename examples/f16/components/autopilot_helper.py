@@ -1,4 +1,8 @@
 """
+CSAF F-16 Model
+
+taken from https://github.com/stanleybak/AeroBenchVVPython
+
 Autopilot helper functions
 """
 
