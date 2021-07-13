@@ -1,3 +1,9 @@
+"""
+CSAF F-16 Model
+
+taken from https://github.com/stanleybak/AeroBenchVVPython
+"""
+
 import numpy as np
 import helpers.f16plant_helper as ph
 from helpers.variables import State, Ctrlinput, Output, state_vector

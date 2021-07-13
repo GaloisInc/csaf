@@ -1,3 +1,9 @@
+"""
+CSAF F-16 Model
+
+taken from https://github.com/stanleybak/AeroBenchVVPython
+"""
+
 import numpy as np
 
 import helpers.llc_helper as lh

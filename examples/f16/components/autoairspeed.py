@@ -1,3 +1,9 @@
+"""
+CSAF F-16 Model
+
+taken from https://github.com/stanleybak/AeroBenchVVPython
+"""
+
 import autopilot_helper as ah
 
 
