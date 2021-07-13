@@ -66,6 +66,11 @@ Clear generated outputs for f16 example:
 
 ## Running examples
 
+A F-16 autopilot example is provided that was taken from 
+[AeroBenchVVPython](https://github.com/stanleybak/AeroBenchVVPython). The model was designed to test autopilot and 
+analysis methods. No claim is made about its accuracy; the F-16 model is based on a common aircraft model with
+additional controllers placed on top of it.
+
 To see the F16 model with GCAS autopilot in action, run the following command:
 
 `./run-csaf.sh -e f16-shield`
@@ -87,6 +92,11 @@ is defined by `examples/f16/components/f16plant.py` and
 * The middleware message formats that
 each component speaks are defined in the ROS message format. The F16 messages 
 can be found in `examples/f16/components/msg`.
+
+### Citation
+> Heidlauf, P., Collins, A., Bolender, M., & Bak, S. (2018, September). Verification Challenges in F-16 Ground Collision 
+> Avoidance and Other Automated Maneuvers. In ARCH@ ADHS (pp. 208-217).
+
 
 ## Jupyter notebooks
 
