@@ -1,6 +1,5 @@
 """
-Stanley Bak
-Python code for F-16 animation video output
+Python code for plotting the results from examples
 """
 import re
 import os

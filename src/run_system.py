@@ -19,8 +19,8 @@ import csaf.system as csys
 import csaf.config as cconf
 import csaf.trace as ctc
 import csaf.parser_test as ctp
-from csaf import csaf_logger
 
+from csaf import csaf_logger
 
 import plot
 import run_parallel

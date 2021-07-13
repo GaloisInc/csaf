@@ -132,3 +132,7 @@ This file is saved in the same directory as your system, in this case `examples/
 
 ## Development
 `CONTRIBUTING.md` contains CSAF development guildelines, please familiarize yourself with the guidelines before opening a pull request. The best way to contact the dev team is via gitlab issues.
+
+## Licensing
+
+The code in this repository is licensed under two different license. The core of CSAF (`src` and `docs` directories) is licensed under [BSD license](LICENSE.txt), the code in the `examples` directory is licensed under [GPL license](examples/LICENSE.txt)

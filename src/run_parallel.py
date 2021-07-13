@@ -1,4 +1,3 @@
-import sys, os
 from multiprocessing import Process, Event, Queue, JoinableQueue
 import multiprocessing
 import tqdm
