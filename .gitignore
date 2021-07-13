@@ -166,9 +166,17 @@ dmypy.json
 # Cython debug symbols
 cython_debug/
 
-# Jupyter notebooks files
-# We don't want to include these PDFs
+# Generated Jupyter notebooks files
+# Update if you want to retain some of them
 docs/notebooks/*.pdf
+docs/notebooks/*.py
+docs/notebooks/*.png
 
 # Pipenv files
 Pipfile*
+
+# CI files
+generated-notebooks-config.yml
+
+# Examples output (generated files)
+examples/*/output/

@@ -7,13 +7,13 @@ CSAF is a framework to minimize the effort required to evaluate, implement, and 
 * Compatibility with external hardware and software processes
 * Ease of deployment
 
-![csaf_importing_components](/uploads/c8ba6291daf48f2ab49270f577576b31/csaf_importing_controllers.png)
+![csaf_importing_components](docs/srs/img/csaf_importing_controllers.png)
 
 Controllers, subsystems and plants are implemented as a collection of components.
 Components communicate via a 0MQ pub/sub configuration and serialize/deserialize ROS messages. Below is an example of a topology graph of F16 system with GCAS autopilot.
 
 
-![f16_with_gcas](/uploads/27e47ebbb19aa11d144db1b01435afb0/image.png)
+![f16_with_gcas](docs/srs/img/csaf_system_diagram.png)
 
 CSAF currently contains two examples, one is F16 with a low level LQR controller and GCAS autopilot, and the second one is a classic [Inverted pendulum model](http://ctms.engin.umich.edu/CTMS/index.php?example=InvertedPendulum&section=ControlDigital#4). Both examples are in `examples` directory.
 
@@ -21,7 +21,7 @@ CSAF currently contains two examples, one is F16 with a low level LQR controller
 ## Quick Start
 CSAF runs inside a [Docker container](https://www.docker.com/), and in order to use CSAF you first need to install docker. CSAF has been tested on Linux (Ubuntu 18.04 and 20.04) and OS X. CSAF can be also run natively on your host machine, but this option is recommended only for the developers.
 
-![csaf_quickstart](/uploads/3fd963be2ef6929d63ceb02ad1a2bcf8/csaf_quickstart.png)
+![csaf_quickstart](docs/srs/img/csaf_quickstart.png)
 
 Once you clone the main repository, `run-csaf.sh` is the entry point to the CSAF framework. For a simple start use `-e` flag and select one of the provided examples to run `f16-shield, f16-simple, f16-llc, inv-pendulum, ...` Note that the script has to be run from the CSAF root directory.
 
@@ -79,7 +79,7 @@ To see the F16 model with GCAS autopilot in action, run the following command:
 Once the simulation completes, navigate to `examples/f16/output` to view the 
 generated run:
 
-![f16-shield-run](/uploads/7a1f3d000298b9f55baa6adbc712bb6f/f16-shield-run.png)
+![f16-shield-run](docs/srs/img/f16-shield-run.png)
 
 Here's a quick glance at what's going on behind the scenes:
 * The overall system and loop topology is defined in `examples/f16/f16_shield_config.toml`. This file
