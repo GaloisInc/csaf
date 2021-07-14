@@ -101,11 +101,14 @@ class System:
 
             # bind and update structures
             comp.init_net(sub_ports, pub_ports)
-            comp.connect_input()
             comp.bind_output()
             components.append(comp)
             names.append(dname)
             ports += pub_ports
+
+        # make connections now that components are up
+        for c in components:
+            c.connect_input()
 
         system = cls(components, eval_order, config)
         return system
