@@ -90,8 +90,9 @@ class DynamicComponent(Component):
                 self._input_buffer['time'] = t
 
         # avoid infinite recursion by checking whether _input_buffer was initialized
-        # FIXME: this check is wrong -- case exists where the buffer doesn't start correctly
-        if len(self._input_buffer.keys()) != len(self.topics) + 1 and len(self.input_socks) > 0:
+        # buffer contains topics AND time
+        input_buff_len = len(self.topics) + 1
+        if len(self._input_buffer.keys()) != input_buff_len  and len(self.input_socks) > 0:
             time.sleep(1e-3)
             self.receive_input()
         self.current_time += 1.0 / self.sampling_frequency
@@ -102,7 +103,6 @@ class DynamicComponent(Component):
         input_vector = []
         if len(self._topics_input) > 0:
             for f in self._topics_input:
-                # bugfix: FIXME: error occurs here
                 input_vector += self._input_buffer[f]
         return input_vector
 
