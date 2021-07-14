@@ -142,7 +142,9 @@ class System:
 
         for cidx, _ in s:
             idx = self.names.index(cidx)
+            # bugfix: receive input must fail here
             self.components[idx].receive_input()
+            # bugfix: FIXME: error occurs here
             out = self.components[idx].send_output()
             if terminating_conditions is not None and terminating_conditions(cidx, out):
                 return False
