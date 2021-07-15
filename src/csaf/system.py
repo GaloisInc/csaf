@@ -100,10 +100,15 @@ class System:
                 comp.debug_node = True
 
             # bind and update structures
-            comp.bind(sub_ports, pub_ports)
+            comp.init_net(sub_ports, pub_ports)
+            comp.bind_output()
             components.append(comp)
             names.append(dname)
             ports += pub_ports
+
+        # make connections now that components are up
+        for c in components:
+            c.connect_input()
 
         system = cls(components, eval_order, config)
         return system
@@ -142,6 +147,7 @@ class System:
 
         for cidx, _ in s:
             idx = self.names.index(cidx)
+            # bugfix: receive input must fail here
             self.components[idx].receive_input()
             out = self.components[idx].send_output()
             if terminating_conditions is not None and terminating_conditions(cidx, out):
@@ -155,6 +161,7 @@ class System:
 
         # produce stimulus
         input_for_first = list(set([p for p, _ in self.config._config["components"][self.eval_order[0]]["sub"]]))
+
         for dname in input_for_first:
             idx = self.names.index(dname)
             self.components[idx].send_stimulus(float(tspan[0]))
