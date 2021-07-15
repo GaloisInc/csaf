@@ -37,7 +37,7 @@ class Component:
         self.zmq_context = None
         self.input_socks = None
         self.output_socks = None
-        self._in_ports, self._out_ports = None, None
+        self._in_ports, self._out_ports = False, False
 
         # threads to manage subscribers over
         self.subscriber_threads = None
@@ -76,7 +76,7 @@ class Component:
 
     def bind_output(self):
         """create component output ports"""
-        assert self._out_ports, f"No output ports specified! Make sure to call init_net first"
+        assert self._out_ports is not False, f"No output ports specified! Make sure to call init_net first"
 
         # setup publishers over TCP network
         # TODO: uses TCP -- maybe make configurable for zeroMQ's various transport options
@@ -88,7 +88,7 @@ class Component:
 
     def connect_input(self):
         """connect input ports to the component outputs"""
-        assert self._in_ports, f"no input ports specified! Make sure to call init_net first"
+        assert self._in_ports is not False, f"no input ports specified! Make sure to call init_net first"
 
         # setup subscribers over TCP network
         self.input_socks = []
