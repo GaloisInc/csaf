@@ -38,21 +38,21 @@ on:
 #         uses: ./.github/docker
 #         with:
 #           cmd: ./run-csaf.sh -h
-jobs:
-  native1:
-    runs-on: ubuntu-latest
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - name: Check out repository code
-        uses: actions/checkout@v2
-      #  with:
-      #    ref: github-actions
-      - run: echo "💡 The ${{ github.repository }} repository has been cloned to the runner."
+  jobs:
+    native1:
+      runs-on: ubuntu-latest
+        # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+        - name: Check out repository code
+          uses: actions/checkout@v2
+        #  with:
+        #    ref: github-actions
+        - run: echo "💡 The ${{ github.repository }} repository has been cloned to the runner."
 
-      - name: Install dependencies
-      - run: ./dependencies.sh
+        - name: Install dependencies
+        - run: ./dependencies.sh
 
-      - name: Install python packages
-      - run: pip3 install -r ./requirements.txt --use-feature=2020-resolver
-    
-      - name: Run a test
-      - run: ./run-csaf.sh -e f16-simple -n
+        - name: Install python packages
+        - run: pip3 install -r ./requirements.txt --use-feature=2020-resolver
+      
+        - name: Run a test
+        - run: ./run-csaf.sh -e f16-simple -n
