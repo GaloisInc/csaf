@@ -1,0 +1,45 @@
+package llc
+public
+	with CSAF_Properties, CSAF_Parameters, Msg, Plant;
+		
+	abstract Controller
+		features
+			--Plant_Sub : feature group inverse of Plant::Pub;
+			Plant_Sub : in data port Msg::Message.Plant_Pub;
+			Autopilot_Outputs : in data port Msg::Message.Autopilot_Output;
+			Outputs : out data port Msg::Message.Controller_Output;
+			States : out data port Msg::Message.Controller_State
+				{ CSAF_Properties::Initial_Values => (0.0, 0.0, 0.0); };
+		properties
+			CSAF_Properties::System_Name => "F16 Low Level Controller";
+			CSAF_Properties::System_Representation => "black box";
+			CSAF_Properties::System_Solver => "Euler";
+			CSAF_Properties::Sampling_Frequency => 100;
+			CSAF_Properties::Is_Discrete => false;
+			CSAF_Properties::Is_Hybrid => false;
+			
+			-- Parameters
+			CSAF_Parameters::lqr_name => "lqr_original";
+			CSAF_Parameters::throttle_max => 1.0;
+			CSAF_Parameters::throttle_min => 0.0;
+			CSAF_Parameters::elevator_max => 25.0;
+			CSAF_Parameters::elevator_min => -25.0;
+			CSAF_Parameters::aileron_max => 21.5;
+			CSAF_Parameters::aileron_min => -21.5;
+			CSAF_Parameters::rudder_max => 30.0;
+			CSAF_Parameters::rudder_min => -30.0;
+			
+--			CSAF_Properties::Parameters => (
+--				[Name => "lqr_name"; Value => "'lqr_original'";],
+--				[Name => "throttle_max"; Value => "1";],
+--				[Name => "throttle_min"; Value => "0";],
+--				[Name => "elevator_max"; Value => "25";],
+--				[Name => "elevator_min"; Value => "-25";],
+--				[Name => "aileron_max"; Value => "21.5";],
+--				[Name => "aileron_min"; Value => "-21.5";],
+--				[Name => "rudder_max"; Value => "30.0";],
+--				[Name => "rudder_min"; Value => "-30.0";]
+--			);
+	end Controller;
+	
+end llc;
