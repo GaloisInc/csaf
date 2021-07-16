@@ -2,7 +2,7 @@
 JUPYTER=0
 JUPYTER_DIR=docs/notebooks
 
-SCRIPT_DIR="csaf_architecture"
+SCRIPT_DIR="csaf"
 DIR=$(basename ${PWD})
 if [ ${DIR} != ${SCRIPT_DIR} ]
 then
