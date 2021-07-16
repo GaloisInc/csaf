@@ -23,8 +23,8 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: Check out repository code
         uses: actions/checkout@v2
-        with:
-          ref: github-actions
+      #  with:
+      #    ref: github-actions
       - run: echo "💡 The ${{ github.repository }} repository has been cloned to the runner."
 
       # Runs a set of commands using the runners shell
@@ -35,6 +35,6 @@ jobs:
       
       - name: Hello world action step
         id: hello
-        uses: ./.github/docker@v1
+        uses: ./.github/docker
         with:
           cmd: './run-csaf.sh -e f16-shield -f f16_job_conf_parallel_random.toml -n'
