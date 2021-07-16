@@ -29,10 +29,10 @@ jobs:
 
       # Runs a set of commands using the runners shell
       - name: Install dependencies
-        run: ./dependencies.sh
+        run: sudo ./dependencies.sh
       
       - name: Install python packages
-        run: pip3 install -r ./requirements.txt --use-feature=2020-resolver
+        run: sudo pip3 install -r ./requirements.txt --use-feature=2020-resolver
 
       - name: Run a test
         run: ./run-csaf.sh -e f16-simple -n
