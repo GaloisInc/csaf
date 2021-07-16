@@ -35,6 +35,6 @@ jobs:
       
       - name: Hello world action step
         id: hello
-        uses: actions/.github/docker@v1
+        uses: ./.github/docker@v1
         with:
           cmd: './run-csaf.sh -e f16-shield -f f16_job_conf_parallel_random.toml -n'
