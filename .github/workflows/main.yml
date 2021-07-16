@@ -37,4 +37,4 @@ jobs:
         id: hello
         uses: ./.github/docker
         with:
-          cmd: ls
+          cmd: ./run-csaf.sh -e f16-shield -f f16_job_conf_parallel_random.toml -n
