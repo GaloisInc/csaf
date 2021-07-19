@@ -1,7 +1,7 @@
 #!/bin/bash
-#apt-get clean
-#apt-get update
-#apt-get -y upgrade
+apt-get clean
+apt-get update
+apt-get -y upgrade
 apt-get install -y \
     git \
     python3 \
@@ -12,7 +12,7 @@ apt-get install -y \
     libopenmpi-dev \
     wget
 
-#python3 -m pip install --upgrade pip
+python3 -m pip install --upgrade pip
 
 # Latex for notebooks
-apt-get install -y texlive-xetex texlive-fonts-recommended texlive-generic-recommended
+apt-get install -y texlive-xetex texlive-fonts-recommended texlive-plain-generic
