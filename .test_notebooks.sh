@@ -24,6 +24,7 @@ do
     # Now actually execute the commands
     echo ">>> Adjust example paths: ln -s ${PWD}/examples/${EXAMPLE} ./csaf-system"
     ln -s ${PWD}/examples/${EXAMPLE} ./csaf-system
+    ls -al ./csaf-system
     echo ">>> Converting ${NOTEBOOK}: jupyter nbconvert --to python $NOTEBOOK"
     jupyter nbconvert --to python $NOTEBOOK
     echo ">>> Testing ${NOTEBOOK}: ipython $PYTHONFILE"
