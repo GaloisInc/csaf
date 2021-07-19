@@ -1,6 +1,8 @@
 #!/bin/bash
 set -e
 FILES=`find .  -name "*.ipynb" ! -name '*checkpoint*'`
+export PYTHONPATH=${PYTHONPATH}:${PWD}/src:${PWD}/examples/f16:${PWD}/examples/inverted-pendulum:${PWD}/examples/rejoin:${PWD}/examples/cansat:/csaf-system
+echo "PYTHONPATH=${PYTHONPATH}"
 for NOTEBOOK in $FILES
 do
     echo ">>> Processing ${NOTEBOOK}"
@@ -24,7 +26,6 @@ do
     # Now actually execute the commands
     echo ">>> Adjust example paths: ln -s ${PWD}/examples/${EXAMPLE} ${PWD}/csaf-system"
     ln -s ${PWD}/examples/${EXAMPLE} ${PWD}/csaf-system
-    ls -al ${PWD}/csaf-system
     echo ">>> Converting ${NOTEBOOK}: jupyter nbconvert --to python $NOTEBOOK"
     jupyter nbconvert --to python $NOTEBOOK
     echo ">>> Testing ${NOTEBOOK}: ipython $PYTHONFILE"
