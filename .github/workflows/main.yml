@@ -36,78 +36,78 @@ jobs:
         if: steps.cache-virtualenv.outputs.cache-hit != 'true'
 
 
-      - name: F16 simple test
-        run: ./run-csaf.sh -e f16-simple -n
+      # - name: F16 simple test
+      #   run: ./run-csaf.sh -e f16-simple -n
       
-      - uses: actions/upload-artifact@v2
-        with:
-          name: f16-simple
-          path: |
-            ./examples/f16/output/*.log
-            ./examples/f16/output/*.pdf
-            ./examples/f16/output/*.png
-          retention-days: 7
-      - run: rm -rf ./examples/f16/output
+      # - uses: actions/upload-artifact@v2
+      #   with:
+      #     name: f16-simple
+      #     path: |
+      #       ./examples/f16/output/*.log
+      #       ./examples/f16/output/*.pdf
+      #       ./examples/f16/output/*.png
+      #     retention-days: 7
+      # - run: rm -rf ./examples/f16/output
 
 
-      - name: F16 fuzzy low level controller
-        run: ./run-csaf.sh -e f16-fuzzy -n
+      # - name: F16 fuzzy low level controller
+      #   run: ./run-csaf.sh -e f16-fuzzy -n
       
-      - uses: actions/upload-artifact@v2
-        with:
-          name: f16-fuzzy
-          path: |
-            ./examples/f16/output/*.log
-            ./examples/f16/output/*.pdf
-            ./examples/f16/output/*.png
-          retention-days: 7
-      - run: rm -rf ./examples/f16/output
+      # - uses: actions/upload-artifact@v2
+      #   with:
+      #     name: f16-fuzzy
+      #     path: |
+      #       ./examples/f16/output/*.log
+      #       ./examples/f16/output/*.pdf
+      #       ./examples/f16/output/*.png
+      #     retention-days: 7
+      # - run: rm -rf ./examples/f16/output
 
 
-      - name: F16 GCAS shield
-        run: ./run-csaf.sh -e f16-shield -n
+      # - name: F16 GCAS shield
+      #   run: ./run-csaf.sh -e f16-shield -n
       
-      - uses: actions/upload-artifact@v2
-        with:
-          name: f16-shield
-          path: |
-            ./examples/f16/output/*.log
-            ./examples/f16/output/*.pdf
-            ./examples/f16/output/*.png
-          retention-days: 7
-      - run: rm -rf ./examples/f16/output
+      # - uses: actions/upload-artifact@v2
+      #   with:
+      #     name: f16-shield
+      #     path: |
+      #       ./examples/f16/output/*.log
+      #       ./examples/f16/output/*.pdf
+      #       ./examples/f16/output/*.png
+      #     retention-days: 7
+      # - run: rm -rf ./examples/f16/output
 
 
-      - name: F16 neural Network low level controller
-        run: ./run-csaf.sh -e f16-llc-nn -n
+      # - name: F16 neural Network low level controller
+      #   run: ./run-csaf.sh -e f16-llc-nn -n
       
-      - uses: actions/upload-artifact@v2
-        with:
-          name: f16-llc-nn
-          path: |
-            ./examples/f16/output/*.log
-            ./examples/f16/output/*.pdf
-            ./examples/f16/output/*.png
-          retention-days: 7
-      - run: rm -rf ./examples/f16/output
+      # - uses: actions/upload-artifact@v2
+      #   with:
+      #     name: f16-llc-nn
+      #     path: |
+      #       ./examples/f16/output/*.log
+      #       ./examples/f16/output/*.pdf
+      #       ./examples/f16/output/*.png
+      #     retention-days: 7
+      # - run: rm -rf ./examples/f16/output
 
 
-      - name: F16 Analyze low level controller performance
-        run: ./run-csaf.sh -e f16-llc-analyze -n
+      # - name: F16 Analyze low level controller performance
+      #   run: ./run-csaf.sh -e f16-llc-analyze -n
       
-      - uses: actions/upload-artifact@v2
-        with:
-          name: f16-llc-analyze
-          path: |
-            ./examples/f16/output/*.log
-            ./examples/f16/output/*.pdf
-            ./examples/f16/output/*.png
-          retention-days: 7
-      - run: rm -rf ./examples/f16/output
+      # - uses: actions/upload-artifact@v2
+      #   with:
+      #     name: f16-llc-analyze
+      #     path: |
+      #       ./examples/f16/output/*.log
+      #       ./examples/f16/output/*.pdf
+      #       ./examples/f16/output/*.png
+      #     retention-days: 7
+      # - run: rm -rf ./examples/f16/output
 
 
       - name: Inverted pendulum example
-        run: ./run-csaf.sh -e inv-pendulum -n
+        run: ./run-csaf.sh -e inv-pendulum
       
       - uses: actions/upload-artifact@v2
         with:
@@ -119,58 +119,58 @@ jobs:
           retention-days: 7
       - run: rm -rf ./examples/inverted-pendulum/output
   
-  test-configs:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Install dependencies
-        run: sudo ./dependencies.sh
-      - uses: actions/setup-python@v2
-        with:
-          python-version: '3.7'
-      - uses: syphar/restore-virtualenv@v1
-        id: cache-virtualenv
-        with:
-          requirement_files: ./requirements.txt
+  # test-configs:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v2
+  #     - name: Install dependencies
+  #       run: sudo ./dependencies.sh
+  #     - uses: actions/setup-python@v2
+  #       with:
+  #         python-version: '3.7'
+  #     - uses: syphar/restore-virtualenv@v1
+  #       id: cache-virtualenv
+  #       with:
+  #         requirement_files: ./requirements.txt
       
-      - uses: syphar/restore-pip-download-cache@v1
-        if: steps.cache-virtualenv.outputs.cache-hit != 'true'
+  #     - uses: syphar/restore-pip-download-cache@v1
+  #       if: steps.cache-virtualenv.outputs.cache-hit != 'true'
 
-        # the package installation will only be executed when the
-        # requirements-files have changed.
-      - run: pip install -r requirements.txt
-        if: steps.cache-virtualenv.outputs.cache-hit != 'true'
+  #       # the package installation will only be executed when the
+  #       # requirements-files have changed.
+  #     - run: pip install -r requirements.txt
+  #       if: steps.cache-virtualenv.outputs.cache-hit != 'true'
 
-      - name: f16-job-config 0 3
-        run: ./run-csaf.sh -e f16-shield -f f16_job_conf_parallel_random.toml -n
-      - name: f16-job-config 1 3
-        run: ./run-csaf.sh -e f16-shield -f f16_job_conf_parallel_fixed.toml -n
-      - name: f16-job-config 2 3
-        run: ./run-csaf.sh -e f16-shield -f f16_job_conf_parallel_from_file.toml -n
-      - name: f16-job-config 3 3
-        run: ./run-csaf.sh -e f16-llc-analyze -f f16_job_conf_parallel_fixed.toml -n
+  #     - name: f16-job-config 0 3
+  #       run: ./run-csaf.sh -e f16-shield -f f16_job_conf_parallel_random.toml -n
+  #     - name: f16-job-config 1 3
+  #       run: ./run-csaf.sh -e f16-shield -f f16_job_conf_parallel_fixed.toml -n
+  #     - name: f16-job-config 2 3
+  #       run: ./run-csaf.sh -e f16-shield -f f16_job_conf_parallel_from_file.toml -n
+  #     - name: f16-job-config 3 3
+  #       run: ./run-csaf.sh -e f16-llc-analyze -f f16_job_conf_parallel_fixed.toml -n
 
-  test-notebooks:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Install dependencies
-        run: sudo ./dependencies.sh
-      - uses: actions/setup-python@v2
-        with:
-          python-version: '3.7'
-      - uses: syphar/restore-virtualenv@v1
-        id: cache-virtualenv
-        with:
-          requirement_files: ./requirements.txt
+  # test-notebooks:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v2
+  #     - name: Install dependencies
+  #       run: sudo ./dependencies.sh
+  #     - uses: actions/setup-python@v2
+  #       with:
+  #         python-version: '3.7'
+  #     - uses: syphar/restore-virtualenv@v1
+  #       id: cache-virtualenv
+  #       with:
+  #         requirement_files: ./requirements.txt
       
-      - uses: syphar/restore-pip-download-cache@v1
-        if: steps.cache-virtualenv.outputs.cache-hit != 'true'
+  #     - uses: syphar/restore-pip-download-cache@v1
+  #       if: steps.cache-virtualenv.outputs.cache-hit != 'true'
 
-        # the package installation will only be executed when the
-        # requirements-files have changed.
-      - run: pip install -r requirements.txt
-        if: steps.cache-virtualenv.outputs.cache-hit != 'true'
+  #       # the package installation will only be executed when the
+  #       # requirements-files have changed.
+  #     - run: pip install -r requirements.txt
+  #       if: steps.cache-virtualenv.outputs.cache-hit != 'true'
 
-      - name: Build notebook tests
-        run: ./.test_notebooks.sh
+  #     - name: Build notebook tests
+  #       run: ./.test_notebooks.sh
