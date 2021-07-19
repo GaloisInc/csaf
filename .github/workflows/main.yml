@@ -44,10 +44,15 @@ jobs:
         # requirements-files have changed.
       - run: pip install -r requirements.txt
         if: steps.cache-virtualenv.outputs.cache-hit != 'true'
-      
-      # - name: Install python packages
-      #   run: sudo pip3 install -r ./requirements.txt --use-feature=2020-resolver
 
-      - name: Run a test
+      - name: F16 simple
         run: ./run-csaf.sh -e f16-simple -n
+      
+      - uses: actions/upload-artifact@v2
+        with:
+          name: f16-simple
+          path: |
+            ./examples/f16/output/f16run.log
+            ./examples/f16/output/f16-shield-config.pdf
+            ./examples/f16/output/f16-shield-run.png
   
