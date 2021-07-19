@@ -28,7 +28,7 @@ do
     echo ">>> Converting ${NOTEBOOK}: jupyter nbconvert --to python $NOTEBOOK"
     jupyter nbconvert --to python $NOTEBOOK
     echo ">>> Testing ${NOTEBOOK}: ipython $PYTHONFILE"
-    #ipython $PYTHONFILE
+    ipython $PYTHONFILE
     echo ">>> Testing ${NOTEBOOK} complete! Removing symlink: rm /csaf-system"
-    rm /csaf-system
+    rm ${PWD}/csaf-system
 done
