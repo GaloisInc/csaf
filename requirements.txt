@@ -12,7 +12,7 @@ pyzmq==18.1.1
 pymap3d==2.4.0
 jupyter==1.0
 stable_baselines==2.10.0
-tensorflow==2.2.0
+tensorflow==1.15.0
 mpi4py==3.0.3
 gym==0.15.6
 sklearn

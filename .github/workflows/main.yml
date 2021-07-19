@@ -27,12 +27,29 @@ jobs:
       #    ref: github-actions
       - run: echo "💡 The ${{ github.repository }} repository has been cloned to the runner."
 
-      # Runs a set of commands using the runners shell
-      - name: Install dependencies
-        run: sudo ./dependencies.sh
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.7'
       
-      - name: Install python packages
-        run: sudo pip3 install -r ./requirements.txt --use-feature=2020-resolver
+      - uses: syphar/restore-virtualenv@v1
+        id: cache-virtualenv
+        with:
+          requirement_files: ./requirements.txt 
+      
+      - uses: syphar/restore-pip-download-cache@v1
+        if: steps.cache-virtualenv.outputs.cache-hit != 'true'
+
+        # the package installation will only be executed when the
+        # requirements-files have changed.
+      - run: pip install -r requirements.txt
+        if: steps.cache-virtualenv.outputs.cache-hit != 'true'
+
+      # # Runs a set of commands using the runners shell
+      # - name: Install dependencies
+      #   run: sudo ./dependencies.sh
+      
+      # - name: Install python packages
+      #   run: sudo pip3 install -r ./requirements.txt --use-feature=2020-resolver
 
       - name: Run a test
         run: ./run-csaf.sh -e f16-simple -n
