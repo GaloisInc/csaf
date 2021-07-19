@@ -1,8 +1,8 @@
 #!/bin/bash
-apt-get clean && \
-    apt-get update && \
-    apt-get -y upgrade && \
-    apt-get install -y \
+apt-get clean
+apt-get update
+apt-get -y upgrade
+apt-get install -y \
     git \
     python3 \
     python3-pip \
@@ -15,4 +15,4 @@ apt-get clean && \
 python3 -m pip install --upgrade pip
 
 # Latex for notebooks
-apt-get install -y texlive-xetex texlive-fonts-recommended texlive-generic-recommended
+apt-get install -y texlive-xetex texlive-fonts-recommended texlive-plain-generic

@@ -1,5 +1,7 @@
 # Control Systems Analysis Framework (CSAF)
 
+![CI](https://github.com/GaloisInc/csaf/actions/workflows/main.yml/badge.svg)
+
 CSAF is a framework to minimize the effort required to evaluate, implement, and **verify** controller design (classical and learning enabled) with respect to the system dynamics. Its key features are:
 
 * Component based controller design
