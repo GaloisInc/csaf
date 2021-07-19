@@ -14,7 +14,7 @@ on:
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   # This workflow contains a single job called "build"
-  hello_world_job:
+  ci-run:
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
 
@@ -45,14 +45,81 @@ jobs:
       - run: pip install -r requirements.txt
         if: steps.cache-virtualenv.outputs.cache-hit != 'true'
 
-      - name: F16 simple
+
+      - name: F16 simple test
         run: ./run-csaf.sh -e f16-simple -n
       
       - uses: actions/upload-artifact@v2
         with:
           name: f16-simple
           path: |
-            ./examples/f16/output/f16run.log
-            ./examples/f16/output/f16-shield-config.pdf
-            ./examples/f16/output/f16-shield-run.png
+            ./examples/f16/output/*.log
+            ./examples/f16/output/*.pdf
+            ./examples/f16/output/*.png
+          retention-days: 7
+
+
+      - name: F16 fuzzy low level controller
+        run: ./run-csaf.sh -e f16-fuzzy -n
+      
+      - uses: actions/upload-artifact@v2
+        with:
+          name: f16-fuzzy
+          path: |
+            ./examples/f16/output/*.log
+            ./examples/f16/output/*.pdf
+            ./examples/f16/output/*.png
+          retention-days: 7
+
+
+      - name: F16 GCAS shield
+        run: ./run-csaf.sh -e f16-shield -n
+      
+      - uses: actions/upload-artifact@v2
+        with:
+          name: f16-shield
+          path: |
+            ./examples/f16/output/*.log
+            ./examples/f16/output/*.pdf
+            ./examples/f16/output/*.png
+          retention-days: 7
+
+
+      - name: F16 neural Network low level controller
+        run: ./run-csaf.sh -e f16-llc-nn -n
+      
+      - uses: actions/upload-artifact@v2
+        with:
+          name: f16-llc-nn
+          path: |
+            ./examples/f16/output/*.log
+            ./examples/f16/output/*.pdf
+            ./examples/f16/output/*.png
+          retention-days: 7
+
+
+      - name: F16 Analyze low level controller performance
+        run: ./run-csaf.sh -e f16-llc-analyze -n
+      
+      - uses: actions/upload-artifact@v2
+        with:
+          name: f16-llc-analyze
+          path: |
+            ./examples/f16/output/*.log
+            ./examples/f16/output/*.pdf
+            ./examples/f16/output/*.png
+          retention-days: 7
+
+
+      - name: Inverted pendulum example
+        run: ./run-csaf.sh -e inv-pendulum -n
+      
+      - uses: actions/upload-artifact@v2
+        with:
+          name: inv-pendulum
+          path: |
+            ./examples/inverted-pendulum/output/*.log
+            ./examples/inverted-pendulum/output/*.pdf
+            ./examples/inverted-pendulum/output/*.png
+          retention-days: 7
   
