@@ -57,6 +57,7 @@ jobs:
             ./examples/f16/output/*.pdf
             ./examples/f16/output/*.png
           retention-days: 7
+      - run: rm -rf ./examples/f16/output
 
 
       - name: F16 fuzzy low level controller
@@ -70,6 +71,7 @@ jobs:
             ./examples/f16/output/*.pdf
             ./examples/f16/output/*.png
           retention-days: 7
+      - run: rm -rf ./examples/f16/output
 
 
       - name: F16 GCAS shield
@@ -83,6 +85,7 @@ jobs:
             ./examples/f16/output/*.pdf
             ./examples/f16/output/*.png
           retention-days: 7
+      - run: rm -rf ./examples/f16/output
 
 
       - name: F16 neural Network low level controller
@@ -96,6 +99,7 @@ jobs:
             ./examples/f16/output/*.pdf
             ./examples/f16/output/*.png
           retention-days: 7
+      - run: rm -rf ./examples/f16/output
 
 
       - name: F16 Analyze low level controller performance
@@ -109,6 +113,7 @@ jobs:
             ./examples/f16/output/*.pdf
             ./examples/f16/output/*.png
           retention-days: 7
+      - run: rm -rf ./examples/f16/output
 
 
       - name: Inverted pendulum example
@@ -122,4 +127,5 @@ jobs:
             ./examples/inverted-pendulum/output/*.pdf
             ./examples/inverted-pendulum/output/*.png
           retention-days: 7
+      - run: rm -rf ./examples/inverted-pendulum/output
   
