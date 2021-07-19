@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 FILES=`find .  -name "*.ipynb" ! -name '*checkpoint*'`
 for NOTEBOOK in $FILES
 do
