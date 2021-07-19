@@ -1,5 +1,6 @@
 #!/bin/bash
 FILES=`find .  -name "*.ipynb" ! -name '*checkpoint*'`
+for NOTEBOOK in $FILES
 do
     echo ">>> Processing ${NOTEBOOK}"
     BASENAME=${NOTEBOOK%.*}
