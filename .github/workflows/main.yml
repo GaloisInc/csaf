@@ -13,17 +13,15 @@ on:
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  create-virtualenv:
+  test-examples:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
       - name: Install dependencies
         run: sudo ./dependencies.sh
-
       - uses: actions/setup-python@v2
         with:
           python-version: '3.7'
-      
       - uses: syphar/restore-virtualenv@v1
         id: cache-virtualenv
         with:
@@ -36,19 +34,6 @@ jobs:
         # requirements-files have changed.
       - run: pip install -r requirements.txt
         if: steps.cache-virtualenv.outputs.cache-hit != 'true'
-
-  test-examples:
-    needs: create-virtualenv
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Install dependencies
-        run: sudo ./dependencies.sh
-      - uses: actions/setup-python@v2
-        with:
-          python-version: '3.7'
-      - uses: syphar/restore-virtualenv@v1
-        id: cache-virtualenv
 
 
       - name: F16 simple test
@@ -135,7 +120,6 @@ jobs:
       - run: rm -rf ./examples/inverted-pendulum/output
   
   test-configs:
-    needs: create-virtualenv
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -146,6 +130,17 @@ jobs:
           python-version: '3.7'
       - uses: syphar/restore-virtualenv@v1
         id: cache-virtualenv
+        with:
+          requirement_files: ./requirements.txt 
+      
+      - uses: syphar/restore-pip-download-cache@v1
+        if: steps.cache-virtualenv.outputs.cache-hit != 'true'
+
+        # the package installation will only be executed when the
+        # requirements-files have changed.
+      - run: pip install -r requirements.txt
+        if: steps.cache-virtualenv.outputs.cache-hit != 'true'
+
       - name: f16-job-config 0 3
         run: ./run-csaf.sh -e f16-shield -f f16_job_conf_parallel_random.toml -n
       - name: f16-job-config 1 3
@@ -156,7 +151,6 @@ jobs:
         run: ./run-csaf.sh -e f16-llc-analyze -f f16_job_conf_parallel_fixed.toml -n
 
   test-notebooks:
-    needs: create-virtualenv
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -167,5 +161,16 @@ jobs:
           python-version: '3.7'
       - uses: syphar/restore-virtualenv@v1
         id: cache-virtualenv
+        with:
+          requirement_files: ./requirements.txt 
+      
+      - uses: syphar/restore-pip-download-cache@v1
+        if: steps.cache-virtualenv.outputs.cache-hit != 'true'
+
+        # the package installation will only be executed when the
+        # requirements-files have changed.
+      - run: pip install -r requirements.txt
+        if: steps.cache-virtualenv.outputs.cache-hit != 'true'
+
       - name: Build notebook tests
         run: echo "hello world"
