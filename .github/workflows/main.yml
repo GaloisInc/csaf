@@ -23,9 +23,10 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: Check out repository code
         uses: actions/checkout@v2
-      #  with:
-      #    ref: github-actions
-      - run: echo "💡 The ${{ github.repository }} repository has been cloned to the runner."
+
+      # # Runs a set of commands using the runners shell
+      - name: Install dependencies
+        run: sudo ./dependencies.sh
 
       - uses: actions/setup-python@v2
         with:
@@ -43,10 +44,6 @@ jobs:
         # requirements-files have changed.
       - run: pip install -r requirements.txt
         if: steps.cache-virtualenv.outputs.cache-hit != 'true'
-
-      # # Runs a set of commands using the runners shell
-      # - name: Install dependencies
-      #   run: sudo ./dependencies.sh
       
       # - name: Install python packages
       #   run: sudo pip3 install -r ./requirements.txt --use-feature=2020-resolver
