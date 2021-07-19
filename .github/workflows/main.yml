@@ -13,17 +13,10 @@ on:
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  test-examples:
-    # The type of runner that the job will run on
+  create-virtualenv:
     runs-on: ubuntu-latest
-
-    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - name: Check out repository code
-        uses: actions/checkout@v2
-
-      # # Runs a set of commands using the runners shell
+      - uses: actions/checkout@v2
       - name: Install dependencies
         run: sudo ./dependencies.sh
 
@@ -43,6 +36,19 @@ jobs:
         # requirements-files have changed.
       - run: pip install -r requirements.txt
         if: steps.cache-virtualenv.outputs.cache-hit != 'true'
+
+  test-examples:
+    needs: create-virtualenv
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install dependencies
+        run: sudo ./dependencies.sh
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.7'
+      - uses: syphar/restore-virtualenv@v1
+        id: cache-virtualenv
 
 
       - name: F16 simple test
@@ -129,6 +135,7 @@ jobs:
       - run: rm -rf ./examples/inverted-pendulum/output
   
   test-configs:
+    needs: create-virtualenv
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -149,6 +156,7 @@ jobs:
         run: ./run-csaf.sh -e f16-llc-analyze -f f16_job_conf_parallel_fixed.toml -n
 
   test-notebooks:
+    needs: create-virtualenv
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
