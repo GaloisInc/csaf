@@ -1,5 +1,5 @@
 #!/bin/bash
-SCRIPT_DIR="csaf_architecture"
+SCRIPT_DIR="csaf"
 DIR=$(basename ${PWD})
 if [ ${DIR} != ${SCRIPT_DIR} ]
 then
