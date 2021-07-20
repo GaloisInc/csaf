@@ -10,6 +10,7 @@
   - [Job configuration](#job-configuration)
   - [Development](#development)
   - [Licensing](#licensing)
+  - [Acknowledgement](#acknwledgement)
 
 
 
@@ -32,7 +33,7 @@ CSAF currently contains two examples, one is F16 with a low level LQR controller
 
 
 ## Quick Start
-CSAF runs inside a [Docker container](https://www.docker.com/), and in order to use CSAF you first need to install docker. CSAF has been tested on Linux (Ubuntu 18.04 and 20.04) and OS X. CSAF can be also run natively on your host machine, but this option is recommended only for the developers.
+CSAF runs inside a [Docker container](https://www.docker.com/), and in order to use CSAF you first need to install docker. CSAF has been tested on Linux (Ubuntu 18.04 and 20.04) and OS X, but should run on any nix-like system that runs docker. CSAF can be also run natively on your host machine, but this option is recommended only for the developers and isn't oficially supported.
 
 ![csaf_quickstart](docs/srs/img/csaf_quickstart.png)
 
@@ -149,3 +150,6 @@ This file is saved in the same directory as your system, in this case `examples/
 ## Licensing
 
 The code in this repository is licensed under two different license. The core of CSAF (`src` and `docs` directories) is licensed under [BSD license](LICENSE.txt), the code in the `examples` directory is licensed under [GPL license](examples/LICENSE.txt)
+
+## Acknowledgement
+This material is based upon work supported by the DARPA Assured Autonomy program under the United States Air Force under Contract No. FA8750-19-C-0092. Any opinions, findings and conclusions or recommendations expressed in this material are those of the author(s) and do not necessarily reflect the views of DARPA or the United States Air Force.
