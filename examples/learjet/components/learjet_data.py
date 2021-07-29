@@ -1,4 +1,11 @@
-""" LearJet Measurements
+"""
+LearJet Measurements
+
+learjet_data.py
+
+> Berger, T., Tischler, M., Hagerott, S. G., Cotting, M. C., Gray, W. R., Gresham, J., ... & Howland, J. (2017).
+> Development and Validation of a Flight-Identified Full-Envelope Business Jet Simulation Model Using a Stitching
+> Architecture. In AIAA Modeling and Simulation Technologies Conference (p. 1550).
 """
 from collections import namedtuple
 import typing as typ

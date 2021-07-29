@@ -1,3 +1,14 @@
+"""
+CanSat Constellation Plant Model
+
+satplant.py
+
+Taken from
+
+> Umberto Ravaioli, James Cunningham, John McCarroll, Vardaan Gangal, Kerianne Hobbs,
+> "Safe Reinforcement Learning Benchmark Environments for Aerospace Control Systems,"
+> IEEE Aerospace, Big Sky, MT, March 2022.
+"""
 import numpy as np
 
 
