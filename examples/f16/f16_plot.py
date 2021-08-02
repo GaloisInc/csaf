@@ -12,28 +12,43 @@ from plot import plot_component
 
 from components import fgnetfdm
 
-def render_in_flightgear(trajs):
+def render_in_flightgear(trajs, nameSuffixes=['']):
     """
     Render the trajectory in FlightGear
+
+    `nameSuffixes` constains a list of suffixes to be added to generic
+    names of 'plant' and 'controller' for the purpose of multi-agent
+    visualisation
     """
+    def get_trajectories(nameSuffix):
+        plant = 'plant' + nameSuffix
+        controller = 'controller' + nameSuffix
+        # Plant states
+        idx = trajs[plant].times.index(timestamp)
+        states = trajs[plant].states[idx]
+        # Controller output
+        idx = trajs[controller].times.index(timestamp)
+        ctrls = trajs[controller].states[idx]
+        return np.concatenate((np.asarray(states),ctrls))
+
     fdm = fgnetfdm.FGNetFDM()
     fdm.init_from_params({})
 
     initial_time = time.monotonic()
+    main_suffix = nameSuffixes.pop(0)
+    if len(nameSuffixes) > 0:
+        intruder_suffix = nameSuffixes[0]
+        fdm_intruder = fgnetfdm.FGNetFDM()
+        fdm_intruder.init_from_params({'FG_GENERIC_PORT': 5507, 'FG_PORT': 5605})
+    else:
+        intruder_suffix = None
     while True:
         real_time = time.monotonic()
         sim_time = real_time - initial_time
-        timestamp = next(filter(lambda x: x > sim_time, trajs['plant'].times), None)
+        timestamp = next(filter(lambda x: x > sim_time, trajs['plant'+main_suffix].times), None)
         if timestamp:
-            # Plant states
-            idx = trajs['plant'].times.index(timestamp)
-            states = trajs['plant'].states[idx]
-            # Controller output
-            idx = trajs['controller'].times.index(timestamp)
-            ctrls = trajs['controller'].states[idx]
-
-            # Update
-            input_f16 = np.concatenate((np.asarray(states),ctrls))
+            # Update main plant
+            input_f16 = get_trajectories(main_suffix)
             fdm.update_and_send(input_f16)
 
             # Check if we crashed
@@ -41,6 +56,11 @@ def render_in_flightgear(trajs):
                 print(fdm.agl)
                 print("CRASH!")
                 break
+                
+            # Update other agents
+            if intruder_suffix:
+                intruder_input_f16 = get_trajectories(intruder_suffix)
+                fdm_intruder.update_and_send(intruder_input_f16)
 
             # Delay
             time.sleep(fgnetfdm.FGNetFDM.FG_SLEEP_S)
