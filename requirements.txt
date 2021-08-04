@@ -5,7 +5,7 @@ pexpect==4.8.0
 pydot==1.4.1
 pyqtgraph==0.10.0
 pyros-genpy==0.6.5
-scipy==1.4.1
+scipy==1.7.1
 toml==0.10.1
 tqdm==4.47.0
 pyzmq==18.1.1
@@ -22,3 +22,4 @@ scikit-optimize==0.8.1
 dill==0.3.2
 toposort==1.5
 onnxruntime==1.7.0
+sympy
