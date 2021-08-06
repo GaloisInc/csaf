@@ -150,11 +150,13 @@ class System:
             # bugfix: receive input must fail here
             self.components[idx].receive_input()
             out = self.components[idx].send_output()
+
             if terminating_conditions is not None and terminating_conditions(cidx, out):
                 return False
+
         return True
 
-    def simulate_tspan(self, tspan, show_status=False, terminating_conditions=None, return_passed=False):
+    def simulate_tspan(self, tspan, show_status=False, terminating_conditions=None, terminating_conditions_all=None, return_passed=False):
         """over a given timespan tspan, simulate the system"""
         sched = Scheduler(self.components, self.eval_order)
         s = sched.get_schedule_tspan(tspan)
@@ -183,9 +185,13 @@ class System:
             self.components[idx].receive_input()
             out = self.components[idx].send_output()
             out["times"] = t
+            dtraces[cidx].append(**out)
+
             if terminating_conditions is not None and terminating_conditions(cidx, out):
                 return dtraces if not return_passed else (dtraces, False)
-            dtraces[cidx].append(**out)
+
+            if terminating_conditions_all is not None and terminating_conditions_all(dtraces):
+                return dtraces if not return_passed else (dtraces, False)
 
         return dtraces if not return_passed else (dtraces, True)
 
@@ -208,14 +214,15 @@ class System:
 
 
 class SystemEnv:
-    def __init__(self, cname, sys, terminating_conditions=None):
+    def __init__(self, cname, sys, terminating_conditions=None, terminating_conditions_all=None):
         """ SystemEnv exposes one component to the user during simulation, allowing step and reset
         :param cname: component to expose
         :param sys: CSAF system
         """
         self.sys: System = sys
         self._cname = cname
-        self._iter = self.make_system_iterator(terminating_conditions=terminating_conditions)
+        self._iter = self.make_system_iterator(terminating_conditions=terminating_conditions,
+                                               terminating_conditions_all=terminating_conditions_all)
         next(self._iter)
 
     def step(self, component_output):
@@ -233,9 +240,17 @@ class SystemEnv:
         """allow component state to be configured"""
         self.sys.set_state(component_name, state)
 
-    def make_system_iterator(self, tstart=0.0, terminating_conditions=None):
+    def make_system_iterator(self, tstart=0.0, terminating_conditions=None, terminating_conditions_all=None):
         """make a generator for the step implementation"""
         sched = Scheduler(self.sys.components, self.sys.eval_order)
+
+        # get time trace fields
+        dnames = self.sys.config.get_name_components
+        dtraces = {}
+        for dname in dnames:
+            fields = (['times'] + [f"{topic}" for topic in self.sys.config.get_topics(dname)])
+            dtraces[dname] = TimeTrace(fields)
+
         s = sched.get_scheduler()
         input_for_first = list(set([p for p, _ in self.sys.config._config["components"][self.sys.eval_order[0]]["sub"]]))
 
@@ -258,7 +273,12 @@ class SystemEnv:
                 out = self.sys.components[idx].send_output(overwrite_buffer = in_buffer)
             else:
                 out = self.sys.components[idx].send_output()
+            dtraces[cidx].append(**out)
 
             # evaluate terminating conditions
             if terminating_conditions is not None and terminating_conditions(cidx, out):
+                return
+
+            # evaluate terminating conditions for all components
+            if terminating_conditions_all is not None and terminating_conditions_all(dtraces):
                 return
