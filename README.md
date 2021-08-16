@@ -4,7 +4,7 @@
 
 
 - [Quick Start](#quick-start)
-- [Running examples](#running-examples)
+- [Examples](#examples)
 - [Jupyter notebooks](#jupyter-notebooks)
 - [Job configuration](#job-configuration)
 - [Development](#development)
