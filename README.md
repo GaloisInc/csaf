@@ -142,7 +142,7 @@ This file is saved in the same directory as your system, in this case `examples/
 
 ## Licensing
 
-The code in this repository is licensed under two different license. The core of CSAF (`src` and `docs` directories) and the majority of
+The code in this repository is licensed under two different licenses. The core of CSAF (`src` and `docs` directories) and the majority of
 examples is licensed under [BSD license](LICENSE.txt). The [f16 example](examples/f16) in the `examples` directory is licensed under [GPL license](examples/f16/LICENSE.txt)
 
 ## Acknowledgment
