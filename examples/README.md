@@ -1,6 +1,6 @@
 # CSAF Examples
 
-The code in these examples are licensed under a standard [BSD 3-Clause License](../LICENSE.txt) unless otherwise noted.
+The code in these examples is licensed under a standard [BSD 3-Clause License](../LICENSE.txt) unless otherwise noted.
 
 
 - [F-16](#f-16)
@@ -16,7 +16,7 @@ analysis methods. No claim is made about its accuracy; the F-16 model is based o
 additional controllers placed on top of it.
 
 ### Citation
-The code in this example is licensed under [GPL license](LICENSE.txt).
+The code in this example is licensed under [GPL license](f16/LICENSE.txt).
 
 > Heidlauf, P., Collins, A., Bolender, M., & Bak, S. (2018, September). Verification Challenges in F-16 Ground Collision 
 > Avoidance and Other Automated Maneuvers. In ARCH@ ADHS (pp. 208-217).
