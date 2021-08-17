@@ -9,8 +9,7 @@
 - [Job configuration](#job-configuration)
 - [Development](#development)
 - [Licensing](#licensing)
-- [Acknowledgement](#acknwledgement)
-
+- [Acknowledgment](#acknowledgment)
 
 CSAF is a framework to minimize the effort required to evaluate, implement, and **verify** controller design (classical and learning enabled) with respect to the system dynamics. Its key features are:
 
@@ -146,5 +145,5 @@ This file is saved in the same directory as your system, in this case `examples/
 
 The code in this repository is licensed under two different license. The core of CSAF (`src` and `docs` directories) is licensed under [BSD license](LICENSE.txt), the code in the `examples` directory is licensed under [GPL license](examples/LICENSE.txt)
 
-## Acknowledgement
+## Acknowledgment
 This material is based upon work supported by the DARPA Assured Autonomy program under the United States Air Force under Contract No. FA8750-19-C-0092. Any opinions, findings and conclusions or recommendations expressed in this material are those of the author(s) and do not necessarily reflect the views of DARPA or the United States Air Force.
