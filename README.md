@@ -75,7 +75,12 @@ Clear generated outputs for f16 example:
     ./run-csaf.sh -e f16-simple -x
 ```
 
-### F-16 example
+## Examples
+CSAF currently contains a number of examples, including the F-16 shown below.
+The examples are located in the `examples` directory and include licensing and attribution information.
+Please read the [examples README.md](./examples/README.md) for a detailed list.
+
+### F-16 Control System
 
 To see the F16 model with GCAS autopilot example in action, run the following command:
 
@@ -97,12 +102,6 @@ is defined by `examples/f16/components/f16plant.py` and
 * The middleware message formats that
 each component speaks are defined in the ROS message format. The F16 messages 
 can be found in `examples/f16/components/msg`.
-
-
-## Examples
-CSAF currently contains a number of other examples, that are located in the `examples` directory.
-Please read the [examples README.md](./examples/README.md) for a detailed list of the included examples,
-containing important licensing and attribution information. 
 
 
 ## Jupyter notebooks
