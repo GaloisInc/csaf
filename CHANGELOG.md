@@ -6,6 +6,14 @@ Note:
 
 # Releases
 
+## 0.1 (2021-08-17)
+* Cansat example
+* Learjet example
+* F16 AADL model example
+* Rejoin example
+* ACAS component and a notebook
+* FlightGear visualisation of two agents
+
 ## Beta-0.2 (2020-10-01)
 
 ### New Features

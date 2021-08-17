@@ -2,17 +2,14 @@
 
 ![CI](https://github.com/GaloisInc/csaf/actions/workflows/main.yml/badge.svg)
 
-- [Control Systems Analysis Framework (CSAF)](#control-systems-analysis-framework-csaf)
-  - [Quick Start](#quick-start)
-  - [Running examples](#running-examples)
-    - [Citation](#citation)
-  - [Jupyter notebooks](#jupyter-notebooks)
-  - [Job configuration](#job-configuration)
-  - [Development](#development)
-  - [Licensing](#licensing)
-  - [Acknowledgement](#acknwledgement)
 
-
+- [Quick Start](#quick-start)
+- [Examples](#examples)
+- [Jupyter notebooks](#jupyter-notebooks)
+- [Job configuration](#job-configuration)
+- [Development](#development)
+- [Licensing](#licensing)
+- [Acknowledgment](#acknowledgment)
 
 CSAF is a framework to minimize the effort required to evaluate, implement, and **verify** controller design (classical and learning enabled) with respect to the system dynamics. Its key features are:
 
@@ -26,16 +23,16 @@ CSAF is a framework to minimize the effort required to evaluate, implement, and 
 Controllers, subsystems and plants are implemented as a collection of components.
 Components communicate via a 0MQ pub/sub configuration and serialize/deserialize ROS messages. Below is an example of a topology graph of F16 system with GCAS autopilot.
 
-
 ![f16_with_gcas](docs/srs/img/csaf_system_diagram.png)
 
-CSAF currently contains two examples, one is F16 with a low level LQR controller and GCAS autopilot, and the second one is a classic [Inverted pendulum model](http://ctms.engin.umich.edu/CTMS/index.php?example=InvertedPendulum&section=ControlDigital#4). Both examples are in `examples` directory.
-
-
 ## Quick Start
-CSAF runs inside a [Docker container](https://www.docker.com/), and in order to use CSAF you first need to install docker. CSAF has been tested on Linux (Ubuntu 18.04 and 20.04) and OS X, but should run on any nix-like system that runs docker. CSAF can be also run natively on your host machine, but this option is recommended only for the developers and isn't oficially supported.
+
+### Installation 
+CSAF runs inside a [Docker container](https://www.docker.com/), and in order to use CSAF, you first need to [install docker](https://docs.docker.com/engine/install/). CSAF has been tested on Linux (Ubuntu 18.04 and 20.04) and OS X, but should run on any nix-like system that runs docker. CSAF can be also run natively on your host machine, but this option is recommended only for the developers and isn't officially supported.
 
 ![csaf_quickstart](docs/srs/img/csaf_quickstart.png)
+
+### Running CSAF
 
 Once you clone the main repository, `run-csaf.sh` is the entry point to the CSAF framework. For a simple start use `-e` flag and select one of the provided examples to run `f16-shield, f16-simple, f16-llc, inv-pendulum, ...` Note that the script has to be run from the CSAF root directory.
 
@@ -78,21 +75,16 @@ Clear generated outputs for f16 example:
     ./run-csaf.sh -e f16-simple -x
 ```
 
-## Running examples
+## Examples
+CSAF currently contains a number of examples, including the F-16 shown below.
+The examples are located in the `examples` directory and include licensing and attribution information.
+Please read the [examples README.md](./examples/README.md) for a detailed list.
 
-Please read the [examples README.md](./examples/README.md) for a detailed list of the included examples, containing important
-licensing and attribution information. 
+### F-16 Control System
 
-### Quick Start
-A F-16 autopilot example is provided that was taken from 
-[AeroBenchVVPython](https://github.com/stanleybak/AeroBenchVVPython). The model was designed to test autopilot and 
-analysis methods. No claim is made about its accuracy; the F-16 model is based on a common aircraft model with
-additional controllers placed on top of it.
-
-To see the F16 model with GCAS autopilot in action, run the following command:
+To see the F16 model with GCAS autopilot example in action, run the following command:
 
 `./run-csaf.sh -e f16-shield`
-
 
 Once the simulation completes, navigate to `examples/f16/output` to view the 
 generated run:
@@ -111,16 +103,13 @@ is defined by `examples/f16/components/f16plant.py` and
 each component speaks are defined in the ROS message format. The F16 messages 
 can be found in `examples/f16/components/msg`.
 
-#### Citation
-> Heidlauf, P., Collins, A., Bolender, M., & Bak, S. (2018, September). Verification Challenges in F-16 Ground Collision 
-> Avoidance and Other Automated Maneuvers. In ARCH@ ADHS (pp. 208-217).
-
 
 ## Jupyter notebooks
 
 CSAF can be used from within a [jupyter notebook](https://jupyter-notebook.readthedocs.io/en/stable/examples/Notebook/What%20is%20the%20Jupyter%20Notebook.html#Introduction). To start CSAF in the notebook mode, run `./run-csaf.sh -j -e f16-simple` - the `-j` flag specified *notebook mode*, and using the `-e f16-simple` as an example will set the paths necessary for using the F16 model.
 
 **NOTE:** notebooks are run inside docker, and because of that the directory paths are different than if they were run natively. Keep this in mind when writing new notebooks, and have a look at the provided examples in `docs/notebooks` directory.
+
 
 ## Job configuration
 
@@ -153,7 +142,8 @@ This file is saved in the same directory as your system, in this case `examples/
 
 ## Licensing
 
-The code in this repository is licensed under two different license. The core of CSAF (`src` and `docs` directories) is licensed under [BSD license](LICENSE.txt), the code in the `examples` directory is licensed under [GPL license](examples/LICENSE.txt)
+The code in this repository is licensed under two different license. The core of CSAF (`src` and `docs` directories) and the majority of
+examples is licensed under [BSD license](LICENSE.txt). The [f16 example](examples/f16) in the `examples` directory is licensed under [GPL license](examples/f16/LICENSE.txt)
 
-## Acknowledgement
+## Acknowledgment
 This material is based upon work supported by the DARPA Assured Autonomy program under the United States Air Force under Contract No. FA8750-19-C-0092. Any opinions, findings and conclusions or recommendations expressed in this material are those of the author(s) and do not necessarily reflect the views of DARPA or the United States Air Force.

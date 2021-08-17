@@ -1,21 +1,26 @@
 # CSAF Examples
 
-The code in these examples are licensed under a standard [BSD 3-Clause License](../LICENSE.txt) unless otherwise noted.
+The code in these examples is licensed under a standard [BSD 3-Clause License](../LICENSE.txt) unless otherwise noted.
 
 
-## F16
+- [F-16](#f-16)
+- [CanSat Docking](#cansat-docking)
+- [Inverted pendulum](#inverted-pendulum)
+- [Learjet](#learjet)
+
+## F-16
 
 A F-16 autopilot example is provided that was taken from 
 [AeroBenchVVPython](https://github.com/stanleybak/AeroBenchVVPython). The model was designed to test autopilot and 
 analysis methods. No claim is made about its accuracy; the F-16 model is based on a common aircraft model with
 additional controllers placed on top of it.
 
-
 ### Citation
-The code in this example is licensed under [GPL license](LICENSE.txt).
+The code in this example is licensed under [GPL license](f16/LICENSE.txt).
 
 > Heidlauf, P., Collins, A., Bolender, M., & Bak, S. (2018, September). Verification Challenges in F-16 Ground Collision 
 > Avoidance and Other Automated Maneuvers. In ARCH@ ADHS (pp. 208-217).
+
 
 ## CanSat Docking
 
@@ -32,6 +37,7 @@ around the chief, who attempt to approach the chief satellite without crashing i
 > * Kyle Dunlap, Mark Mote, Kaiden Delsing, Kerianne Hobbs, "Run-Time Assured Reinforcement Learning for Safe Satellite Docking" AIAA SciTech 2022, San Diego, CA, January 2022.
 > * Christopher D. Petersen, Sean Phillips, Kerianne L. Hobbs, and Kendra Lang, “Challenge Problem: Assured Satellite Proximity Operations” 1st AAS/AIAA Space Flight Mechanics Meeting, Virtual, February 1-4, 2021.
 
+
 ## Dubins Aircraft Rejoin
 
 This system provides a multi-agent task scenario,  where a group of Dubins aircraft attempt to rejoin in formation 
@@ -42,6 +48,7 @@ taken from the [AerospaceRL repository on GitHub](https://github.com/act3-ace/ae
 
 > Umberto Ravaioli, James Cunningham, John McCarroll, Vardaan Gangal, Kerianne Hobbs, "Safe Reinforcement Learning Benchmark Environments for Aerospace Control Systems," IEEE Aerospace, Big Sky, MT, March 2022.
 
+
 ## Inverted Pendulum
 
 This system is a *linearized* cart-pole inverted pendulum model.
@@ -49,6 +56,7 @@ This system is a *linearized* cart-pole inverted pendulum model.
 ### Citations
 
 [Inverted Pendulum: System Modeling](https://ctms.engin.umich.edu/CTMS/index.php?example=InvertedPendulum&section=SystemModeling)
+
 
 ## Learjet
 
