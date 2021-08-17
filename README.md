@@ -29,7 +29,7 @@ Components communicate via a 0MQ pub/sub configuration and serialize/deserialize
 ## Quick Start
 
 ### Installation 
-CSAF runs inside a [Docker container](https://www.docker.com/), and in order to use CSAF you first need to [install docker](https://docs.docker.com/engine/install/). CSAF has been tested on Linux (Ubuntu 18.04 and 20.04) and OS X, but should run on any nix-like system that runs docker. CSAF can be also run natively on your host machine, but this option is recommended only for the developers and isn't oficially supported.
+CSAF runs inside a [Docker container](https://www.docker.com/), and in order to use CSAF, you first need to [install docker](https://docs.docker.com/engine/install/). CSAF has been tested on Linux (Ubuntu 18.04 and 20.04) and OS X, but should run on any nix-like system that runs docker. CSAF can be also run natively on your host machine, but this option is recommended only for the developers and isn't officially supported.
 
 ![csaf_quickstart](docs/srs/img/csaf_quickstart.png)
 
