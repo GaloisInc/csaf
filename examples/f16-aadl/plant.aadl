@@ -1,0 +1,72 @@
+package Plant
+public
+	with CSAF_Properties, CSAF_Parameters, Msg;
+		
+	feature group Pub
+		features
+			States : out data port Msg::Message.Plant_State {
+				CSAF_Properties::Initial_Values => (
+					540.0,
+					0.037027160081059704,
+					0.0,
+					0.7853981633974483,
+					-1.2566370614359172,
+					-0.7853981633974483,
+					0.0,
+					0.0,
+					0.0,
+					0.0,
+					0.0,
+					3600.0,
+					9.0
+				);
+			};
+			Outputs : out data port Msg::Message.Plant_Output;
+	end Pub;
+	
+	abstract Plant
+		features
+			Low_Level_Controller_Outputs : in data port Msg::Message.Controller_Output;
+			Pub : out data port Msg::Message.Plant_Pub;
+			--Pub : feature group Pub;
+		properties
+			CSAF_Properties::System_Name => "F16 Low Level Controller";
+			CSAF_Properties::System_Representation => "black box";
+			CSAF_Properties::System_Solver => "Euler";
+			CSAF_Properties::Sampling_Frequency => 100;
+			CSAF_Properties::Is_Discrete => false;
+			CSAF_Properties::Is_Hybrid => false;
+			
+			-- Parameters
+			CSAF_Parameters::s => 300.0;
+			CSAF_Parameters::b => 30.0;
+			CSAF_Parameters::cbar => 11.32;
+			CSAF_Parameters::rm => 1.57e-3;
+			CSAF_Parameters::xcgref => 0.35;
+			CSAF_Parameters::xcg => 0.35;
+			CSAF_Parameters::he => 160.0;
+			CSAF_Parameters::c1 => -0.770;
+			CSAF_Parameters::c2 => 0.02755;
+			CSAF_Parameters::c3 => 1.055e-4;
+			CSAF_Parameters::c4 => 1.642e-6;
+			CSAF_Parameters::c5 => 0.9604;
+			CSAF_Parameters::c6 => 1.759e-2;
+			CSAF_Parameters::c7 => 1.792e-5;
+			CSAF_Parameters::c8 => -0.7336;
+			CSAF_Parameters::c9 => 1.587e-5;
+			CSAF_Parameters::rtod => 57.29578;
+			CSAF_Parameters::g => 32.17;
+			CSAF_Parameters::xcg_mult => 1.0;
+			CSAF_Parameters::cxt_mult => 1.0;
+			CSAF_Parameters::cyt_mult => 1.0;
+			CSAF_Parameters::czt_mult => 1.0;
+			CSAF_Parameters::clt_mult => 1.0;
+			CSAF_Parameters::cmt_mult => 1.0;
+			CSAF_Parameters::cnt_mult => 1.0;
+			CSAF_Parameters::model => "morelli";
+		annex agree {**
+			
+		**};
+	end Plant;
+	
+end Plant;

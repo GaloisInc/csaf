@@ -15,6 +15,10 @@ stable_baselines==2.10.0
 tensorflow==1.15.0
 mpi4py==3.0.3
 gym==0.15.6
+cloudpickle~=1.2.0
 sklearn
 modAL==0.3.6
-tqdm==4.47
+scikit-optimize==0.8.1
+dill==0.3.2
+toposort==1.5
+onnxruntime==1.7.0

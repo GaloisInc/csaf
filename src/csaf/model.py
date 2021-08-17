@@ -12,6 +12,7 @@ import pathlib
 import toml
 from inspect import signature
 
+from . import csaf_logger
 
 def dynamical_input(func: typ.Callable):
     """asserts that the input passed to a callable matches the signature of a dynamical system, being a 4-tuple
@@ -169,6 +170,7 @@ class ModelNative(Model):
 
         # relate user defined functions to the model interface
         self.funcs = {}
+        csaf_logger.debug(f'initializing model: {mname}')
         for iface, uface in zip(self.dynamic_callables, self.user_functions):
             if hasattr(module, uface):
                 ufunc = getattr(module, uface)

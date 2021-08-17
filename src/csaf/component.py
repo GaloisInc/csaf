@@ -37,6 +37,7 @@ class Component:
         self.zmq_context = None
         self.input_socks = None
         self.output_socks = None
+        self._in_ports, self._out_ports = False, False
 
         # threads to manage subscribers over
         self.subscriber_threads = None
@@ -60,9 +61,8 @@ class Component:
         if self.debug_node:
             logging.debug(self.debug_start() + s)
 
-    def bind(self, in_ports, out_ports):
-        """bind subscribers/publishers to their respective ports"""
-
+    def init_net(self, in_ports, out_ports):
+        """network context initialization"""
         self.stop_threads = threading.Event()
 
         if self.zmq_context is not None:
@@ -72,23 +72,32 @@ class Component:
 
         assert len(out_ports) == self.num_output_socks
         assert len(in_ports) == self.num_input_socks
+        self._in_ports, self._out_ports = in_ports, out_ports
+
+    def bind_output(self):
+        """create component output ports"""
+        assert self._out_ports is not False, f"No output ports specified! Make sure to call init_net first"
 
         # setup publishers over TCP network
         # TODO: uses TCP -- maybe make configurable for zeroMQ's various transport options
         self.output_socks = []
         for idx in range(self.num_output_socks):
             sock = self.zmq_context.socket(zmq.PUB)
-            sock.bind(f"tcp://*:{out_ports[idx]}")
+            sock.bind(f"tcp://*:{self._out_ports[idx]}")
             self.output_socks.append(sock)
+
+    def connect_input(self):
+        """connect input ports to the component outputs"""
+        assert self._in_ports is not False, f"no input ports specified! Make sure to call init_net first"
 
         # setup subscribers over TCP network
         self.input_socks = []
         self.input_topics = []
         for idx in range(self.num_input_socks):
             sock = self.zmq_context.socket(zmq.SUB)
-            sock.connect(f"tcp://127.0.0.1:{in_ports[idx][0]}")
-            topic = in_ports[idx][1]
-            self.print_if_debug(f"binding socket {in_ports[idx][0]} with topic {topic}")
+            sock.connect(f"tcp://127.0.0.1:{self._in_ports[idx][0]}")
+            topic = self._in_ports[idx][1]
+            self.print_if_debug(f"binding socket {self._in_ports[idx][0]} with topic {topic}")
             sock.setsockopt_string(zmq.SUBSCRIBE, topic)
             sock.setsockopt(zmq.CONFLATE, 1)
             self.input_socks.append(sock)
@@ -96,6 +105,14 @@ class Component:
 
         # TODO: needed for some reason -- better way to make sure subscribers are ready?
         time.sleep(0.2)
+
+
+    def bind(self, in_ports, out_ports):
+        """bind subscribers/publishers to their respective ports"""
+        self.init_net()
+        self.bind_output(out_ports)
+        self.connect_input(in_ports)
+
 
     def unbind(self):
         """unbind from ports and destroy zmq context"""
@@ -127,6 +144,12 @@ class Component:
         else:
             self.output_socks[output_idx].send(self.serialize(message))
         self._n_publish[output_idx] += 1
+
+    def reset(self):
+        raise NotImplementedError
+
+    def send_output(self, overwrite_buffer):
+        raise NotImplementedError
 
     @property
     def num_input_socks(self):

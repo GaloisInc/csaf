@@ -1,0 +1,20 @@
+system_name = "LLC Monitor and Selector"
+system_representation = "black box"
+system_solver = "Euler"
+
+sampling_frequency = 100
+
+is_discrete = true
+is_hybrid = false
+
+[parameters]
+
+[inputs]
+  msgs = ["f16plant_state.msg", "f16llc_output.msg", "f16llc_output.msg"]
+
+[topics]
+  [topics.outputs]
+      msg = "f16llc_output.msg"
+
+  [topics.states]
+      msg = "shield_llc_state.msg"

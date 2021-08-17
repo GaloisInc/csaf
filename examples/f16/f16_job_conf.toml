@@ -5,16 +5,16 @@ tspan = [0.0, 10.0]
 show_status = true # show progress during simulation
 plot = true # plot results on screen
 
-initial_conditions = [  540.0,
-                        0.037027160081059704,
-                        0.0,
-                        0.1,
-                        -0.1,
-                        -0.1,
-                        0.0,
-                        0.0,
-                        0.0,
-                        0.0,
-                        0.0,
-                        4800.0,
-                        90.0]
+initial_conditions = [  540.0, # vt [ft/s]
+                        0.037027160081059704, # alpha [rad]
+                        0.0, # beta [rad]
+                        0.1, # phi [rad]
+                        -0.1, # theta [rad]
+                        -0.1, # psi [rad]
+                        0.0, # p [rad/s]
+                        0.0, # q [rad/s]
+                        0.0, # r [rad/s]
+                        0.0, # pn [m]
+                        0.0, # pe [m]
+                        4800.0, # h [ft]
+                        90.0] # power [%]

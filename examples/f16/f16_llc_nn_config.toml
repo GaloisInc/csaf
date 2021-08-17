@@ -23,8 +23,10 @@ log_level = "info"
 # environment to run under
 run_command = "python3"
 
+config = "components/f16llc_nn.toml"
 # path to model executable
-process = "f16llc_nn.py"
+process = "f16llc_nn.py" # Needs TF 1.x and Open AI Gym
+#process = "f16llc_nn_np.py"
 
 # whether to print debug diagnostics
 debug = false

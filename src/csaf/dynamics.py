@@ -90,49 +90,65 @@ class DynamicComponent(Component):
                 self._input_buffer['time'] = t
 
         # avoid infinite recursion by checking whether _input_buffer was initialized
-        if len(self._input_buffer.keys()) == 0 and len(self.input_socks) > 0:
-            time.sleep(1e-4)
+        # buffer contains topics AND time
+        input_buff_len = len(self.topics) + 1
+        if len(self._input_buffer.keys()) != input_buff_len  and len(self.input_socks) > 0:
+            time.sleep(1e-3)
             self.receive_input()
         self.current_time += 1.0 / self.sampling_frequency
         return self._input_buffer
 
-    def send_output(self):
-        """send {states, outputs} for DynamicComponent"""
-        update_increment = 1.0 / self.sampling_frequency
-        current_time = self.current_time + update_increment
-        return_buffer = {}
-
+    def input_as_vector(self):
         # obtain the input vector by concatenating the messages together
         input_vector = []
         if len(self._topics_input) > 0:
             for f in self._topics_input:
                 input_vector += self._input_buffer[f]
+        return input_vector
+
+    def send_output(self, overwrite_buffer=None):
+        """send {states, outputs} for DynamicComponent"""
+        update_increment = 1.0 / self.sampling_frequency
+        current_time = self.current_time + update_increment
+        return_buffer = {}
+
+        # get the input in vector form
+        input_vector = self.input_as_vector()
 
         # obtain state vector
         state_vector = self._output_buffer[f"{self.name}-states"] if f"{self.name}-states" in self._output_buffer else []
 
-        # iterate through topics and send output
-        for tname in self._messenger_out.topics:
-            # TODO: getter is a mess
-            getter = tname.split('-')[1][:-1]
-            getter = getter if getter != "state" else "update"
+        if overwrite_buffer is None:
+            # iterate through topics and send output
+            for tname in self._messenger_out.topics:
+                # TODO: getter is a mess
+                getter = tname.split('-')[1][:-1]
+                getter = getter if getter != "state" else "update"
 
-            # continuous state is a special case
-            if not (self._model.is_continuous and getter == "update"):
-               return_value = self._model.get(current_time, state_vector, input_vector, getter)
-            else:
-                state_diff_fcn = lambda y, t: self._model.get_state_update(t, y, input_vector)
-                ivp_solution = scipy.integrate.odeint(state_diff_fcn, state_vector, [current_time-update_increment, current_time])
-                return_value = list(ivp_solution[-1])
-            self._output_buffer[tname] = return_value
+                # continuous state is a special case
+                if not (self._model.is_continuous and getter == "update"):
+                   return_value = self._model.get(current_time, state_vector, input_vector, getter)
+                else:
+                    state_diff_fcn = lambda y, t: self._model.get_state_update(t, y, input_vector)
+                    ivp_solution = scipy.integrate.odeint(state_diff_fcn, state_vector, [current_time-update_increment, current_time])
+                    return_value = list(ivp_solution[-1])
+                self._output_buffer[tname] = return_value
 
-            # serialize, send message, and update return buffer
-            msg = self._messenger_out.serialize_message(return_value, tname, current_time)
-            self.send_message(0, msg, topic=tname)
-            return_buffer[tname.split('-')[1]] = return_value
+                # serialize, send message, and update return buffer
+                msg = self._messenger_out.serialize_message(return_value, tname, current_time)
+                self.send_message(0, msg, topic=tname)
+                return_buffer[tname.split('-')[1]] = return_value
 
-        # default caller -- model state but not component state
-        self._model.update_model(current_time, state_vector, input_vector)
+            # default caller -- model state but not component state
+            self._model.update_model(current_time, state_vector, input_vector)
+        else:
+            # iterate through topics and send output
+            for tname in self._messenger_out.topics:
+                # serialize, send message, and update return buffer
+                return_value = overwrite_buffer[tname]
+                msg = self._messenger_out.serialize_message(return_value, tname, current_time)
+                self.send_message(0, msg, topic=tname)
+                return_buffer[tname.split('-')[1]] = return_value
 
         # add time to return buffer
         return_buffer['times'] = current_time

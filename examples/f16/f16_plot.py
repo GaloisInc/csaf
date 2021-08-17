@@ -12,28 +12,43 @@ from plot import plot_component
 
 from components import fgnetfdm
 
-def render_in_flightgear(trajs):
+def render_in_flightgear(trajs, nameSuffixes=['']):
     """
     Render the trajectory in FlightGear
+
+    `nameSuffixes` constains a list of suffixes to be added to generic
+    names of 'plant' and 'controller' for the purpose of multi-agent
+    visualisation
     """
+    def get_trajectories(nameSuffix):
+        plant = 'plant' + nameSuffix
+        controller = 'controller' + nameSuffix
+        # Plant states
+        idx = trajs[plant].times.index(timestamp)
+        states = trajs[plant].states[idx]
+        # Controller output
+        idx = trajs[controller].times.index(timestamp)
+        ctrls = trajs[controller].states[idx]
+        return np.concatenate((np.asarray(states),ctrls))
+
     fdm = fgnetfdm.FGNetFDM()
     fdm.init_from_params({})
 
     initial_time = time.monotonic()
+    main_suffix = nameSuffixes.pop(0)
+    if len(nameSuffixes) > 0:
+        intruder_suffix = nameSuffixes[0]
+        fdm_intruder = fgnetfdm.FGNetFDM()
+        fdm_intruder.init_from_params({'FG_GENERIC_PORT': 5507, 'FG_PORT': 5605})
+    else:
+        intruder_suffix = None
     while True:
         real_time = time.monotonic()
         sim_time = real_time - initial_time
-        timestamp = next(filter(lambda x: x > sim_time, trajs['plant'].times), None)
+        timestamp = next(filter(lambda x: x > sim_time, trajs['plant'+main_suffix].times), None)
         if timestamp:
-            # Plant states
-            idx = trajs['plant'].times.index(timestamp)
-            states = trajs['plant'].states[idx]
-            # Controller output
-            idx = trajs['controller'].times.index(timestamp)
-            ctrls = trajs['controller'].states[idx]
-
-            # Update
-            input_f16 = np.concatenate((np.asarray(states),ctrls))
+            # Update main plant
+            input_f16 = get_trajectories(main_suffix)
             fdm.update_and_send(input_f16)
 
             # Check if we crashed
@@ -41,6 +56,11 @@ def render_in_flightgear(trajs):
                 print(fdm.agl)
                 print("CRASH!")
                 break
+                
+            # Update other agents
+            if intruder_suffix:
+                intruder_input_f16 = get_trajectories(intruder_suffix)
+                fdm_intruder.update_and_send(intruder_input_f16)
 
             # Delay
             time.sleep(fgnetfdm.FGNetFDM.FG_SLEEP_S)
@@ -68,7 +88,7 @@ def plot_shield(trajs):
     plot_component(ax[3][1], trajs, "controller", "outputs", 3, "throttle ()")
 
     ax[0][2].set_title("Autopilots")
-    plot_component(ax[0][2], trajs, "monitor", "outputs", 0, "autopilot selected ()", do_schedule=True)
+    plot_component(ax[0][2], trajs, "monitor_ap", "outputs", 0, "autopilot selected ()", do_schedule=True)
     plot_component(ax[1][2], trajs, "autopilot", "fdas", 0, "GCAS State ()", do_schedule=True)
     ax[1][2].set_title("GCAS Finite Discrete State")
     ax[2][2].axis('off')
@@ -120,6 +140,35 @@ def plot_llc(trajs):
     plot_component(ax[1], trajs, "plant", "outputs", 1, "Ny+r ()")
     plot_component(ax[2], trajs, "autopilot", "outputs", 1, "ps_ref (rad/s)")
     plot_component(ax[2], trajs, "plant", "states", 6, "ps (rad/s)")
+    return fig
+
+def plot_llc_shield(trajs):
+    """
+    Plot reference tracking of LLC
+    """
+    fig, ax = plt.subplots(figsize=(25, 15), nrows=4, ncols=3, sharex=True)
+    ax[0][0].set_title("F16 Plant")
+    plot_component(ax[0][0], trajs, "plant", "states", 11, "height (ft)")
+    plot_component(ax[1][0], trajs, "plant", "states", 1, "alpha (ft/s)")
+    plot_component(ax[2][0], trajs, "plant", "states", 3, "roll (degrees)")
+    plot_component(ax[2][0], trajs, "plant", "states", 4, "pitch (degrees)")
+    plot_component(ax[2][0], trajs, "plant", "states", 5, "yaw (degrees)")
+    plot_component(ax[3][0], trajs, "plant", "states", 7, "pitch rate (degrees/s)")
+
+    ax[0][1].set_title("Low Level Controller")
+    plot_component(ax[0][1], trajs, "shield_llc", "outputs", 0, "s0 ()")
+    plot_component(ax[1][1], trajs, "shield_llc", "outputs", 1, "s1 ()")
+    plot_component(ax[2][1], trajs, "shield_llc", "outputs", 2, "s2 ()")
+    plot_component(ax[3][1], trajs, "shield_llc", "outputs", 3, "s3 ()")
+
+    ax[0][2].set_title("Autopilot")
+    plot_component(ax[0][2], trajs, "autopilot", "outputs", 0, "a0 ()")
+    plot_component(ax[1][2], trajs, "autopilot", "outputs", 1, "a1 ()")
+    plot_component(ax[2][2], trajs, "autopilot", "outputs", 2, "a2 ()")
+    plot_component(ax[3][2], trajs, "autopilot", "outputs", 3, "a3 ()")
+
+    [ax[3][idx].set_xlabel('Time (s)') for idx in range(3)]
+
     return fig
 
 

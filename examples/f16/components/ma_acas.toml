@@ -1,0 +1,24 @@
+system_name = "F16 GCAS ACAS Autopilot"
+system_representation = "black box"
+system_solver = "Euler"
+
+sampling_frequency = 10
+
+is_discrete = true
+is_hybrid = false
+
+[parameters]
+setpoint = 2500.0
+xequil = [502.0, 0.03887505597600522, 0.0, 0.0, 0.03887505597600522, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1000.0, 9.05666543872074]
+
+[inputs]
+msgs = [ "f16plant_state.msg", "f16llc_state.msg",
+    "f16plant_state.msg", "f16llc_state.msg"]
+
+[topics]
+[topics.states]
+msg = "autopilot_state.msg"
+initial = ["clear"]
+
+[topics.outputs]
+msg = "autopilot_output.msg"

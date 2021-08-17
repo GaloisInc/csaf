@@ -1,23 +1,83 @@
-import sys, os
 from multiprocessing import Process, Event, Queue, JoinableQueue
 import multiprocessing
+import tqdm
+import dill
+import numpy as np
 
 import csaf.system as csys
 import csaf.config as cconf
 import csaf.trace as ctc
+from csaf import csaf_logger
 
+def save_states_to_file(filename, states):
+    np.savetxt(filename, [val['plant'] for val in states], delimiter=",")
+
+def load_states_from_file(filename, component_name):
+    x0s = np.loadtxt(filename, delimiter=",")
+    return [{component_name : initial_state} for initial_state in x0s]
+
+def gen_fixed_states(bounds, component_name):
+    def sanity_check(bounds):
+        # sanity check
+        for b in bounds:
+            assert(len(b) == 1 or len(b) == 3)
+            if len(b) == 3:
+                # lower bound is always first
+                lower = b[0]
+                upper = b[1] 
+                step = b[2]
+                assert(lower <= upper)
+                # the step is smaller than the bounds interval
+                assert(upper - lower > step)
+
+    def interpolate_bounds(lower, upper, step) -> np.ndarray:
+        iters = int((upper - lower)/step)
+        return np.linspace(lower, upper, iters)
+
+    sanity_check(bounds)
+
+    # create initial vector
+    x0 = np.array([b[0] for b in bounds])
+    x0s = [x0]
+    # iterate over bounds    
+    for idx, b in enumerate(bounds):
+        # ignore static values
+        if len(b) == 1:
+            continue
+        vals = interpolate_bounds(b[0],b[1],b[2])
+        new_x0s = []
+        for x in x0s:
+            for val in vals:
+                new_x0 = x.copy()
+                # ignore the value that already exists
+                if new_x0[idx] == val:
+                    continue
+                new_x0[idx] = val
+                new_x0s.append(new_x0)
+        x0s += new_x0s
+
+    return [{component_name : initial_state} for initial_state in x0s]
+
+def gen_random_states(bounds, component_name, iterations):
+    def generate_single_random_state(bounds):
+        sample = np.random.rand(len(bounds))
+        ranges = np.array([b[1] - b[0] if len(b) == 2 else b[0] for b in bounds])
+        offset = np.array([- b[0] for b in bounds])
+        return sample * ranges - offset
+
+    return [{component_name : generate_single_random_state(bounds)} for _ in range(iterations)]
 
 class Worker(Process):
-    def __init__(self, evt, config, task_queue, result_queue):
+    def __init__(self, evt, config, task_queue, result_queue, progress_queue=None):
         super().__init__()
         self._evt = evt
         self._config = config
         self.system = None
         self._task_queue = task_queue
         self._result_queue = result_queue
+        self._progress_queue = progress_queue
 
-    def run(self):
-        proc_name = self.name
+    def run(self, on_finish=None):
         self.system = csys.System.from_config(self._config)
         self._evt.set()
         while True:
@@ -29,8 +89,9 @@ class Worker(Process):
             self._task_queue.task_done()
             self._result_queue.put(answer)
             self.system.reset()
+            if self._progress_queue is not None:
+                self._progress_queue.put(True)
         return
-
 
 class Task(object):
     def __init__(self, idx, system_attr, initial_states, *args, **kwargs):
@@ -46,42 +107,47 @@ class Task(object):
         assert hasattr(system, self.system_attr)
         try:
             ret = getattr(system, self.system_attr)(*self.args, **self.kwargs)
-            answer = [self.idx, ret]
+            answer = [self.idx, dill.dumps(ret), self.states]
         except Exception as exc:
-            answer = [self.idx, exc]
-        # some ugliness to get around the unpicklable named tuple
-        if self.system_attr == "simulate_tspan" and isinstance(answer[1], dict):
-            answer_picklable = {}
-            for k, v in answer[1].items():
-                if isinstance(v, ctc.TimeTrace):
-                    fields = [a for a in dir(v.NT) if not a.startswith('_') and a not in ["count", "index"]]
-                    tt_dict = {fieldn: getattr(v, fieldn) for fieldn in fields}
-                    answer_picklable[k] = tt_dict
-            answer[1] = answer_picklable
+            csaf_logger.warning(f"running {self.system_attr} failed for states {self.states}")
+            answer = [self.idx, exc, self.states]
         return tuple(answer)
 
     def __str__(self):
         return f"id {self.idx} -- {self.system_attr}(args={self.args}, kwargs={self.kwargs})"
 
 
-def run_workgroup(n_tasks, config, initial_states, *args, fname="simulate_tspan", **kwargs):
+def run_workgroup(n_tasks, config, initial_states, *args, fname="simulate_tspan", show_status=True, **kwargs):
+    def progress_listener(q):
+        pbar = tqdm.tqdm(total = n_tasks)
+        for _ in iter(q.get, None):
+            pbar.update()
+
+    csaf_logger.info(f"starting a parallel run of {n_tasks} tasks over the method {fname}")
+
     # Establish communication queues
     tasks = JoinableQueue()
     results = Queue()
+    progress = Queue()
+
+    # Start the progress bar
+    if show_status:
+        proc = Process(target=progress_listener, args=(progress,))
+        proc.start()
 
     # Start workers
     n_workers = min(n_tasks, multiprocessing.cpu_count() * 2)
     workers = []
     for idx in range(n_workers):
         evt = Event()
-        w = Worker(evt, config, tasks, results)
+        w = Worker(evt, config, tasks, results, progress)
         w.start()
         evt.wait()
         workers.append(w)
 
     # Enqueue jobs
     for idx in range(n_tasks):
-        t = Task(idx, fname, initial_states[idx], *args, **kwargs, show_status=False)
+        t = Task(idx, fname, initial_states[idx], *args, **kwargs, show_status=False, return_passed=True)
         tasks.put(t)
 
     # Stop all workers
@@ -90,68 +156,18 @@ def run_workgroup(n_tasks, config, initial_states, *args, fname="simulate_tspan"
 
     # Wait for all of the tasks to finish
     tasks.join()
+    if show_status:
+        progress.put(None)
+        proc.join()
 
     # Start printing results
     ret = [None] * n_tasks
     while n_tasks:
         result = results.get()
-        ret[result[0]] = result[1]
+        if not isinstance(result[1], Exception):
+            res = dill.loads(result[1])
+            ret[result[0]] = tuple([res[1], res[0], result[2]])
         n_tasks -= 1
+    csaf_logger.info("parallel run finished")
+    ret = [val for val in ret if val != None]
     return ret
-
-
-if __name__ == '__main__':
-    import numpy as np
-    import matplotlib.pyplot as plt
-
-    def term_condition(cname, outs):
-        """ground collision"""
-        return cname == "plant" and outs["states"][11] <= 0.0
-
-    def gen_random_state(bounds):
-        sample = np.random.rand(len(bounds))
-        ranges = np.array([b[1] - b[0] for b in bounds])
-        offset = np.array([- b[0] for b in bounds])
-        return sample * ranges - offset
-
-    bounds = [(200, 1500),
-              (np.deg2rad(2.1215-0.6), np.deg2rad(2.1215+0.6)),
-              (0.0, 0.0),
-              ((np.pi/2)*0.5, (np.pi/2)*0.5),
-              (-np.pi, np.pi),
-              (-np.pi/4, -np.pi/4 ),
-              (0.0, 0.0),
-              (-0.1, 0.1),
-              (0.0, 0.0),
-              (0.0, 0.0),
-              (0.0, 0.0),
-              (500, 8000),
-              (9, 9)]
-
-    ## build and simulate system
-    csaf_dir=sys.argv[1]
-    csaf_config=sys.argv[2]
-    state_index = int(sys.argv[3])
-
-    ## system to run in parallel
-    config_filename = os.path.join(csaf_dir, csaf_config)
-    model_conf = cconf.SystemConfig.from_toml(config_filename)
-
-    # number of jobs to run
-    n_tasks = 16
-
-    # define states of component to run
-    # format [{"plant": <list>}, ..., {"plant" : <list>, "controller": <list>}]
-    states = [{"plant" : gen_random_state(bounds)} for _ in range(n_tasks)]
-
-    # run tasks in a workgroup
-    runs = run_workgroup(n_tasks, model_conf, states, (0.0, 35.0), terminating_conditions=term_condition)
-    altitudes = [np.array(r["plant"]["states"])[:, state_index] for r in runs if not isinstance(r, Exception)]
-    times = [r["plant"]["times"] for r in runs if not isinstance(r, Exception)]
-    fig, ax = plt.subplots(figsize=(12, 3 * len(altitudes)), nrows=len(altitudes), sharex=True)
-    for idx, traces in enumerate(zip(times, altitudes)):
-        ax[idx].plot(*traces)
-        ax[idx].set_ylabel(f"Run {idx}")
-    ax[-1].set_xlabel("Time (s)")
-    ax[0].set_title("Simulation Workgroup Runs")
-    plt.show()
