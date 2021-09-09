@@ -1,0 +1,18 @@
+system_name = "Acas Selector"
+system_representation = "black box"
+system_solver = "Euler"
+
+sampling_frequency = 10
+
+is_discrete = true
+is_hybrid = false
+
+[parameters]
+mapper = ["acas", "acas_recovery"]
+
+[inputs]
+msgs = ["autopilot_output.msg", "autopilot_output.msg", "predictor_output.msg"]
+
+[topics]
+[topics.outputs]
+msg = "autopilot_output.msg"

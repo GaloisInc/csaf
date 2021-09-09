@@ -1,0 +1,112 @@
+name = "f16-acas-shield"
+
+codec_dir = "codec"
+
+output_dir = "output"
+
+evaluation_order = [
+    "autopilot",
+    "autopilot_recovery",
+    "predictor",
+    "switch",
+    "controller",
+    "plant",
+    "autopilot_intruder",
+    "controller_intruder",
+    "plant_intruder"
+]
+
+log_file = "f16run.log"
+
+log_level = "info"
+
+[components]
+    [components.controller]
+        run_command = "python3"
+        process = "f16llc.py"
+        debug = false
+        sub = [
+            ["plant", "states"],
+            ["plant", "outputs"],
+            ["switch", "outputs"]
+        ]
+        pub = 5501
+
+    [components.plant]
+        run_command = "python3"
+        process = "f16plant.py"
+        debug = false
+        sub = [["controller", "outputs"]]
+        pub = 5502
+
+    [components.autopilot]
+        run_command = "python3"
+        process = "ma_acas.py"
+        debug = false
+        sub = [
+            ["plant", "states"],
+            ["controller", "states"],
+            ["plant_intruder", "states"],
+            ["controller_intruder", "states"]
+        ]
+        pub = 5503
+
+    [components.autopilot_recovery]
+        run_command = "python3"
+        process = "ma_acas.py"
+        debug = false
+        sub = [
+            ["plant", "states"],
+            ["controller", "states"],
+            ["plant_intruder", "states"],
+            ["controller_intruder", "states"]
+        ]
+        pub = 5504
+
+    [components.switch]
+        run_command = "python3"
+        process = "acas_switch.py"
+        debug = false
+        sub = [
+            ["autopilot", "outputs"],
+            ["autopilot_recovery", "outputs"],
+            ["predictor", "outputs"]
+        ]
+        pub = 5505
+
+    [components.predictor]
+        run_command = "python3"
+        process = "predictor.py"
+        debug = false
+        sub = [
+            ["plant", "states"],
+            ["controller", "states"],
+            ["plant_intruder", "states"],
+            ["controller_intruder", "states"]
+        ]
+        pub = 5506
+
+    [components.controller_intruder]
+        run_command = "python3"
+        process = "f16llc.py"
+        debug = false
+        sub = [
+            ["plant_intruder", "states"],
+            ["plant_intruder", "outputs"],
+            ["autopilot_intruder", "outputs"]
+        ]
+        pub = 5507
+
+    [components.plant_intruder]
+        run_command = "python3"
+        process = "f16plant.py"
+        debug = false
+        sub = [["controller_intruder", "outputs"]]
+        pub = 5508
+
+    [components.autopilot_intruder]
+        run_command = "python3"
+        process = "autoairspeed.py"
+        debug = false
+        sub = [["plant_intruder", "states"], ["plant_intruder", "outputs"]]
+        pub = 5509
