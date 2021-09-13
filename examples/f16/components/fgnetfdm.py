@@ -152,27 +152,28 @@ class FGNetFDM:
     def update_and_send(self,inputs):
         """
         Update the internal values and send a FG compatible packet
+
+        The expected format of `inputs` is:
+        - float64 vt 0
+        - float64 alpha 1
+        - float64 beta 2
+        - float64 phi 3
+        - float64 theta 4
+        - float64 psi 5
+        - float64 p 6
+        - float64 q 7
+        - float64 r 8
+        - float64 pn 9
+        - float64 pe 10
+        - float64 h 11
+        - float64 pow 12
+        - float64 delta_e 13
+        - float64 delta_a 14
+        - float64 delta_r 15
+        - float64 throttle 16
         """
         assert(self.running == True)
 
-        # TODO: figure out a better way to get state indexes
-        # float64 vt 0
-        # float64 alpha 1
-        # float64 beta 2
-        # float64 phi 3
-        # float64 theta 4
-        # float64 psi 5
-        # float64 p 6
-        # float64 q 7
-        # float64 r 8
-        # float64 pn 9
-        # float64 pe 10
-        # float64 h 11
-        # float64 pow 12
-        # float64 delta_e 13
-        # float64 delta_a 14
-        # float64 delta_r 15
-        # float64 throttle 16
         self.vcas = inputs[0]
         self.alpha = inputs[1]
         self.beta = inputs[2]
