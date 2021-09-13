@@ -12,7 +12,7 @@ from plot import plot_component
 
 from components import fgnetfdm
 
-def render_in_flightgear(trajs, nameSuffixes=['']):
+def render_in_flightgear(trajs, nameSuffixes=[''], speed=1.0):
     """
     Render the trajectory in FlightGear
 
@@ -44,7 +44,7 @@ def render_in_flightgear(trajs, nameSuffixes=['']):
         intruder_suffix = None
     while True:
         real_time = time.monotonic()
-        sim_time = real_time - initial_time
+        sim_time = (real_time - initial_time)*speed
         timestamp = next(filter(lambda x: x > sim_time, trajs['plant'+main_suffix].times), None)
         if timestamp:
             # Update main plant
@@ -65,8 +65,9 @@ def render_in_flightgear(trajs, nameSuffixes=['']):
             # Delay
             time.sleep(fgnetfdm.FGNetFDM.FG_SLEEP_S)
         else:
-            print("Done!")
             break
+    print("Done!")
+
 
 def plot_shield(trajs):
     """
