@@ -4,6 +4,7 @@ from math import sin, cos
 
 from f16lib.models.helpers.variables import State
 
+
 class FeedbackController:
     def __init__(self, ctrlLimits, model, ctrl_fn, xequil, uequil):
         self.ctrlLimits = ctrlLimits
@@ -26,12 +27,11 @@ class FeedbackController:
         """ get the reference commands for the control surfaces """
         # Calculate control
         x_ctrl = type(self).permute2xctrl(self.xerror(x_f16), cstate)
-        return self.ctrl_fn(x_ctrl) # Full Control
+        return self.ctrl_fn(x_ctrl)  # Full Control
 
     def output(self, t, cstate, u):
-
         assert len(u) == 21
-        #TODO: hard coded indices!
+        # TODO: hard coded indices!
         x_f16, y, u_ref = u[:13], u[13:17], u[17:]
 
         # Initialize control vectors
@@ -86,7 +86,7 @@ class FeedbackController:
 
         error = np.array([Nz - u_ref[0], ps - u_ref[1], Ny_r - u_ref[2]])
         # Integrate/Sum the error
-        error_ = cstate + error*sampling_period
+        error_ = cstate + error * sampling_period
 
         return error_
 
@@ -95,7 +95,7 @@ class CtrlLimits:
     'Control Limits'
 
     def __init__(self):
-        self.ThrottleMax = 1 # Afterburner on for throttle > 0.7
+        self.ThrottleMax = 1  # Afterburner on for throttle > 0.7
         self.ThrottleMin = 0
         self.ElevatorMaxDeg = 25
         self.ElevatorMinDeg = -25
@@ -103,12 +103,11 @@ class CtrlLimits:
         self.AileronMinDeg = -21.5
         self.RudderMaxDeg = 30
         self.RudderMinDeg = -30
-        self.MaxBankDeg = 60 # For turning maneuvers
-        self.NzMax = 6 # Should this not be at least 9Gs?
+        self.MaxBankDeg = 60  # For turning maneuvers
+        self.NzMax = 6  # Should this not be at least 9Gs?
         self.NzMin = -1
 
         self.check()
-
 
     def check(self):
         'check that limits are in bounds'
@@ -125,6 +124,7 @@ class CtrlLimits:
 
         assert not (ctrlLimits.RudderMaxDeg > 30 or ctrlLimits.RudderMinDeg < -30), \
             'ctrlLimits: Rudder Limits (-30 deg to 30 deg)'
+
 
 def clip_u(model, u_deg):
     """ helper to clip controller output within defined control limits

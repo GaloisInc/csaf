@@ -1,9 +1,11 @@
 import numpy as np
 import os
 import sys
+
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from f16lib.models.helpers.f16plant_helper import fix, sign
-from numba import jit # type: ignore
+from numba import jit  # type: ignore
+
 
 @jit(nopython=True)
 def cx(alpha, el):
@@ -216,6 +218,7 @@ def cn(alpha, beta):
 
     return dum * sign(beta)
 
+
 @jit(nopython=True)
 def dlda(alpha, beta):
     """dlda function"""
@@ -258,6 +261,7 @@ def dlda(alpha, beta):
     w = u + abs(da) * (a[l - 1, n - 1] - u)
 
     return v + (w - v) * abs(db)
+
 
 @jit(nopython=True)
 def dldr(alpha, beta):
@@ -349,6 +353,7 @@ def dnda(alpha, beta):
 
     return v + (w - v) * abs(db)
 
+
 @jit(nopython=True)
 def dndr(alpha, beta):
     """dndr function"""
@@ -391,6 +396,7 @@ def dndr(alpha, beta):
     w = u + abs(da) * (a[l - 1, n - 1] - u)
     return v + (w - v) * abs(db)
 
+
 @jit(nopython=True)
 def stevens_f16(*, alpha, beta, el, ail, rdr, dail, drdr):
     '''
@@ -405,4 +411,3 @@ def stevens_f16(*, alpha, beta, el, ail, rdr, dail, drdr):
     cmt = cm(alpha, el)
     cnt = cn(alpha, beta) + dnda(alpha, beta) * dail + dndr(alpha, beta) * drdr
     return cxt, cyt, czt, clt, cmt, cnt
-
