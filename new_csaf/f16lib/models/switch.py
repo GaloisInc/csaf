@@ -6,4 +6,4 @@ def model_output(model, time_t, state_switch, input_autopilot):
     else:
         sidx = model.mapper.index(controller)
     assert len(input_autopilot) == 13
-    return input_autopilot[4*sidx:4*sidx+4]
+    return input_autopilot[4 * sidx:4 * sidx + 4]
