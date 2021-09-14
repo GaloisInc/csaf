@@ -7,18 +7,18 @@ calling models implemented as python functions.
     * *Implementing a 
 protocol (ZMQ + ROSmsgs) to utilize non-python component implementations is 
 being planned. Currently, nothing in the F16 library needs such
-compatibility, and integration with Tensorflow and OpenAI Gym remains unmodified
+compatibility, and integration with Tensorflow and OpenAI Gym remains in tact
  by this change.*
     * The current architectural approach lessens the internal networking resources
-    consumed by CSAF so that it could be more simply used by common
+    required by CSAF for easier usage with common
     parallelization tools in the python ecosystem. Systems that are 
-    composed purely of python models shouldn't require such resources to
-    be used.
+    composed purely of python models shouldn't require such sockets to
+    be used, for example.
     
 * Systems no longer needs an `Component.evaluation_order` to start a simulation, but
-rather initial value inputs.
+now require initial values for the inputs.
     * fixing cyclic dependencies through evaluation order wasn't general enough,
-    and systems could be created that failed due to the wrong order being presented.
+    and systems could be created that failed due to the wrong order being defined.
     * every component must have initial inputs provided to start the system in an
     accurate state. The system object is aware that if an initial state is modified for a component that 
     serves as an input to other components, it will update the initial inputs for the
@@ -61,14 +61,14 @@ class MyComponent(csaf.DiscreteComponent):
     }
     
 ```
-* Currently, *the old description is broken* but a translation layer to the new description format
- can easily be implemented such that the old library is fully functional
-* CSAF objects can be checked via `CsafObj.check()` and find the error location
+* currently, *the old description format is incompatible* but a translation layer to the new description format
+ can be implemented such that the old library is fully functional
+* CSAF elements can be checked via `CsafObj.check()` and find the error location
 ```python
 import csaf
 import f16lib.systems as f16
 
-# modified a component inside of F16AcasShield to have have all default initial values defined
+# modified a component inside of F16AcasShield to NOT have all the default initial values defined
 
 class F16Env(csaf.SystemEnv):
     """create an environment so we can implement predictor externally"""
@@ -85,7 +85,7 @@ AssertionError: |SystemEnv <F16AcasShieldEnv>| |System <F16AcasShield>||Componen
 values must reference all inputs and states 
 """
 ```
-* CSAF objects can be type checked
+* CSAF elements can be type checked
 ```python
 class F16AcasSwitchComponent(DiscreteComponent):
     ...
@@ -102,11 +102,11 @@ $ mypy components.py
 f16lib/components.py:306: error: Dict entry 3 has incompatible type "str": "bool"; expected "str": "Sequence[Any]"
 """
 ```
-* Generated block diagrams are cleaner and display more system information.
+* generated block diagrams are cleaner and display more system information
 
 ## F16lib Changes
 * library components have been translated fully to the new representation and checked
-* The plant functions have been decorated in some places with `numba.jit` in order
+* aircraft plant functions have been decorated in some places with `numba.jit` in order
 to speed up simulation time.
 
 | Benchmark      | Original Time | JIT Optimized Time |
