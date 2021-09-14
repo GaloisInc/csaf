@@ -1,14 +1,16 @@
 import numpy as np
-from numba import jit # type: ignore
+from numba import jit  # type: ignore
+
 
 # replace np.deg2rad so sympy can generate equations
 @jit(nopython=True)
 def deg2rad(args):
     ret = np.zeros(len(args))
     for i in range(len(args)):
-        ret[i] = np.pi*args[i] / 180.0
+        ret[i] = np.pi * args[i] / 180.0
     return ret
-    #return (np.pi*arg/180.0 for arg in args)
+    # return (np.pi*arg/180.0 for arg in args)
+
 
 @jit(nopython=True)
 def morelli_f16(*, alpha, beta, de, da, dr, p, q, r, cbar, b, V, xcg, xcgref):

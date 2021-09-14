@@ -5,12 +5,14 @@ Created by Stanley Bak
 import numpy as np
 from numba import jit  # type: ignore
 
+
 @jit(nopython=True)
 def tfac(alt):
     '''
     Non-linearities: None
     '''
     return 1 - .703e-5 * alt
+
 
 @jit(nopython=True)
 def temp_at(alt):
@@ -26,6 +28,7 @@ def temp_at(alt):
     t = 390 if alt >= 35000 else 519 * tfac(alt)
     return t
 
+
 @jit(nopython=True)
 def temp_at_linear_sym(alt):
     '''
@@ -38,6 +41,7 @@ def temp_at_linear_sym(alt):
     assert alt < 35000
     t = 519 * tfac(alt)
     return t
+
 
 @jit(nopython=True)
 def amach(vt, alt):
@@ -58,6 +62,7 @@ def amach(vt, alt):
     # amach = mach number
     amach = vt / a
     return amach
+
 
 @jit(nopython=True)
 def qbar(vt, alt):
@@ -86,6 +91,7 @@ def tgear(thtl):
 
     return tg
 
+
 @jit(nopython=True)
 def rtau_linear_sym(dp):
     '''
@@ -97,6 +103,7 @@ def rtau_linear_sym(dp):
     assert dp > 25 and dp < 50
 
     return rt
+
 
 @jit(nopython=True)
 def rtau(dp):
@@ -113,6 +120,7 @@ def rtau(dp):
 
     return rt
 
+
 # XXX: nonlinear
 @jit(nopython=True)
 def pdot_sym(p3, p1):
@@ -121,7 +129,7 @@ def pdot_sym(p3, p1):
     Non-linearities: discontinuous w.r.t. p1 and p3
     '''
 
-    if p1 >=50 and p3 >= 50:
+    if p1 >= 50 and p3 >= 50:
         p2 = p1
     elif p1 >= 50 and p3 < 50:
         p2 = 60
@@ -133,6 +141,7 @@ def pdot_sym(p3, p1):
     pd = t * (p2 - p3)
 
     return pd
+
 
 @jit(nopython=True)
 def pdot(p3, p1):
@@ -167,7 +176,6 @@ def thrust_lookup(power, alt, rmach):
 
     Non-linearities: lookup table, rounding using fix(), ...
     '''
-
 
     # Idle
     thrust_a_table = np.array([
@@ -257,22 +265,25 @@ def dampp_lookup(alpha):
 
     da = s - k
     l = k + fix(1.1 * sign(da))
-    k += 3; l += 3 #XXX: Why this increment?
+    k += 3;
+    l += 3  # XXX: Why this increment?
 
     d = np.zeros(9)
 
     # offset for 0-based indexing
-    k -= 1;l -= 1
+    k -= 1;
+    l -= 1
     d = [dampp_table[k, i] + abs(da) * (dampp_table[l, i] - dampp_table[k, i]) for i in range(9)]
 
     return np.array(d)
+
 
 @jit(nopython=True)
 def engine(thtlc, power, vt, alt):
     '''
     Non-linearities: Calls non-linear functions
     '''
-    #XXX: amach computation uses saturation
+    # XXX: amach computation uses saturation
     amach_ = amach(vt, alt)
 
     # XXX: Piecewise linear
@@ -284,13 +295,16 @@ def engine(thtlc, power, vt, alt):
 
     return power_dot, thrust
 
+
 @jit(nopython=True)
 def fix(x):
     """round towards zero"""
     return int(np.floor(x) if x >= 0 else np.ceil(x))
-    #return int(np.fix(x))
+    # return int(np.fix(x))
+
+
 #     assert isinstance(x, float)
-#return int(floor(x)) if x > 0 else int(ceil(x))
+# return int(floor(x)) if x > 0 else int(ceil(x))
 
 
 @jit(nopython=True)

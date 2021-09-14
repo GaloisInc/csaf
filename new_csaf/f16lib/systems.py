@@ -84,7 +84,7 @@ class F16MultiAgentCentral(System):
             "inputs_pstates_1": [0.0,] * 13,
             "states": []
         }
-        parameters = {}
+        parameters: typing.Dict[str, typing.Any] = {}
         states = EmptyMessage
         inputs = (
             ("inputs_pstates_0", F16PlantStateMessage),

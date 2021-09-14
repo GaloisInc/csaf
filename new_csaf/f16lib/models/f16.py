@@ -13,10 +13,9 @@ def model_state_update(model, time_t, state_f16, input_controller):
     return subf16df(model, time_t, state_f16, input_controller)[0]
 
 
-
 def subf16df(model, t, x, u, adjust_cy=True):
     ''' Calculate state space differential '''
-    #if len(f) != 4+4:
+    # if len(f) != 4+4:
     #    raise E.SystemDimensionError("forcing vector must have 4 values")
     parameters = model.parameters
 
@@ -27,11 +26,11 @@ def subf16df(model, t, x, u, adjust_cy=True):
     xcg_mult, cxt_mult, cyt_mult, czt_mult, clt_mult, cmt_mult, cnt_mult = \
         (parameters[p] for p in 'xcg_mult cxt_mult cyt_mult czt_mult clt_mult cmt_mult cnt_mult'.split())
 
-    vt, alpha, beta, phi, theta, psi, p, q, r  = x[0:9]
+    vt, alpha, beta, phi, theta, psi, p, q, r = x[0:9]
     alt, power = x[11], x[12]
 
-    #XXX: Whats the rtod multiplier?
-    alpha, beta = alpha*rtod, beta*rtod
+    # XXX: Whats the rtod multiplier?
+    alpha, beta = alpha * rtod, beta * rtod
     xcg *= xcg_mult
 
     # get air data computer and engine model
@@ -43,8 +42,8 @@ def subf16df(model, t, x, u, adjust_cy=True):
 
     if parameters['model'] == 'stevens':
         cxt, cyt, czt, clt, cmt, cnt = stevens_f16(alpha=alpha,
-                                                   beta=beta, el=el, ail=ail, rdr=rdr, dail=ail/20,
-                                                   drdr=rdr/30)
+                                                   beta=beta, el=el, ail=ail, rdr=rdr, dail=ail / 20,
+                                                   drdr=rdr / 30)
     elif parameters['model'] == 'morelli':
         cxt, cyt, czt, clt, cmt, cnt = morelli_f16(alpha=alpha,
                                                    beta=beta, de=el, da=ail, dr=rdr, p=p, q=q, r=r,
@@ -52,7 +51,12 @@ def subf16df(model, t, x, u, adjust_cy=True):
     else:
         raise NotImplementedError
 
-    cxt *= cxt_mult; cyt *= cyt_mult; czt *= czt_mult; clt *= clt_mult; cmt *= cmt_mult; cnt *= cnt_mult
+    cxt *= cxt_mult;
+    cyt *= cyt_mult;
+    czt *= czt_mult;
+    clt *= clt_mult;
+    cmt *= cmt_mult;
+    cnt *= cnt_mult
 
     tvt = .5 / vt
     b2v = b * tvt
@@ -66,8 +70,8 @@ def subf16df(model, t, x, u, adjust_cy=True):
     cyt = cyt + b2v * (d[1] * r + d[2] * p)
     czt = czt + cq * d[3]
     clt = clt + b2v * (d[4] * r + d[5] * p)
-    cmt = cmt + cq * d[6] + czt * (xcgref-xcg)
-    cnt = cnt + b2v * (d[7] * r + d[8] * p)-cyt * (xcgref-xcg) * cbar/b
+    cmt = cmt + cq * d[6] + czt * (xcgref - xcg)
+    cnt = cnt + b2v * (d[7] * r + d[8] * p) - cyt * (xcgref - xcg) * cbar / b
 
     # Get redy for state equations
     cbta = np.cos(x[2])
@@ -89,25 +93,25 @@ def subf16df(model, t, x, u, adjust_cy=True):
     az = rmqs * czt
 
     # force equations
-    udot = r * v-q * w-g * sth + rm * (qs * cxt + thrust)
-    vdot = p * w-r * u + gcth * sph + ay
-    wdot = q * u-p * v + gcth * cph + az
+    udot = r * v - q * w - g * sth + rm * (qs * cxt + thrust)
+    vdot = p * w - r * u + gcth * sph + ay
+    wdot = q * u - p * v + gcth * cph + az
     dum = (u * u + w * w)
 
-    vt_dot = (u * udot + v * vdot + w * wdot)/vt
-    alpha_dot = (u * wdot-w * udot)/dum
-    beta_dot = (vt * vdot-v * vt_dot) * cbta/dum
+    vt_dot = (u * udot + v * vdot + w * wdot) / vt
+    alpha_dot = (u * wdot - w * udot) / dum
+    beta_dot = (vt * vdot - v * vt_dot) * cbta / dum
 
     # kinematics
-    phi_dot = p + (sth/cth) * (qsph + r * cph)
-    theta_dot = q * cph-r * sph
-    psi_dot = (qsph + r * cph)/cth
+    phi_dot = p + (sth / cth) * (qsph + r * cph)
+    theta_dot = q * cph - r * sph
+    psi_dot = (qsph + r * cph) / cth
 
     # XXX: Looks quite different form the book
     # moments
     p_dot = (c2 * p + c1 * r + c4 * he) * q + qsb * (c3 * clt + c4 * cnt)
-    q_dot = (c5 * p-c7 * he) * r + c6 * (r * r-p * p) + qs * cbar * c7 * cmt
-    r_dot = (c8 * p-c2 * r + c9 * he) * q + qsb * (c4 * clt + c9 * cnt)
+    q_dot = (c5 * p - c7 * he) * r + c6 * (r * r - p * p) + qs * cbar * c7 * cmt
+    r_dot = (c8 * p - c2 * r + c9 * he) * q + qsb * (c4 * clt + c9 * cnt)
 
     # navigation
     t1 = sph * cpsi
@@ -115,24 +119,24 @@ def subf16df(model, t, x, u, adjust_cy=True):
     t3 = sph * spsi
     s1 = cth * cpsi
     s2 = cth * spsi
-    s3 = t1 * sth-cph * spsi
+    s3 = t1 * sth - cph * spsi
     s4 = t3 * sth + cph * cpsi
     s5 = sph * cth
     s6 = t2 * cpsi + t3
-    s7 = t2 * spsi-t1
+    s7 = t2 * spsi - t1
     s8 = cph * cth
-    pn_dot = u * s1 + v * s3 + w * s6    # north speed
-    pe_dot = u * s2 + v * s4 + w * s7   # east speed
-    alt_dot = u * sth-v * s5-w * s8      # vertical speed
+    pn_dot = u * s1 + v * s3 + w * s6  # north speed
+    pe_dot = u * s2 + v * s4 + w * s7  # east speed
+    alt_dot = u * sth - v * s5 - w * s8  # vertical speed
 
-    xa = 15.0                  # sets distance normal accel is in front of the c.g. (xa = 15.0 at pilot)
-    az = az-xa * q_dot           # moves normal accel in front of c.g.
+    xa = 15.0  # sets distance normal accel is in front of the c.g. (xa = 15.0 at pilot)
+    az = az - xa * q_dot  # moves normal accel in front of c.g.
 
     if adjust_cy:
-        ay = ay+xa*r_dot           # moves side accel in front of c.g.
+        ay = ay + xa * r_dot  # moves side accel in front of c.g.
 
     # For extraction of Nz
-    Nz = (-az / g) - 1 # zeroed at 1 g, positive g = pulling up
+    Nz = (-az / g) - 1  # zeroed at 1 g, positive g = pulling up
     Ny = ay / g
 
     output = np.array([Nz, Ny, az, ay])
