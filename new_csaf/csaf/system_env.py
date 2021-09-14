@@ -50,7 +50,7 @@ class SystemEnv(cbase.CsafBase):
     def make_system_coroutine(self,
                               tstart=0.0,
                               terminating_conditions=None,
-                              terminating_conditions_all=None) -> typing.Coroutine:
+                              terminating_conditions_all=None) -> typing.Generator:
         """make an iterator that can step through a simulation and accept input from external agents
 
         :param tstart: time to start (now only supports 0.0)
