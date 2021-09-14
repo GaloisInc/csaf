@@ -60,8 +60,8 @@ class F16Shield(System):
         ("monitor", "inputs_gcas"): ("autopilot", "fdas"),
 
         ("switch", "inputs_0"): ("autopilot", "outputs"),
-        ("switch", "inputs_2"): ("autoairspeed", "outputs"),
-        ("switch", "inputs_1"): ("autoaltitude", "outputs"),
+        ("switch", "inputs_1"): ("autoairspeed", "outputs"),
+        ("switch", "inputs_2"): ("autoaltitude", "outputs"),
         ("switch", "inputs_monitors"): ("monitor", "outputs"),
     }
 
