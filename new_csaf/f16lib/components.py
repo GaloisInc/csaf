@@ -43,7 +43,7 @@ f16_xequil = [502.0,
 
 class F16PlantComponent(ContinuousComponent):
     name = "F16 Plant Model"
-    sampling_frequency = 100.0
+    sampling_frequency = 30.0
     parameters = {
         "s": 300.0,
         "b": 30.0,
@@ -91,7 +91,7 @@ class F16PlantComponent(ContinuousComponent):
 
 class F16LlcComponent(ContinuousComponent):
     name = "F16 Low Level Controller"
-    sampling_frequency = 100.0
+    sampling_frequency = 30.0
     parameters = {
         "lqr_name": "lqr_original",
         "throttle_max": 1,
@@ -127,7 +127,7 @@ class F16LlcComponent(ContinuousComponent):
 
 class F16AutopilotComponent(DiscreteComponent):
     name = ""
-    sampling_frequency = 10.0
+    sampling_frequency = 2.0
     inputs = (
         ("inputs_pstates", F16PlantStateMessage),
         ("inputs_poutputs", F16PlantOutputMessage),
@@ -201,7 +201,7 @@ class F16AutoAltitudeComponent(F16AutopilotComponent):
 
 class F16MonitorComponent(DiscreteComponent):
     name = "F16 Autopilot Monitor"
-    sampling_frequency = 10.0
+    sampling_frequency = 2.0
     parameters: typing.Dict[str, typing.Any] = {
 
     }
@@ -227,7 +227,7 @@ class F16MonitorComponent(DiscreteComponent):
 
 class F16SwitchComponent(DiscreteComponent):
     name = "F16 Autopilot Selector"
-    sampling_frequency = 10.0
+    sampling_frequency = 2.0
     default_initial_values = {
         "inputs_0": [0.0, 0.0, 0.0, 0.0],
         "inputs_1": [0.0, 0.0, 0.0, 0.0],
@@ -255,7 +255,7 @@ class F16SwitchComponent(DiscreteComponent):
 
 class F16AcasComponent(DiscreteComponent):
     name = "F16 Acas Xu Controller"
-    sampling_frequency = 10.0
+    sampling_frequency = 2.0
     parameters = {
         "setpoint": 2500.0,
         "xequil": [502.0, 0.03887505597600522, 0.0, 0.0, 0.03887505597600522, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1000.0, 9.05666543872074]
@@ -286,7 +286,7 @@ class F16AcasComponent(DiscreteComponent):
 
 class F16AcasSwitchComponent(DiscreteComponent):
     name = "F16 Acas Selector"
-    sampling_frequency = 10.0
+    sampling_frequency = 2.0
     parameters = {
         "mapper": ["acas", "acas_recovery"]
     }
@@ -313,7 +313,7 @@ class F16AcasSwitchComponent(DiscreteComponent):
 
 class F16CollisionPredictor(DiscreteComponent):
     name = "F16 Collision Predictor"
-    sampling_frequency = 10.0
+    sampling_frequency = 2.0
     parameters: typing.Dict[str, typing.Any] = {
     }
     inputs = (
