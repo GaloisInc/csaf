@@ -5,8 +5,8 @@ import csaf.base as cbase
 from csaf.solver import LSODASolver, DiscreteSolver, SystemSolver
 
 import abc
-import typing
 import enum
+import typing
 
 # custom types
 RepresentationIdentifier = typing.Annotated[int, 'RepresentationIdentifier']
