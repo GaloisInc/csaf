@@ -68,7 +68,7 @@ class MyComponent(csaf.DiscreteComponent):
 import csaf
 import f16lib.systems as f16
 
-# modified a component inside of F16AcasShield to have have all default initial values defined
+# modified a component inside of F16AcasShield to NOT have all the default initial values defined
 
 class F16Env(csaf.SystemEnv):
     """create an environment so we can implement predictor externally"""
