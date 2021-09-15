@@ -27,13 +27,13 @@ jobs:
         with:
           requirement_files: ./requirements.txt
       
-      - uses: syphar/restore-pip-download-cache@v1
-        if: steps.cache-virtualenv.outputs.cache-hit != 'true'
+      #- uses: syphar/restore-pip-download-cache@v1
+      #  if: steps.cache-virtualenv.outputs.cache-hit != 'true'
 
         # the package installation will only be executed when the
         # requirements-files have changed.
       - run: pip install -r requirements.txt
-        if: steps.cache-virtualenv.outputs.cache-hit != 'true'
+      #  if: steps.cache-virtualenv.outputs.cache-hit != 'true'
 
 
       - name: F16 simple test
