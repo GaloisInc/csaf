@@ -32,7 +32,6 @@ def render_in_flightgear(trajs, nameSuffixes=[''], speed=1.0):
         return np.concatenate((np.asarray(states),ctrls))
 
     fdm = fgnetfdm.FGNetFDM()
-    fdm.init_from_params({})
 
     initial_time = time.monotonic()
     main_suffix = nameSuffixes.pop(0)
@@ -63,7 +62,7 @@ def render_in_flightgear(trajs, nameSuffixes=[''], speed=1.0):
                 fdm_intruder.update_and_send(intruder_input_f16)
 
             # Delay
-            time.sleep(fgnetfdm.FGNetFDM.FG_SLEEP_S)
+            time.sleep(fgnetfdm.FGNetFDM.DEFAULT_DELTA_T)
         else:
             break
     print("Done!")
