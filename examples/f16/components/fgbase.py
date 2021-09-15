@@ -19,8 +19,8 @@ class Dubins2DConverter():
     Converts orientation and rotation from ENU to ECEF
     """
 
-    @classmethod
-    def quaternion_from_lon_lat(cls, lon: float, lat: float) -> typing.List[float]:
+    @staticmethod
+    def quaternion_from_lon_lat(lon: float, lat: float) -> typing.List[float]:
         """
         A helper function to calculate a quaternion representation of a rotation from ENU to ECEF
         parameters: longitude and latitude (radians)
@@ -109,8 +109,10 @@ class FlightGearBase(ABC):
     lat0 = np.deg2rad(DEFAULT_FG_LAT)
     lon0 = np.deg2rad(DEFAULT_FG_LON)
     h0 = DEFAULT_FG_GROUND_LEVEL
+    sock_args = (socket.AF_INET, socket.SOCK_DGRAM)  # UDP
 
-    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) # UDP
+    def __init__(self) -> None:
+        self.sock = socket.socket(*self.sock_args)
 
     def reset(self):
         """

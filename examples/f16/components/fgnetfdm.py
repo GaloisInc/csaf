@@ -59,27 +59,27 @@ class FGNetFDM(FlightGearBase):
 
     # Engine status
     num_engines: int = 0                       # Number of valid engines
-    eng_state: typing.List[int] # Engine state (off, cranking, running)
-    rpm: typing.List[int]          # Engine RPM rev/min
-    fuel_flow: typing.List[int]    # Fuel flow gallons/hr
-    fuel_px: typing.List[int]      # Fuel pressure psi
-    egt: typing.List[int]          # Exhuast gas temp deg F
-    cht: typing.List[int]          # Cylinder head temp deg F
-    mp_osi: typing.List[int]       # Manifold pressure
-    tit: typing.List[int]          # Turbine Inlet Temperature
-    oil_temp: typing.List[int]     # Oil temp deg F
-    oil_px: typing.List[int]       # Oil pressure psi
+    eng_state: typing.Sequence[int] # Engine state (off, cranking, running)
+    rpm: typing.Sequence[int]          # Engine RPM rev/min
+    fuel_flow: typing.Sequence[int]    # Fuel flow gallons/hr
+    fuel_px: typing.Sequence[int]      # Fuel pressure psi
+    egt: typing.Sequence[int]          # Exhuast gas temp deg F
+    cht: typing.Sequence[int]          # Cylinder head temp deg F
+    mp_osi: typing.Sequence[int]       # Manifold pressure
+    tit: typing.Sequence[int]          # Turbine Inlet Temperature
+    oil_temp: typing.Sequence[int]     # Oil temp deg F
+    oil_px: typing.Sequence[int]       # Oil pressure psi
 
     # Consumables
     num_tanks: int = 0         # Max number of fuel tanks
-    fuel_quantity: typing.List[float]
+    fuel_quantity: typing.Sequence[float]
 
     # Gear status
     num_wheels: int = 0
-    wow: typing.List[int]
-    gear_pos: typing.List[float]
-    gear_steer: typing.List[float]
-    gear_compression: typing.List[float]
+    wow: typing.Sequence[int]
+    gear_pos: typing.Sequence[float]
+    gear_steer: typing.Sequence[float]
+    gear_compression: typing.Sequence[float]
 
     # Environment
     cur_time: int = 0           # current unix time
@@ -103,6 +103,7 @@ class FGNetFDM(FlightGearBase):
         Set everything to zeros, and set lists to the correct length
         If parameters are supplied, initialize from parameters
         """
+        super().__init__()
         self.eng_state = [0,0,0,0]
         self.rpm = [0,0,0,0]
         self.fuel_flow = [0,0,0,0]
@@ -182,42 +183,43 @@ class FGNetFDM(FlightGearBase):
         Because we have so many variables, getting the correct
         format string for packing is handled in this function
         """
-        format_string = '!'
-        format_string +=  'I I' # version, padding
-        format_string +=  'd d d' # lon,lat,alt
-        format_string +=  'f f f' # agl, phi, theta
-        format_string +=  'f f f' # psi, alpha, beta
-        format_string +=  'f f f' # phidot, thetadot, psidot
-        format_string +=  'f f'   # vcasm climb_rate
-        format_string +=  'f f f' # v_n, v_e, v_d
-        format_string +=  'f f f' # v_u, v_v, v_w
-        format_string +=  'f f f' # A_Y_pilot, A_Y_pilot, A_Z_pilot
-        format_string +=  'f f' # stall, slip
-        format_string +=  'I' # num_engines
-        format_string +=  'IIII' # eng_state[FG_NET_FDM_MAX_ENGINES]
-        format_string +=  'ffff' # rpm[FG_NET_FDM_MAX_ENGINES]
-        format_string +=  'ffff' # fuel_flow[FG_NET_FDM_MAX_ENGINES]
-        format_string +=  'ffff' # fuel_px[FG_NET_FDM_MAX_ENGINES]
-        format_string +=  'ffff' # egt[FG_NET_FDM_MAX_ENGINES]
-        format_string +=  'ffff' # cht[FG_NET_FDM_MAX_ENGINES]
-        format_string +=  'ffff' # mp_osi[FG_NET_FDM_MAX_ENGINES]
-        format_string +=  'ffff' # tit[FG_NET_FDM_MAX_ENGINES]
-        format_string +=  'ffff' # oil_temp[FG_NET_FDM_MAX_ENGINES]
-        format_string +=  'ffff' # oil_px[FG_NET_FDM_MAX_ENGINES]
-        format_string +=  'I' # num_tanks
-        format_string +=  'ffff' # fuel_quantity[FG_NET_FDM_MAX_TANKS]
-        format_string +=  'I' # num wheels
-        format_string +=  'III' # wow[FG_NET_FDM_MAX_WHEELS]
-        format_string +=  'fff' # gear_pos[FG_NET_FDM_MAX_WHEELS]
-        format_string +=  'fff' # gear_steer[FG_NET_FDM_MAX_WHEELS]
-        format_string +=  'fff' # gear_compression[FG_NET_FDM_MAX_WHEELS]
-        format_string +=  'I' # cur time
-        format_string +=  'i' # warp
-        format_string +=  'f' # visibility
-        format_string +=  'f f f f' # elevator, elevator_trim, left_flap, right_flap
-        format_string +=  'f f f' # left aileron, right aileron, rudder
-        format_string +=  'f f f' # nose_wheel, speedbrake, spoilers
-        return format_string
+        format_string = []
+        format_string.append('!')
+        format_string.append('I I') # version, padding
+        format_string.append('d d d') # lon,lat,alt
+        format_string.append('f f f') # agl, phi, theta
+        format_string.append('f f f') # psi, alpha, beta
+        format_string.append('f f f') # phidot, thetadot, psidot
+        format_string.append('f f')   # vcasm climb_rate
+        format_string.append('f f f') # v_n, v_e, v_d
+        format_string.append('f f f') # v_u, v_v, v_w
+        format_string.append('f f f') # A_Y_pilot, A_Y_pilot, A_Z_pilot
+        format_string.append('f f') # stall, slip
+        format_string.append('I') # num_engines
+        format_string.append('IIII') # eng_state[FG_NET_FDM_MAX_ENGINES]
+        format_string.append('ffff') # rpm[FG_NET_FDM_MAX_ENGINES]
+        format_string.append('ffff') # fuel_flow[FG_NET_FDM_MAX_ENGINES]
+        format_string.append('ffff') # fuel_px[FG_NET_FDM_MAX_ENGINES]
+        format_string.append('ffff') # egt[FG_NET_FDM_MAX_ENGINES]
+        format_string.append('ffff') # cht[FG_NET_FDM_MAX_ENGINES]
+        format_string.append('ffff') # mp_osi[FG_NET_FDM_MAX_ENGINES]
+        format_string.append('ffff') # tit[FG_NET_FDM_MAX_ENGINES]
+        format_string.append('ffff') # oil_temp[FG_NET_FDM_MAX_ENGINES]
+        format_string.append('ffff') # oil_px[FG_NET_FDM_MAX_ENGINES]
+        format_string.append('I') # num_tanks
+        format_string.append('ffff') # fuel_quantity[FG_NET_FDM_MAX_TANKS]
+        format_string.append('I') # num wheels
+        format_string.append('III') # wow[FG_NET_FDM_MAX_WHEELS]
+        format_string.append('fff') # gear_pos[FG_NET_FDM_MAX_WHEELS]
+        format_string.append('fff') # gear_steer[FG_NET_FDM_MAX_WHEELS]
+        format_string.append('fff') # gear_compression[FG_NET_FDM_MAX_WHEELS]
+        format_string.append('I') # cur time
+        format_string.append('i') # warp
+        format_string.append('f') # visibility
+        format_string.append('f f f f') # elevator, elevator_trim, left_flap, right_flap
+        format_string.append('f f f') # left aileron, right aileron, rudder
+        format_string.append('f f f') # nose_wheel, speedbrake, spoilers
+        return ''.join(format_string)
 
     def unpack_from_struct(self, data):
         """

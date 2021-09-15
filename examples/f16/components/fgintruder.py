@@ -266,6 +266,7 @@ class FGIntruder(FlightGearBase):
                     516 - F-16
                     702 - air balloon
         """
+        super().__init__()
         self.callsign = callsign[0:7].encode('utf-8')       
         self.model_path = model_path.encode('utf-8')
         self.fallback_model_index = fallback_model_index
@@ -312,18 +313,19 @@ class FGIntruder(FlightGearBase):
         self.sock.sendto(self.pack_to_struct(), (FlightGearBase.DEFAULT_FG_IP, self.DEFAULT_FG_MP_PORT))
     
     def get_format_string(self) -> str:
-        format_string = '!'                 # byte alignment and size (network, standard)
-        format_string += 'I I I I I I 8s'   # Header: magic, version, msgID, msgLen, reqRangeNum, ReplyPort, callsign
-        format_string += '96s'              # Position: ModelName (96 bytes string)
-        format_string += '5d'               # time, lag, pos_x, pos_y, pos_z (5 8-byte doubles)
-        format_string += '15f'              # ori_[xyz], vel_[xyz], av[123], acc[123], ang_acc[123]
-        format_string += 'I'#'4x'               # padding (4 bytes)
+        format_string = []
+        format_string.append('!')                 # byte alignment and size (network, standard)
+        format_string.append('I I I I I I 8s')   # Header: magic, version, msgID, msgLen, reqRangeNum, ReplyPort, callsign
+        format_string.append('96s')              # Position: ModelName (96 bytes string)
+        format_string.append('5d')               # time, lag, pos_x, pos_y, pos_z (5 8-byte doubles)
+        format_string.append('15f')              # ori_[xyz], vel_[xyz], av[123], acc[123], ang_acc[123]
+        format_string.append('I')#'4x'               # padding (4 bytes)
 
         # # Properties
-        format_string += 'HH' # protocol version + value
-        format_string += 'II'               # sim/model/fallback-model-index | SHORTINT (00000204)
+        format_string.append('HH') # protocol version + value
+        format_string.append('II')               # sim/model/fallback-model-index | SHORTINT (00000204)
 
-        return format_string
+        return ''.join(format_string)
     
     def pack_to_struct(self):
         """
