@@ -3,8 +3,13 @@ argon2-cffi==21.1.0
 attrs==21.2.0
 backcall==0.2.0
 bleach==4.1.0
+blessings==1.7
+bpython==0.21
 certifi==2021.5.30
 cffi==1.14.6
+charset-normalizer==2.0.5
+curtsies==0.3.5
+cwcwidth==0.1.4
 cycler==0.10.0
 Cython==0.29.24
 debugpy==1.4.3
@@ -13,6 +18,8 @@ defusedxml==0.7.1
 entrypoints==0.3
 flatbuffers==2.0
 GPy==1.10.0
+greenlet==1.1.1
+idna==3.2
 iniconfig==1.1.1
 ipykernel==6.4.1
 ipython==7.27.0
@@ -42,7 +49,7 @@ nbformat==5.1.3
 nest-asyncio==1.5.1
 notebook==6.4.3
 numba==0.54.0
-numpy==1.20.3
+numpy==1.20.0
 onnxruntime==1.8.1
 packaging==21.0
 pandocfilters==1.5.0
@@ -65,13 +72,16 @@ pyparsing==2.4.7
 pyrsistent==0.18.0
 pytest==6.2.5
 python-dateutil==2.8.2
+pyxdg==0.27
 pyzmq==22.2.1
 qtconsole==5.1.1
 QtPy==1.11.1
+requests==2.26.0
 scipy==1.7.1
 Send2Trash==1.8.0
 setuptools==52.0.0.post20210125
 six==1.16.0
+svgpath2mpl==1.0.0
 terminado==0.12.1
 testpath==0.5.0
 toml==0.10.2
@@ -79,6 +89,7 @@ tornado==6.1
 tqdm==4.62.2
 traitlets==5.1.0
 typing-extensions==3.10.0.2
+urllib3==1.26.6
 wcwidth==0.2.5
 webencodings==0.5.1
 wheel==0.37.0

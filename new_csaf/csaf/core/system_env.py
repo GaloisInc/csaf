@@ -1,10 +1,10 @@
 """
 CSAF System Environment (implement component flows externally)
 """
-import csaf.base as cbase
-from csaf.system import ComponentComposition
-from csaf.scheduler import Scheduler
-from csaf.trace import TimeTrace
+import csaf.core.base as cbase
+from csaf.core.system import ComponentComposition
+from csaf.core.scheduler import Scheduler
+from csaf.core.trace import TimeTrace
 import typing
 
 __all__ = ['SystemEnv']
