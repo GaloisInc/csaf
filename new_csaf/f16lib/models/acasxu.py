@@ -1,7 +1,11 @@
-'''acasxu autopilot
-with support for multiple aircraft
-'''
+"""
+CSAF F-16 ACAS Xu Autopilot Model
 
+acasxu autopilot
+with support for multiple aircraft
+
+taken from https://github.com/stanleybak/AeroBenchVVPython
+"""
 from typing import List, Optional
 
 import os
@@ -11,43 +15,7 @@ import numpy as np
 
 import onnxruntime as ort  # type: ignore
 
-
-# from aerobench.highlevel.autopilot import Autopilot
-# from aerobench.util import StateIndex, get_state_names, get_script_path
-
-class StateIndex:
-    'list of static state indices'
-    # TODO: is this somewhere else?
-
-    VT = 0
-    VEL = 0  # alias
-
-    ALPHA = 1
-    BETA = 2
-    PHI = 3  # roll angle
-    THETA = 4  # pitch angle
-    PSI = 5  # yaw angle
-
-    P = 6
-    Q = 7
-    R = 8
-
-    POSN = 9
-    POS_N = 9
-
-    POSE = 10
-    POS_E = 10
-
-    ALT = 11
-    H = 11
-
-    POW = 12
-
-
-def get_state_names():
-    'returns a list of state variable names'
-
-    return ['vt', 'alpha', 'beta', 'phi', 'theta', 'psi', 'P', 'Q', 'R', 'pos_n', 'pos_e', 'alt', 'pow']
+from f16lib.models.helpers.aerobench_helpers import *
 
 
 def get_script_path(script_filename):
@@ -62,8 +30,10 @@ class AcasXuAutopilot():
     '''AcasXu autopilot'''
 
     def __init__(self, init, num_aircraft_acasxu=1, stop_on_coc=False,
-                 hardcoded_u_seq=None, stdout=False):
+                 hardcoded_u_seq=None, stdout=False, roll_rates=(0, -1.5, 1.5, -3.0, 3.0) ):
         'waypoints is a list of 3-tuples'
+
+        self.roll_rates = roll_rates
 
         init = np.array(init, dtype=float)
 
@@ -443,7 +413,7 @@ class AcasXuAutopilot():
         command = self.commands[index]
         assert 0 <= command <= 4, f"invalid command in get u_ref ownship: {command}"
 
-        roll_rate_cmd_list = [0, -1.5, 1.5, -3.0, 3.0]  # deg / sec
+        roll_rate_cmd_list = self.roll_rates # deg / sec
         roll_rate_cmd_deg = roll_rate_cmd_list[command]
 
         # these bank angle cmds were empirically found to achieve the desired turn rate
@@ -455,6 +425,10 @@ class AcasXuAutopilot():
             psi_cmd_deg = -34
         elif roll_rate_cmd_deg == 3.0:
             psi_cmd_deg = 54
+        elif roll_rate_cmd_deg == 6.0:
+            psi_cmd_deg = 80
+        elif roll_rate_cmd_deg == -6.0:
+            psi_cmd_deg = -80
         else:
             assert roll_rate_cmd_deg == -3.0, f"unsupported roll rate cmd: {roll_rate_cmd_deg}"
             psi_cmd_deg = -54

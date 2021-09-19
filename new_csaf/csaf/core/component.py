@@ -1,8 +1,8 @@
 """
 CSAF Component
 """
-import csaf.base as cbase
-from csaf.solver import LSODASolver, DiscreteSolver, SystemSolver
+import csaf.core.base as cbase
+from csaf.core.solver import LSODASolver, DiscreteSolver, SystemSolver
 
 import abc
 import enum
@@ -44,7 +44,7 @@ class Component(cbase.CsafBase, metaclass=abc.ABCMeta):
     is_discrete: bool
 
     # time invariant system parameters
-    parameters: Parameters
+    default_parameters: Parameters
 
     # input messages
     inputs: typing.Sequence[typing.Tuple[FlowIdentifier, typing.Type[typing.Tuple]]]
@@ -65,6 +65,8 @@ class Component(cbase.CsafBase, metaclass=abc.ABCMeta):
     initialize: typing.Optional[typing.Callable] = None
 
     def __init__(self):
+        self.parameters = self.default_parameters.copy()
+
         if set(self.flows) != self.flow_names:
             raise RuntimeError(f"{self.__class__.__name__} flows are not correctly specified "
                                f"(must have names {self.flow_names})")

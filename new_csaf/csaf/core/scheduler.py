@@ -11,7 +11,7 @@ import typing
 
 if typing.TYPE_CHECKING:
     # cyclic imports issue
-    from csaf.component import Component
+    from csaf.core.component import Component
 
 __all__ = ['Scheduler']
 

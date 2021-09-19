@@ -1,10 +1,10 @@
 """
 CSAF System
 """
-from csaf.component import Component
-from csaf.scheduler import Scheduler
-from csaf.trace import TimeTrace
-import csaf.base as cbase
+from csaf.core.component import Component
+from csaf.core.scheduler import Scheduler
+from csaf.core.trace import TimeTrace
+import csaf.core.base as cbase
 
 import typing
 import tqdm  # type: ignore
@@ -55,7 +55,7 @@ class ComponentComposition(cbase.CsafBase):
         translate into a vector.
 
         TODO: is this too slow?
-        TODO: should some of this be in the csaf.Component class?
+        TODO: should some of this be in the csaf.core.Component class?
 
         :param component_name: name of component to build an input vector for
         :return: input vector
@@ -133,8 +133,9 @@ class ComponentComposition(cbase.CsafBase):
 
                 if terminating_conditions_all is not None and terminating_conditions_all(dtraces):
                     return dtraces if not return_passed else (dtraces, False)
-        except Exception:
+        except Exception as exc:
             # FIXME: TODO
+            raise exc
             pass
 
         return dtraces if not return_passed else (dtraces, True)
@@ -205,9 +206,9 @@ class ComponentComposition(cbase.CsafBase):
         for nname, ncomp in self.components.items():
             devname = ncomp.name  # ninfo['config']["system_name"]
             if ncomp.is_discrete:
-                verts[nname] = pydot.Node(f"'{nname}'\n{devname}\n{len(ncomp.parameters)} Parameter(s)\n{ncomp.sampling_frequency} Hz", style="solid")
+                verts[nname] = pydot.Node(f"'{nname}'\n{devname}\n{len(ncomp.default_parameters)} Parameter(s)\n{ncomp.sampling_frequency} Hz", style="solid")
             else:
-                verts[nname] = pydot.Node(f"'{nname}'\n{devname}\n{len(ncomp.parameters)} Parameter(s)", style="bold")
+                verts[nname] = pydot.Node(f"'{nname}'\n{devname}\n{len(ncomp.default_parameters)} Parameter(s)", style="bold")
             graph.add_node(verts[nname])
 
         pairs = []
@@ -253,8 +254,8 @@ class ComponentComposition(cbase.CsafBase):
                 insig = outdict[outflow].__annotations__.items()
                 outsig = indict[inflow].__annotations__.items()
                 assert len(insig) == len(outsig)
-                for (_, intype), (_, outtype) in zip(insig, outsig):
-                    assert issubclass(intype, outtype)
+                for (inid, intype), (outid, outtype) in zip(insig, outsig):
+                    assert issubclass(intype, outtype), f"subclass errors ({inid, intype})<-({outid, outtype})"
         except Exception as exc:
             raise exc.__class__(f"|System <{self.__class__.__name__}>|{exc}")
 

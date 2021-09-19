@@ -1,4 +1,4 @@
-from csaf.system import System
+from csaf.core.system import System
 import typing
 import f16lib.components as f16c
 
@@ -67,7 +67,7 @@ class F16Shield(System):
 
 
 class F16MultiAgentCentral(System):
-    from csaf.component import DiscreteComponent
+    from csaf import DiscreteComponent
 
     class CentralController(DiscreteComponent):
         """NOTE: this doesn't do much as it will be used in a SystemEnv"""
@@ -127,16 +127,22 @@ class F16MultiAgentCentral(System):
 
 
 class F16AcasShield(System):
+    class F16AcasRecoveryComponent(f16c.create_nagents_acas_xu(1)):
+        parameters = {
+            **f16c.create_nagents_acas_xu(1).default_parameters,
+            "roll_rates": (0, -3.0, 3.0, -6.0, 6.0)
+        }
+
     components = {
         "plant": f16c.F16PlantComponent,
         "llc": f16c.F16LlcComponent,
-        "autopilot": f16c.F16AcasComponent,
-        "autopilot_recovery": f16c.F16AcasComponent,
-        "switch": f16c.F16AcasSwitchComponent,
-        "predictor": f16c.F16CollisionPredictor,
+        "autopilot": f16c.create_nagents_acas_xu(1),
+        "autopilot_recovery": F16AcasRecoveryComponent,
+        "switch": f16c.F16AcasRecoverySwitchComponent,
+        "predictor": f16c.create_collision_predictor(1),
         "intruder_llc": f16c.F16LlcComponent,
         "intruder_plant": f16c.F16PlantComponent,
-        "intruder_autopilot": f16c.F16AutoAirspeedComponent
+        "intruder_autopilot": f16c.F16AutoWaypointComponent
     }
 
     connections = {
@@ -146,20 +152,14 @@ class F16AcasShield(System):
         ("llc", "inputs_poutputs"): ("plant", "outputs"),
         ("llc", "inputs_coutputs"): ("switch", "outputs"),
 
-        ("autopilot", "inputs_own_pstates"): ("plant", "states"),
-        #("autopilot", "inputs_own_lstates"): ("llc", "states"),
-        ("autopilot", "inputs_other_pstates"): ("intruder_plant", "states"),
-        #("autopilot", "inputs_other_lstates"): ("intruder_llc", "states"),
+        ("autopilot", "inputs_own"): ("plant", "states"),
+        ("autopilot", "inputs_intruder0"): ("intruder_plant", "states"),
 
-        ("autopilot_recovery", "inputs_own_pstates"): ("plant", "states"),
-        #("autopilot_recovery", "inputs_own_lstates"): ("llc", "states"),
-        ("autopilot_recovery", "inputs_other_pstates"): ("intruder_plant", "states"),
-        #("autopilot_recovery", "inputs_other_lstates"): ("intruder_llc", "states"),
+        ("autopilot_recovery", "inputs_own"): ("plant", "states"),
+        ("autopilot_recovery", "inputs_intruder0"): ("intruder_plant", "states"),
 
-        ("predictor", "inputs_own_pstates"): ("plant", "states"),
-        #("predictor", "inputs_own_lstates"): ("llc", "states"),
-        ("predictor", "inputs_other_pstates"): ("intruder_plant", "states"),
-        #("predictor", "inputs_other_lstates"): ("intruder_llc", "states"),
+        ("predictor", "inputs_own"): ("plant", "states"),
+        ("predictor", "inputs_intruder0"): ("intruder_plant", "states"),
 
         ("switch", "inputs"): ("autopilot", "outputs"),
         ("switch", "inputs_recovery"): ("autopilot_recovery", "outputs"),
@@ -170,6 +170,135 @@ class F16AcasShield(System):
         ("intruder_llc", "inputs_poutputs"): ("intruder_plant", "outputs"),
         ("intruder_llc", "inputs_coutputs"): ("intruder_autopilot", "outputs"),
         ("intruder_plant", "inputs"): ("intruder_llc", "outputs"),
+        ("intruder_autopilot", "inputs_poutputs"): ("intruder_plant", "outputs"),
+        ("intruder_autopilot", "inputs_pstates"): ("intruder_plant", "states")
+    }
+
+
+class F16AcasShieldSurrogate(System):
+    components = {
+        "plant": f16c.F16PlantComponent,
+        "llc": f16c.F16LlcComponent,
+        "autopilot": f16c.create_nagents_acas_xu(1),
+        "intruder_plant": f16c.F16PlantComponent,
+    }
+
+    connections = {
+        ("plant", "inputs"): ("llc", "outputs"),
+
+        ("llc", "inputs_pstates"): ("plant", "states"),
+        ("llc", "inputs_poutputs"): ("plant", "outputs"),
+        ("llc", "inputs_coutputs"): ("autopilot", "outputs"),
+
+        ("autopilot", "inputs_own"): ("plant", "states"),
+        ("autopilot", "inputs_intruder0"): ("intruder_plant", "states"),
+    }
+
+
+class F16AcasIntruderBalloon(System):
+    components = {
+        "plant": f16c.F16PlantComponent,
+        "llc": f16c.F16LlcComponent,
+        "acas": f16c.create_nagents_acas_xu(2),
+        "waypoint": f16c.F16AutoWaypointComponent,
+        "switch": f16c.F16AcasSwitchComponent,
+        "intruder_llc": f16c.F16LlcComponent,
+        "intruder_plant": f16c.F16PlantComponent,
+        "intruder_autopilot": f16c.F16AutoWaypointComponent,
+        "balloon": f16c.StaticObject
+    }
+
+    connections = {
+        ("plant", "inputs"): ("llc", "outputs"),
+
+        ("llc", "inputs_pstates"): ("plant", "states"),
+        ("llc", "inputs_poutputs"): ("plant", "outputs"),
+        ("llc", "inputs_coutputs"): ("switch", "outputs"),
+
+        ("acas", "inputs_own"): ("plant", "states"),
+        ("acas", "inputs_intruder1"): ("intruder_plant", "states"),
+        ("acas", "inputs_intruder0"): ("balloon", "states"),
+
+        ("waypoint", "inputs_poutputs"): ("plant", "outputs"),
+        ("waypoint", "inputs_pstates"): ("plant", "states"),
+
+        ("switch", "inputs"): ("waypoint", "outputs"),
+        ("switch", "inputs_recovery"): ("acas", "outputs"),
+        ("switch", "inputs_select"): ("acas", "states"),
+
+        # setup the intruder plan
+        ("intruder_llc", "inputs_pstates"): ("intruder_plant", "states"),
+        ("intruder_llc", "inputs_poutputs"): ("intruder_plant", "outputs"),
+        ("intruder_llc", "inputs_coutputs"): ("intruder_autopilot", "outputs"),
+
+        ("intruder_plant", "inputs"): ("intruder_llc", "outputs"),
+
+        ("intruder_autopilot", "inputs_poutputs"): ("intruder_plant", "outputs"),
+        ("intruder_autopilot", "inputs_pstates"): ("intruder_plant", "states")
+    }
+
+
+class F16AcasShieldIntruderBalloon(System):
+    class F16AcasRecoveryComponent(f16c.create_nagents_acas_xu(2)):
+        parameters = {
+            **f16c.create_nagents_acas_xu(1).default_parameters,
+            "roll_rates": (0, -3.0, 3.0, -6.0, 6.0)
+        }
+
+    components = {
+        "plant": f16c.F16PlantComponent,
+        "llc": f16c.F16LlcComponent,
+        "acas": f16c.create_nagents_acas_xu(2),
+        "acas_recovery": F16AcasRecoveryComponent,
+        "acas_switch": f16c.F16AcasRecoverySwitchComponent,
+        "predictor": f16c.create_collision_predictor(2),
+        "waypoint": f16c.F16AutoWaypointComponent,
+        "switch": f16c.F16AcasSwitchComponent,
+        "intruder_llc": f16c.F16LlcComponent,
+        "intruder_plant": f16c.F16PlantComponent,
+        "intruder_autopilot": f16c.F16AutoWaypointComponent,
+        "balloon": f16c.StaticObject
+    }
+
+    connections = {
+        ("plant", "inputs"): ("llc", "outputs"),
+
+        ("llc", "inputs_pstates"): ("plant", "states"),
+        ("llc", "inputs_poutputs"): ("plant", "outputs"),
+        ("llc", "inputs_coutputs"): ("switch", "outputs"),
+
+        ("acas", "inputs_own"): ("plant", "states"),
+        ("acas", "inputs_intruder1"): ("intruder_plant", "states"),
+        ("acas", "inputs_intruder0"): ("balloon", "states"),
+
+        ("acas_recovery", "inputs_own"): ("plant", "states"),
+        ("acas_recovery", "inputs_intruder1"): ("intruder_plant", "states"),
+        ("acas_recovery", "inputs_intruder0"): ("balloon", "states"),
+
+        ("predictor", "inputs_own"): ("plant", "states"),
+        ("predictor", "inputs_intruder1"): ("intruder_plant", "states"),
+        ("predictor", "inputs_intruder0"): ("balloon", "states"),
+
+        ("acas_switch", "inputs"): ("acas", "outputs"),
+        ("acas_switch", "inputs_recovery"): ("acas_recovery", "outputs"),
+        ("acas_switch", "inputs_state"): ("acas", "states"),
+        ("acas_switch", "inputs_recovery_state"): ("acas_recovery", "states"),
+        ("acas_switch", "inputs_select"): ("predictor", "outputs"),
+
+        ("waypoint", "inputs_poutputs"): ("plant", "outputs"),
+        ("waypoint", "inputs_pstates"): ("plant", "states"),
+
+        ("switch", "inputs"): ("waypoint", "outputs"),
+        ("switch", "inputs_recovery"): ("acas_switch", "outputs"),
+        ("switch", "inputs_select"): ("acas_switch", "outputs_state"),
+
+        # setup the intruder plan
+        ("intruder_llc", "inputs_pstates"): ("intruder_plant", "states"),
+        ("intruder_llc", "inputs_poutputs"): ("intruder_plant", "outputs"),
+        ("intruder_llc", "inputs_coutputs"): ("intruder_autopilot", "outputs"),
+
+        ("intruder_plant", "inputs"): ("intruder_llc", "outputs"),
+
         ("intruder_autopilot", "inputs_poutputs"): ("intruder_plant", "outputs"),
         ("intruder_autopilot", "inputs_pstates"): ("intruder_plant", "states")
     }

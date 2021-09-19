@@ -18,10 +18,5 @@ __maintainer__ = "Ethan Lew"
 __email__ = "elew@galois.com"
 __status__ = "prototype"
 
-# import major CSAF objects
-from csaf.component import Component, DiscreteSolver, ContinuousComponent
-from csaf.scheduler import Scheduler
-from csaf.system_env import SystemEnv
-from csaf.system import ComponentComposition, System
-from csaf.solver import LSODASolver, DiscreteSolver
-from csaf.trace import TimeTrace
+# bring core CSAF objects to the top level
+from csaf.core import *
