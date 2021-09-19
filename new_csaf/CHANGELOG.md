@@ -47,7 +47,7 @@ import csaf
 class MyComponent(csaf.DiscreteComponent):
     name = "My Component"
     sampling_frequency = 25.0
-    parameters = {"length": 3.0}
+    default_parameters = {"length": 3.0}
     inputs = (("voltage", VoltageMessage),)
     outputs = (("torque", TorqueMessage),)
     states = ComponentMessage

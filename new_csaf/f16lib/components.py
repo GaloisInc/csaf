@@ -3,14 +3,17 @@ import f16lib.models.llc as llc
 import f16lib.models.autopilot as auto
 import f16lib.models.autoairspeed as autoair
 import f16lib.models.autoaltitude as autoalt
+import f16lib.models.autowaypoint as awaypoint
 import f16lib.models.switch as switch
-import f16lib.models.ma_acas as acas
+import f16lib.models.autoacas as acas
 import f16lib.models.monitor_ap as monitor
 import f16lib.models.acas_switch as aswitch
 import f16lib.models.predictor as predictor
 
 from f16lib.messages import *
-from csaf.component import *
+from csaf import ContinuousComponent, DiscreteComponent
+import typing
+
 
 f16_gcas_scen = [540.0,
                  0.037027160081059704,
@@ -44,7 +47,7 @@ f16_xequil = [502.0,
 class F16PlantComponent(ContinuousComponent):
     name = "F16 Plant Model"
     sampling_frequency = 30.0
-    parameters = {
+    default_parameters = {
         "s": 300.0,
         "b": 30.0,
         "cbar": 11.32,
@@ -92,7 +95,7 @@ class F16PlantComponent(ContinuousComponent):
 class F16LlcComponent(ContinuousComponent):
     name = "F16 Low Level Controller"
     sampling_frequency = 30.0
-    parameters = {
+    default_parameters = {
         "lqr_name": "lqr_original",
         "throttle_max": 1,
         "throttle_min": 0,
@@ -127,7 +130,7 @@ class F16LlcComponent(ContinuousComponent):
 
 class F16AutopilotComponent(DiscreteComponent):
     name = ""
-    sampling_frequency = 2.0
+    sampling_frequency = 10.0
     inputs = (
         ("inputs_pstates", F16PlantStateMessage),
         ("inputs_poutputs", F16PlantOutputMessage),
@@ -137,7 +140,7 @@ class F16AutopilotComponent(DiscreteComponent):
 
 class F16GcasComponent(F16AutopilotComponent):
     name = "F16 GCAS Autopilot"
-    parameters = {
+    default_parameters = {
         "NzMax": 9.0,
         "vt_des": 502.0
     }
@@ -160,7 +163,7 @@ class F16GcasComponent(F16AutopilotComponent):
 
 class F16AutoAirspeedComponent(F16AutopilotComponent):
     name = "F16 Airspeed Autopilot"
-    parameters = {
+    default_parameters = {
         "setpoint": 800.0,  # setpoint in airspeed (ft/s)
         "p_gain": 0.01,  # P controller gain value
         "xequil": [502.0, 0.03887505597600522, 0.0, 0.0, 0.03887505597600522, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1000.0, 9.05666543872074]
@@ -181,7 +184,7 @@ class F16AutoAirspeedComponent(F16AutopilotComponent):
 
 class F16AutoAltitudeComponent(F16AutopilotComponent):
     name = "F16 Altitude Autopilot"
-    parameters = {
+    default_parameters = {
         "setpoint": 2500,
         "xequil": f16_xequil
     }
@@ -201,8 +204,8 @@ class F16AutoAltitudeComponent(F16AutopilotComponent):
 
 class F16MonitorComponent(DiscreteComponent):
     name = "F16 Autopilot Monitor"
-    sampling_frequency = 2.0
-    parameters: typing.Dict[str, typing.Any] = {
+    sampling_frequency = 10.0
+    default_parameters: typing.Dict[str, typing.Any] = {
 
     }
     default_initial_values = {
@@ -227,7 +230,7 @@ class F16MonitorComponent(DiscreteComponent):
 
 class F16SwitchComponent(DiscreteComponent):
     name = "F16 Autopilot Selector"
-    sampling_frequency = 2.0
+    sampling_frequency = 10.0
     default_initial_values = {
         "inputs_0": [0.0, 0.0, 0.0, 0.0],
         "inputs_1": [0.0, 0.0, 0.0, 0.0],
@@ -235,7 +238,7 @@ class F16SwitchComponent(DiscreteComponent):
         "inputs_monitors": ["gcas"],
         "states": []
     }
-    parameters = {
+    default_parameters = {
         "mapper": ["gcas", "altitude", "airspeed"]
     }
     states = EmptyMessage
@@ -253,87 +256,192 @@ class F16SwitchComponent(DiscreteComponent):
     }
 
 
-class F16AcasComponent(DiscreteComponent):
-    name = "F16 Acas Xu Controller"
-    sampling_frequency = 2.0
-    parameters = {
-        "setpoint": 2500.0,
-        "xequil": [502.0, 0.03887505597600522, 0.0, 0.0, 0.03887505597600522, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1000.0, 9.05666543872074]
-    }
-    inputs = (
-        ("inputs_own_pstates", F16PlantStateMessage),
-        #("inputs_own_lstates", F16LlcStateMessage),
-        ("inputs_other_pstates", F16PlantStateMessage),
-        #("inputs_other_lstates", F16LlcStateMessage),
-    )
-    outputs = (
-        ("outputs", F16ControllerOutputMessage),
-    )
-    states = F16AutopilotOutputMessage
-    default_initial_values = {
-        "states": ['clear'],
-        "inputs_other_pstates": f16_xequil,
-        "inputs_own_pstates": f16_xequil,
-        #"inputs_own_lstates": [0.0, 0.0, 0.0],
-        #"inputs_other_lstates": [0.0, 0.0, 0.0]
-    }
-    flows = {
-        "outputs": acas.model_output,
-        "states": acas.model_state_update
-    }
-    initialize = acas.model_init
+def create_collision_predictor(nagents: int) -> typing.Type[DiscreteComponent]:
+    class _F16CollisionPredictor(DiscreteComponent):
+        name = "F16 Collision Predictor"
+        sampling_frequency = 10.0
+        default_parameters: typing.Dict[str, typing.Any] = {
+        }
+        inputs = (
+            ("inputs_own", F16PlantStateMessage),
+            *[(f"inputs_intruder{idx}", F16PlantStateMessage) for idx in range(nagents)]
+        )
+        outputs = (
+            ("outputs", PredictorOutputMessage),
+        )
+        states = EmptyMessage
+        default_initial_values = {
+            "inputs_own": f16_xequil,
+            "states": [],
+            **{f"inputs_intruder{idx}": f16_xequil for idx in range(nagents)}
+        }
+        flows = {
+            "outputs": predictor.model_output
+        }
+        initialize = None
+    return _F16CollisionPredictor
 
 
-class F16AcasSwitchComponent(DiscreteComponent):
-    name = "F16 Acas Selector"
-    sampling_frequency = 2.0
-    parameters = {
+
+def create_nagents_acas_xu(nagents: int) -> typing.Type[DiscreteComponent]:
+    class _F16AcasComponent(DiscreteComponent):
+        name = "F16 Acas Xu Controller"
+        sampling_frequency = 10.0
+        default_parameters = {
+            "roll_rates": (0, -1.5, 1.5, -3.0, 3.0),
+            "setpoint": 2500.0,
+            "xequil": [502.0, 0.03887505597600522, 0.0, 0.0, 0.03887505597600522, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1000.0, 9.05666543872074]
+        }
+        inputs = (
+            ("inputs_own", F16PlantStateMessage),
+            *[(f"inputs_intruder{idx}", F16PlantStateMessage) for idx in range(nagents)]
+        )
+        outputs = (
+            ("outputs", F16ControllerOutputMessage),
+        )
+        states = F16AutopilotOutputMessage
+        default_initial_values = {
+            "states": ['clear'],
+            "inputs_own": f16_xequil,
+            **{f"inputs_intruder{idx}": f16_xequil for idx in range(nagents)}
+        }
+        flows = {
+            "outputs": acas.model_output,
+            "states": acas.model_state_update
+        }
+        initialize = acas.model_init
+    return _F16AcasComponent
+
+
+def switch_model_output(model, t, states, inputs):
+    if inputs[-1] == "clear":
+        return inputs[:4]
+    else:
+        return inputs[4:8]
+
+
+def switch_model_state(model, t, states, inputs):
+    return [inputs[-1]]
+
+
+class F16AcasRecoverySwitchComponent(DiscreteComponent):
+    name = "F16 Acas Recovery Selector"
+    sampling_frequency = 10.0
+    default_parameters = {
         "mapper": ["acas", "acas_recovery"]
     }
     inputs = (
         ("inputs", F16ControllerOutputMessage),
+        ("inputs_state", F16MonitorOutputMessage),
         ("inputs_recovery", F16PlantOutputMessage),
-        ("inputs_monitors", PredictorOutputMessage),
+        ("inputs_recovery_state", F16MonitorOutputMessage),
+        ("inputs_select", PredictorOutputMessage),
     )
     outputs = (
         ("outputs", F16ControllerOutputMessage),
+        ("outputs_state", F16MonitorOutputMessage)
     )
     states = EmptyMessage
     default_initial_values = {
         "inputs": [0.0,]*4,
         "inputs_recovery": [0.0,]*4,
         "states": [],
-        "inputs_monitors": [False]
+        "inputs_select": [False],
+        "inputs_state": ["clear"],
+        "inputs_recovery_state": ["clear"]
     }
     flows = {
-        "outputs": aswitch.model_output
+        "outputs": aswitch.model_output,
+        "outputs_state": aswitch.model_output_state
     }
     initialize = None
 
 
 class F16CollisionPredictor(DiscreteComponent):
     name = "F16 Collision Predictor"
-    sampling_frequency = 2.0
-    parameters: typing.Dict[str, typing.Any] = {
+    sampling_frequency = 10.0
+    default_parameters: typing.Dict[str, typing.Any] = {
     }
     inputs = (
-        ("inputs_own_pstates", F16PlantStateMessage),
-        #("inputs_own_lstates", F16LlcStateMessage),
-        ("inputs_other_pstates", F16PlantStateMessage),
-        #("inputs_other_lstates", F16LlcStateMessage)
+        ("inputs_own", F16PlantStateMessage),
+        ("inputs_intruder0", F16PlantStateMessage),
     )
     outputs = (
         ("outputs", PredictorOutputMessage),
     )
     states = EmptyMessage
     default_initial_values = {
-        "inputs_own_pstates": f16_xequil,
-        "inputs_other_pstates": f16_xequil,
-        #"inputs_own_lstates": [0.0, 0.0, 0.0],
-        #"inputs_other_lstates": [0.0, 0.0, 0.0],
+        "inputs_own": f16_xequil,
+        "inputs_intruder0": f16_xequil,
         "states": []
     }
     flows = {
         "outputs": predictor.model_output
     }
     initialize = None
+
+
+class F16AutoWaypointComponent(F16AutopilotComponent):
+    name = "F16 Waypoint Autopilot"
+    default_parameters = {
+        "waypoints": [(5000.0, -1000.0, 1000.0)]
+    }
+    states = F16AutopilotOutputMessage
+    default_initial_values = {
+        "states": ['Waiting 1'],
+        "inputs_pstates": f16_xequil,
+        "inputs_poutputs": [0.0, 0.0, 0.0, 0.0],
+    }
+    outputs = (
+        ("outputs", F16ControllerOutputMessage),
+    )
+    flows = {
+        "outputs": awaypoint.model_output,
+        "states": awaypoint.model_state_update
+    }
+    initialize = awaypoint.model_init
+
+
+class StaticObject(DiscreteComponent):
+    name = "Static Object"
+    sampling_frequency = 1.0
+    default_parameters = {}
+    inputs = ()
+    outputs = ()
+    states = F16PlantStateMessage
+    default_initial_values = {
+        "states": f16_xequil
+    }
+    flows = {
+        "states": lambda m, t, s, i: s
+    }
+
+
+
+class F16AcasSwitchComponent(DiscreteComponent):
+
+    name = "F16 Acas Monitor"
+    sampling_frequency = 10.0
+    default_initial_values = {
+        "inputs": [0.0, 0.0, 0.0, 0.0],
+        "inputs_recovery": [0.0, 0.0, 0.0, 0.0],
+        "inputs_select": ["clear"],
+        "states": []
+    }
+    default_parameters = {
+        "mapper": ["gcas", "altitude", "airspeed"]
+    }
+    states = EmptyMessage
+    inputs = (
+        ("inputs", F16ControllerOutputMessage),
+        ("inputs_recovery", F16ControllerOutputMessage),
+        ("inputs_select", F16MonitorOutputMessage)
+    )
+    outputs = (
+        ("outputs", F16ControllerOutputMessage),
+        ("outputs_state", F16MonitorOutputMessage),
+    )
+    flows = {
+        "outputs": switch_model_output,
+        "outputs_state": switch_model_state
+    }

@@ -3,8 +3,8 @@ CSAF Solver
 """
 from __future__ import annotations
 
-import csaf.base as cbase
-import csaf.scheduler as sched
+import csaf.core.base as cbase
+import csaf.core.scheduler as sched
 
 import scipy.integrate  # type: ignore
 
@@ -12,7 +12,7 @@ import typing
 
 if typing.TYPE_CHECKING:
     # cyclic imports issue
-    from csaf.component import Component
+    from csaf.core.component import Component
 
 __all__ = ['LSODASolver', 'DiscreteSolver']
 
