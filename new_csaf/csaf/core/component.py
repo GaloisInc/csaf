@@ -24,6 +24,25 @@ class Component(cbase.CsafBase, metaclass=abc.ABCMeta):
     """
     CSAF System Component
     """
+    required_fields = [
+        "name",
+        "system_representation",
+        "system_solver",
+        "sampling_frequency",
+        "sampling_phase",
+        "is_discrete",
+        "default_parameters",
+        "inputs",
+        "outputs",
+        "states",
+        "default_initial_values",
+        "flows"
+    ]
+
+    @classmethod
+    def check_fields(cls):
+        for r in cls.required_fields:
+            assert hasattr(cls, r), f"{cls.__name__} does not have required attribute {r}"
 
     # component name
     name: str
@@ -65,6 +84,7 @@ class Component(cbase.CsafBase, metaclass=abc.ABCMeta):
     initialize: typing.Optional[typing.Callable] = None
 
     def __init__(self):
+        self.check_fields()
         self.parameters = self.default_parameters.copy()
 
         if set(self.flows) != self.flow_names:
@@ -80,6 +100,12 @@ class Component(cbase.CsafBase, metaclass=abc.ABCMeta):
     def reset(self):
         """reset component members to their defaults"""
         self.initial_values = self.default_initial_values.copy()
+
+    def build_default_inputs(self):
+        inputs = []
+        for in_name, in_sig in self.inputs:
+            inputs += self.default_initial_values[in_name]
+        return inputs
 
     def solve_state(self,
                     inputs: typing.Sequence,
@@ -144,7 +170,7 @@ class Component(cbase.CsafBase, metaclass=abc.ABCMeta):
 
     def __getattr__(self, item):
         """access the component parameters in the object dir"""
-        if item == "parameters":
+        if item == "parameters" or item == "default_parameters":
             raise RuntimeError
         if item in self.parameters:
             return self.parameters[item]
@@ -157,6 +183,7 @@ class Component(cbase.CsafBase, metaclass=abc.ABCMeta):
                 value), f"value with name {name} doesn't match length of signature {signature}"
 
         try:
+            self.check_fields()
             assert self.sampling_frequency > 0.0, f"sampling frequency must be greater than 0.0"
             assert set(self.initial_values.keys()) == ({k for k, _ in self.inputs} | {
                 "states"}), f"initial values must reference all inputs and states"
@@ -168,6 +195,22 @@ class Component(cbase.CsafBase, metaclass=abc.ABCMeta):
             sig_dict = dict(list(self.inputs) + [('states', self.states)])
             for vname, vval in self.initial_values.items():
                 validate_signature(vname, sig_dict[vname], vval)
+
+            # test flows against default
+            dins = self.build_default_inputs()
+            states = self.default_initial_values["states"]
+            sig_dict = dict(list(self.outputs) + [('states', self.states)])
+            for name, f in self.flows.items():
+                ret = f(self, 0.0, states, dins)
+                sd = sig_dict[name]
+                assert len(ret) == len(sig_dict[name].__annotations__), f"flow {name} doesn't have correct " \
+                                                                        f"return length" \
+                                                                        f" against defaults (expected " \
+                                                                        f"{len(sig_dict[name].__annotations__)}, " \
+                                                                        f"received {len(ret)})"
+                for idx, (sname, stype) in enumerate(sd.__annotations__.items()):
+                    assert isinstance(ret[idx], stype), f"flow {name} signature requires {sname} ({idx}) have " \
+                                                        f"type {stype}, but returned {ret[idx]} instead"
         except Exception as exc:
             raise exc.__class__(f"|Component <{self.__class__.__name__}>| {exc}")
 
@@ -176,11 +219,11 @@ class ContinuousComponent(Component):
     system_representation = SystemRepresentationEnum.BLACK_BOX
     system_solver = LSODASolver
     is_discrete = False
-    sampling_phase = 1E-8
+    sampling_phase = 0.0
 
 
 class DiscreteComponent(Component):
     system_representation = SystemRepresentationEnum.BLACK_BOX
     system_solver = DiscreteSolver
     is_discrete = True
-    sampling_phase = 1E-8
+    sampling_phase = 0.0

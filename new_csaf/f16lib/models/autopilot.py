@@ -60,7 +60,7 @@ def model_info(model, time_t, state_controller, input_f16):
 def model_output(model, time_t, state_controller, input_f16):
     """for the current discrete state, get the reference inputs signals"""
     state = state_controller[0]
-    Nz_des = min(5, model.NzMax)  # Desired maneuver g's
+    Nz_des = min(5.0, model.NzMax)  # Desired maneuver g's
 
     # Pull out important variables for ease of use
     phi = input_f16[3]  # Roll angle    (rad)
@@ -74,16 +74,16 @@ def model_output(model, time_t, state_controller, input_f16):
     # Determine which angle is "level" (0, 180, 360, 720, etc)
     radsFromWingsLevel = round(phi / np.pi)
     phi_des = np.pi * radsFromWingsLevel
-    p_des = 0
+    p_des = 0.0
 
     # Determine "which" angle is level (0, 360, 720, etc)
     radsFromNoseLevel = round(gamma / np.pi)
     gamma_des = np.pi * radsFromNoseLevel
 
     if state == GcasAutopilot.STATE_START:
-        Nz, ps = 0, 0
+        Nz, ps = 0.0, 0.0
     elif state == GcasAutopilot.STATE_ROLL:
-        Nz, ps = 0, state_roll(phi_des, phi, p)
+        Nz, ps = 0.0, state_roll(phi_des, phi, p)
     elif state == GcasAutopilot.STATE_PULL:
         Nz, ps = state_pull(Nz_des), 0
     elif state == GcasAutopilot.STATE_DONE:
@@ -94,7 +94,7 @@ def model_output(model, time_t, state_controller, input_f16):
 
     # basic speed control
     throttle = ah.p_cntrl(kp=0.25, e=(model.vt_des - vt))
-    Ny_r = 0
+    Ny_r = 0.0
     # New references
     return Nz, ps, Ny_r, throttle
 
@@ -103,7 +103,7 @@ def state_roll(phi_des, phi, p):
     # Determine which angle is "level" (0, 180, 360, 720, etc)
 
     # PD Control until phi == phi_des
-    K_prop = 4  # 000
+    K_prop = 4.0  # 000
     K_der = K_prop * 0.3
 
     ps = -(phi - phi_des) * K_prop - p * K_der
@@ -118,7 +118,7 @@ def state_pull(Nz_des):
 def state_done(gamma_des, phi_des, p_des, gamma, phi, p):
     # steady-level hold
     # Set Proportional-Derivative control gains for roll
-    K_prop = 1
+    K_prop = 1.0
     K_der = K_prop * 0.3
     e_ps, ed_ps = phi_des - phi, p_des - p
     # PD Control on phi using roll rate
@@ -130,7 +130,7 @@ def state_done(gamma_des, phi_des, p_des, gamma, phi, p):
     # ./rundemo.py --test-id=dc --endtime=19.4 --animate
     # K_prop2 = 78
 
-    K_prop2 = 2
+    K_prop2 = 2.0
     K_der2 = K_prop * 0.3
     # XXX: Why is roll rate (p) being used here? Should be q, the pitch rate
     e_nz, ed_nz = gamma_des - gamma, p_des - p
