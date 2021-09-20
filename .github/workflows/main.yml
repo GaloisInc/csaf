@@ -35,7 +35,7 @@ jobs:
       - run: pip install -r new_csaf/requirements.txt
         if: steps.cache-virtualenv.outputs.cache-hit != 'true'
 
-       run: cd new_csaf && PYTHONPATH=$PWD pytest --mypy -s tests
+      - run: cd new_csaf && PYTHONPATH=$PWD pytest --mypy -s tests
 
   #     - name: F16 simple test
   #       run: ./run-csaf.sh -e f16-simple -n
