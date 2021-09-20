@@ -127,7 +127,9 @@ class F16MultiAgentCentral(System):
 
 
 class F16AcasShield(System):
-    class F16AcasRecoveryComponent(f16c.create_nagents_acas_xu(1)):
+    Base: typing.Any = f16c.create_nagents_acas_xu(1)
+
+    class F16AcasRecoveryComponent(Base):
         parameters = {
             **f16c.create_nagents_acas_xu(1).default_parameters,
             "roll_rates": (0, -3.0, 3.0, -6.0, 6.0)
@@ -181,7 +183,7 @@ class F16AcasShieldSurrogate(System):
     class F16SurrogatePlaceholderComponent(f16c.DiscreteComponent):
         name = "F16 Surrogate Placeholder"
         sampling_frequency = 30.0
-        default_parameters = {}
+        default_parameters: typing.Dict[str, typing.Any] = {}
         inputs = ()
         outputs = (
             ("outputs", f16c.F16PlantOutputMessage),
@@ -258,7 +260,9 @@ class F16AcasIntruderBalloon(System):
 
 
 class F16AcasShieldIntruderBalloon(System):
-    class F16AcasRecoveryComponent(f16c.create_nagents_acas_xu(2)):
+    Base: typing.Any = f16c.create_nagents_acas_xu(2)
+
+    class F16AcasRecoveryComponent(Base):
         parameters = {
             **f16c.create_nagents_acas_xu(1).default_parameters,
             "roll_rates": (0, -3.0, 3.0, -6.0, 6.0)

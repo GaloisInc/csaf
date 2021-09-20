@@ -23,7 +23,7 @@ def view_block_diagram(system: typing.Union[System, typing.Type[System]],
     system.plot_config(fname=pathlib.Path(plot_fname).resolve(), prog=["dot", "-Gdpi=400"])
 
     if ipython_notebook:
-        from IPython.display import Image
+        from IPython.display import Image # type: ignore
         return Image(plot_fname, height=800, width=800)
     else:
         open_image(plot_fname)

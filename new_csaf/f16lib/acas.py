@@ -85,13 +85,11 @@ class AcasShieldScenario(AcasScenario):
     system_type = f16sys.F16AcasShieldIntruderBalloon
 
 
-from svgpath2mpl import parse_path
+from svgpath2mpl import parse_path # type: ignore
 import matplotlib as mpl
 import matplotlib.pyplot as plt
-import matplotlib.path as mpath
-from matplotlib.colors import ListedColormap, BoundaryNorm
-from matplotlib.collections import LineCollection
-import matplotlib.animation as animation
+from matplotlib.collections import LineCollection # type: ignore
+import matplotlib.animation as animation # type: ignore
 from numpy import sin, cos
 
 
