@@ -92,7 +92,7 @@ scikit-learn==0.24.2
 scikit-optimize==0.8.1
 scipy==1.7.1
 Send2Trash==1.8.0
-setuptools==52.0.0.post20210125
+setuptools==52.0
 six==1.16.0
 svgpath2mpl==1.0.0
 terminado==0.12.1
