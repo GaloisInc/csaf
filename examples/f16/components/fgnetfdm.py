@@ -98,7 +98,16 @@ class FGNetFDM(FlightGearBase):
     speedbrake: float = 0
     spoilers: float = 0
 
-    def __init__(self, parameters: dict = {}):
+    def __init__(self,
+            lat0_deg: float = FlightGearBase.DEFAULT_FG_LAT,
+            lon0_deg: float = FlightGearBase.DEFAULT_FG_LON,
+            h0_m: float = FlightGearBase.DEFAULT_FG_GROUND_LEVEL,
+            elevator_max_deg: float = FlightGearBase.DEFAULT_FG_ELEVATOR_MAX_DEG,
+            rudder_max_deg: float = FlightGearBase.DEFAULT_FG_RUDDER_MAX_DEG,
+            aileron_max_deg: float = FlightGearBase.DEFAULT_FG_AILERON_MAX_DEG,
+            fg_port: int = DEFAULT_FG_PORT,
+            fg_generic_port: int = FG_GENERIC_PORT
+        ):
         """
         Set everything to zeros, and set lists to the correct length
         If parameters are supplied, initialize from parameters
@@ -122,18 +131,18 @@ class FGNetFDM(FlightGearBase):
         self.gear_compression = [0.0, 0.0, 0.0]
         self.num_engines = 1
 
-        self.lat0 = deg2rad(float(parameters.get("FG_LAT", FlightGearBase.DEFAULT_FG_LAT)))
-        self.lon0 = deg2rad(float(parameters.get("FG_LON", FlightGearBase.DEFAULT_FG_LON)))
-        self.h0 = parameters.get("FG_GROUND_LEVEL", FlightGearBase.DEFAULT_FG_GROUND_LEVEL)
+        self.lat0 = deg2rad(lat0_deg)
+        self.lon0 = deg2rad(lon0_deg)
         # TODO: the altitude is not matching very well until initialized with traces
-        self.agl = self.h0
+        self.h0 = h0_m
+        self.agl = h0_m
 
-        self.elevator_max = deg2rad(parameters.get("elevator_max", FlightGearBase.DEFAULT_FG_ELEVATOR_MAX_DEG))
-        self.runnder_max = deg2rad(parameters.get("rudder_max", FlightGearBase.DEFAULT_FG_RUDDER_MAX_DEG))
-        self.aileron_max = deg2rad(parameters.get("aileron_max", FlightGearBase.DEFAULT_FG_AILERON_MAX_DEG))
+        self.elevator_max = deg2rad(elevator_max_deg)
+        self.rudder_max = deg2rad(rudder_max_deg)
+        self.aileron_max = deg2rad(aileron_max_deg)
 
-        self.FG_PORT = parameters.get("FG_PORT", self.DEFAULT_FG_PORT)
-        self.FG_GENERIC_PORT = parameters.get("FG_GENERIC_PORT", self.DEFAULT_FG_GENERIC_PORT)
+        self.FG_PORT = fg_port
+        self.FG_GENERIC_PORT = fg_generic_port
 
     def update_and_send(self, inputs: typing.Optional[typing.List[float]] =None):
         if inputs is not None:
@@ -156,7 +165,7 @@ class FGNetFDM(FlightGearBase):
             self.rpm = [6000,1,0,0,] # Dummy values
 
             self.elevator = -1.0*inputs[13]*self.elevator_max
-            self.rudder = inputs[15]*self.runnder_max
+            self.rudder = inputs[15]*self.rudder_max
             self.left_aileron = inputs[14]*self.aileron_max
             self.right_aileron = self.left_aileron
 
