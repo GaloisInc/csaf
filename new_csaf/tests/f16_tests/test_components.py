@@ -19,3 +19,9 @@ def test_component(comp_name, comp):
     else:
         comp().check()
 
+
+@pytest.mark.parametrize("comp_name,comp", components)
+def test_defaults_component(comp_name, comp):
+    if comp not in abstract_components:
+        compi = comp()
+        compi.solve_default()
