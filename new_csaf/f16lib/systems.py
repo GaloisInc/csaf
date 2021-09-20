@@ -84,7 +84,7 @@ class F16MultiAgentCentral(System):
             "inputs_pstates_1": [0.0,] * 13,
             "states": []
         }
-        parameters: typing.Dict[str, typing.Any] = {}
+        default_parameters: typing.Dict[str, typing.Any] = {}
         states = EmptyMessage
         inputs = (
             ("inputs_pstates_0", F16PlantStateMessage),
@@ -164,6 +164,8 @@ class F16AcasShield(System):
         ("switch", "inputs"): ("autopilot", "outputs"),
         ("switch", "inputs_recovery"): ("autopilot_recovery", "outputs"),
         ("switch", "inputs_select"): ("predictor", "outputs"),
+        ("switch", "inputs_state"): ("autopilot", "states"),
+        ("switch", "inputs_recovery_state"): ("autopilot_recovery", "states"),
 
         # setup the intruder plane
         ("intruder_llc", "inputs_pstates"): ("intruder_plant", "states"),
@@ -176,11 +178,28 @@ class F16AcasShield(System):
 
 
 class F16AcasShieldSurrogate(System):
+    class F16SurrogatePlaceholderComponent(f16c.DiscreteComponent):
+        name = "F16 Surrogate Placeholder"
+        sampling_frequency = 30.0
+        default_parameters = {}
+        inputs = ()
+        outputs = (
+            ("outputs", f16c.F16PlantOutputMessage),
+        )
+        states = f16c.F16PlantStateMessage
+        default_initial_values = {
+            "states": f16c.f16_xequil
+        }
+        flows = {
+            "outputs": lambda m, t, s, i: [0.0,]*4,
+            "states": lambda m, t, s, i: f16c.f16_xequil
+        }
+
     components = {
         "plant": f16c.F16PlantComponent,
         "llc": f16c.F16LlcComponent,
         "autopilot": f16c.create_nagents_acas_xu(1),
-        "intruder_plant": f16c.F16PlantComponent,
+        "intruder_plant": F16SurrogatePlaceholderComponent,
     }
 
     connections = {
