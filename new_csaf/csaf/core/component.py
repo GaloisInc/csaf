@@ -201,16 +201,18 @@ class Component(cbase.CsafBase, metaclass=abc.ABCMeta):
             states = self.default_initial_values["states"]
             sig_dict = dict(list(self.outputs) + [('states', self.states)])
             for name, f in self.flows.items():
-                ret = f(self, 0.0, states, dins)
-                sd = sig_dict[name]
-                assert len(ret) == len(sig_dict[name].__annotations__), f"flow {name} doesn't have correct " \
-                                                                        f"return length" \
-                                                                        f" against defaults (expected " \
-                                                                        f"{len(sig_dict[name].__annotations__)}, " \
-                                                                        f"received {len(ret)})"
-                for idx, (sname, stype) in enumerate(sd.__annotations__.items()):
-                    assert isinstance(ret[idx], stype), f"flow {name} signature requires {sname} ({idx}) have " \
-                                                        f"type {stype}, but returned {ret[idx]} instead"
+                pass
+                # TODO: this isn't safe :( as initialize could store state
+                #ret = f(self, 0.0, states, dins)
+                #sd = sig_dict[name]
+                #assert len(ret) == len(sig_dict[name].__annotations__), f"flow {name} doesn't have correct " \
+                #                                                        f"return length" \
+                #                                                        f" against defaults (expected " \
+                #                                                        f"{len(sig_dict[name].__annotations__)}, " \
+                #                                                        f"received {len(ret)})"
+                #for idx, (sname, stype) in enumerate(sd.__annotations__.items()):
+                #    assert isinstance(ret[idx], stype), f"flow {name} signature requires {sname} ({idx}) have " \
+                #                                        f"type {stype}, but returned {ret[idx]} instead"
         except Exception as exc:
             raise exc.__class__(f"|Component <{self.__class__.__name__}>| {exc}")
 
