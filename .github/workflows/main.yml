@@ -21,7 +21,7 @@ jobs:
         run: sudo ./dependencies.sh
       - uses: actions/setup-python@v2
         with:
-          python-version: '3.7'
+          python-version: '3.9.6'
       - uses: syphar/restore-virtualenv@v1
         id: cache-virtualenv
         with:
