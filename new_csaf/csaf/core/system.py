@@ -109,6 +109,7 @@ class ComponentComposition(cbase.CsafBase):
         :param return_passed: whether to return a boolean value that if false means that the simulation met the
                                 terminating conditions
         """
+        self.reset()
         self.initialize_buffer()
 
         sched = Scheduler(self._components, list(self._components.keys()) if self.priority is None else self.priority)
@@ -161,7 +162,7 @@ class ComponentComposition(cbase.CsafBase):
         assert isinstance(ret[1], bool)
         return ret[1]
 
-    def set_component_iv(self, component_name: str, iv_name: str, state: typing.Sequence):
+    def _set_component_iv(self, component_name: str, iv_name: str, state: typing.Sequence):
         assert component_name in self._components
         component = self._components[component_name]
         assert iv_name in component.initial_values
@@ -169,13 +170,16 @@ class ComponentComposition(cbase.CsafBase):
         for cin, cout in self.connections.items():
             if cout == (component_name, iv_name):
                 self._components[cin[0]].initial_values[cin[1]] = state
+
+    def set_component_iv(self, component_name: str, iv_name: str, state: typing.Sequence):
+        self._set_component_iv(component_name, iv_name, state)
         self._iv_changes.append((component_name, iv_name, state))
 
     def reset(self):
         for c in self._components.values():
             c.reset()
         for change in self._iv_changes:
-            self.set_component_iv(*change)
+            self._set_component_iv(*change)
 
     def set_state(self, component_name: str, state: typing.Sequence):
         self.set_component_iv(component_name, "states", state)
