@@ -14,7 +14,6 @@ from f16lib.messages import *
 from csaf import ContinuousComponent, DiscreteComponent
 import typing
 
-
 f16_gcas_scen = [540.0,
                  0.037027160081059704,
                  0.0,
@@ -165,7 +164,8 @@ class F16AutoAirspeedComponent(F16AutopilotComponent):
     default_parameters = {
         "setpoint": 800.0,  # setpoint in airspeed (ft/s)
         "p_gain": 0.01,  # P controller gain value
-        "xequil": [502.0, 0.03887505597600522, 0.0, 0.0, 0.03887505597600522, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1000.0, 9.05666543872074]
+        "xequil": [502.0, 0.03887505597600522, 0.0, 0.0, 0.03887505597600522, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1000.0,
+                   9.05666543872074]
     }
     states = EmptyMessage
     default_initial_values = {
@@ -278,6 +278,7 @@ def create_collision_predictor(nagents: int) -> typing.Type[DiscreteComponent]:
             "outputs": predictor.model_output
         }
         initialize = None
+
     return _F16CollisionPredictor
 
 
@@ -288,7 +289,8 @@ def create_nagents_acas_xu(nagents: int) -> typing.Type[DiscreteComponent]:
         default_parameters = {
             "roll_rates": (0, -1.5, 1.5, -3.0, 3.0),
             "setpoint": 2500.0,
-            "xequil": [502.0, 0.03887505597600522, 0.0, 0.0, 0.03887505597600522, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1000.0, 9.05666543872074]
+            "xequil": [502.0, 0.03887505597600522, 0.0, 0.0, 0.03887505597600522, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1000.0,
+                       9.05666543872074]
         }
         inputs = (
             ("inputs_own", F16PlantStateMessage),
@@ -308,17 +310,20 @@ def create_nagents_acas_xu(nagents: int) -> typing.Type[DiscreteComponent]:
             "states": acas.model_state_update
         }
         initialize = acas.model_init
+
     return _F16AcasComponent
 
 
-def switch_model_output(model, t, states, inputs):
+def switch_model_output(*args):
+    inputs = args[-1]
     if inputs[-1] == "clear":
         return inputs[:4]
     else:
         return inputs[4:8]
 
 
-def switch_model_state(model, t, states, inputs):
+def switch_model_state(*args):
+    inputs = args[-1]
     return [inputs[-1]]
 
 
@@ -341,8 +346,8 @@ class F16AcasRecoverySwitchComponent(DiscreteComponent):
     )
     states = EmptyMessage
     default_initial_values = {
-        "inputs": [0.0,]*4,
-        "inputs_recovery": [0.0,]*4,
+        "inputs": [0.0, ] * 4,
+        "inputs_recovery": [0.0, ] * 4,
         "states": [],
         "inputs_select": [False],
         "inputs_state": ["clear"],
@@ -415,9 +420,7 @@ class StaticObject(DiscreteComponent):
     }
 
 
-
 class F16AcasSwitchComponent(DiscreteComponent):
-
     name = "F16 Acas Monitor"
     sampling_frequency = 10.0
     default_initial_values = {

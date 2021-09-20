@@ -14,7 +14,7 @@ if typing.TYPE_CHECKING:
     # cyclic imports issue
     from csaf.core.component import Component
 
-__all__ = ['LSODASolver', 'DiscreteSolver']
+__all__ = ['LSODASolver', 'DiscreteSolver', 'SystemSolver']
 
 
 class SystemSolver(cbase.CsafBase):

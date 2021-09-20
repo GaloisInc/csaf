@@ -78,10 +78,10 @@ class F16MultiAgentCentral(System):
         name = "2 F16 Central Controller"
         sampling_frequency = 10.0
         default_initial_values = {
-            "inputs_poutputs_0": [0.0,] * 4,
-            "inputs_pstates_0": [0.0,] * 13,
-            "inputs_poutputs_1": [0.0,] * 4,
-            "inputs_pstates_1": [0.0,] * 13,
+            "inputs_poutputs_0": [0.0, ] * 4,
+            "inputs_pstates_0": [0.0, ] * 13,
+            "inputs_poutputs_1": [0.0, ] * 4,
+            "inputs_pstates_1": [0.0, ] * 13,
             "states": []
         }
         default_parameters: typing.Dict[str, typing.Any] = {}
@@ -97,8 +97,8 @@ class F16MultiAgentCentral(System):
             ("outputs_1", F16ControllerOutputMessage),
         )
         flows = {
-            "outputs_0": lambda m, t, s, y: [0.0,] * 4,
-            "outputs_1": lambda m, t, s, y: [0.0,] * 4
+            "outputs_0": lambda m, t, s, y: [0.0, ] * 4,
+            "outputs_1": lambda m, t, s, y: [0.0, ] * 4
         }
 
     components = {
@@ -193,7 +193,7 @@ class F16AcasShieldSurrogate(System):
             "states": f16c.f16_xequil
         }
         flows = {
-            "outputs": lambda m, t, s, i: [0.0,]*4,
+            "outputs": lambda m, t, s, i: [0.0, ] * 4,
             "states": lambda m, t, s, i: f16c.f16_xequil
         }
 

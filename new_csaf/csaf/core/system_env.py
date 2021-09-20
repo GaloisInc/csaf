@@ -48,12 +48,10 @@ class SystemEnv(cbase.CsafBase):
         return self._iter.send(component_output)
 
     def make_system_coroutine(self,
-                              tstart=0.0,
                               terminating_conditions=None,
                               terminating_conditions_all=None) -> typing.Generator:
         """make an iterator that can step through a simulation and accept input from external agents
 
-        :param tstart: time to start (now only supports 0.0)
         :param terminating_conditions: system terminating conditions
         :param terminating_conditions_all: system terminating_all conditions
         :return:
@@ -61,16 +59,17 @@ class SystemEnv(cbase.CsafBase):
         # TODO: FIXME: use tstart
         self.system.initialize_buffer()
 
-        sched = Scheduler(self.system._components, list(self.system._components.keys()) \
-            if self.system.priority is None else self.system.priority)
+        sched = Scheduler(self.system.component_instances, list(self.system.component_instances.keys()) if
+                          self.system.priority is None else self.system.priority)
+
         evts_it = sched.get_scheduler()
 
         # get time trace fields
         # NOTE: we need dtraces for the terminating_conditions_all
-        dnames = self.system._components.keys()
+        dnames = self.system.component_instances.keys()
         dtraces = {}
         for dname in dnames:
-            fields = ['times'] + list(self.system._components[dname].flow_names)
+            fields = ['times'] + list(self.system.component_instances[dname].flow_names)
             dtraces[dname] = TimeTrace(fields)
 
         yield None
@@ -78,16 +77,15 @@ class SystemEnv(cbase.CsafBase):
         try:
             for cname, ctime in evts_it:
                 if cname in self.agents:
-                    out: typing.Dict[str, typing.Dict[str, typing.Sequence]] = yield (ctime,
-                                                                                      self.system.build_input_vec(
-                                                                                          cname)) # typing: ignore
+                    out  = yield (ctime,
+                                  self.system.build_input_vec(cname))  # type: ignore
                     # update the context
                     r = {(cname, k): v for k, v in out.items()}
                     self.system._signals_buffer.update(r)
                     self.system._update_times[cname] = ctime
                 else:
-                    out = self.system.update_component(cname, ctime) # typing: ignore
-                out["times"] = ctime  # typing: ignore
+                    out = self.system.update_component(cname, ctime)  # type: ignore
+                out["times"] = ctime  # type: ignore
                 dtraces[cname].append(**out)
                 if terminating_conditions is not None and terminating_conditions(cname, out):
                     return
@@ -116,7 +114,10 @@ class SystemEnv(cbase.CsafBase):
             self.system.validate()
 
             # assert that agents referenced are actually defined in the system object
-            assert set(self.agents).issubset(self.system_type.components.keys()), f"{self.agents} are not in " \
-                                                                                  f"system {self.system_type.__class__.__name__}"
+            assert set(
+                self.agents
+            ).issubset(self.system_type.components.keys()), f"{self.agents} are not in system " \
+                                                            f"{self.system_type.__class__.__name__}"
+
         except Exception as exc:
             raise exc.__class__(f"|SystemEnv <{self.__class__.__name__}>| {exc}")
