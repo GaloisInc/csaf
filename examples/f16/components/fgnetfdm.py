@@ -106,7 +106,7 @@ class FGNetFDM(FlightGearBase):
             rudder_max_deg: float = FlightGearBase.DEFAULT_FG_RUDDER_MAX_DEG,
             aileron_max_deg: float = FlightGearBase.DEFAULT_FG_AILERON_MAX_DEG,
             fg_port: int = DEFAULT_FG_PORT,
-            fg_generic_port: int = FG_GENERIC_PORT
+            fg_generic_port: int = DEFAULT_FG_GENERIC_PORT
         ):
         """
         Set everything to zeros, and set lists to the correct length
