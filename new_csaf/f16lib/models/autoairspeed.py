@@ -14,5 +14,5 @@ def model_output(model, time_t, state_controller, input_f16):
 
     # basic speed control
     throttle = ah.p_cntrl(kp=0.25, e=(vt_des - vt))
-    Nz, ps, Ny_r = 0, 0, 0
+    Nz, ps, Ny_r = 0.0, 0.0, 0.0
     return Nz, ps, Ny_r, throttle

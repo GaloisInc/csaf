@@ -13,6 +13,18 @@ def acas_shield_balloon_f16():
 
 
 @pytest.fixture
+def acas_shield_f16():
+    sys = f16s.F16AcasShield()
+    yield sys
+
+
+@pytest.fixture
+def acas_balloon_f16():
+    sys = f16s.F16AcasIntruderBalloon()
+    yield sys
+
+
+@pytest.fixture
 def acas_scenario() -> csaf.System:
     scen = f16acas.AcasScenario(
         [-1000, 5000], # balloon position
@@ -27,7 +39,7 @@ def acas_scenario() -> csaf.System:
 
 
 def air_collision_condition(ctraces):
-        """ground collision premature termination condition"""
+        """air collision termination condition"""
         # get the aircraft states
         sa, sb, sc = ctraces['plant']['states'], ctraces['intruder_plant']['states'], ctraces['balloon']['states']
         if sa and sb and sc:
@@ -37,8 +49,16 @@ def air_collision_condition(ctraces):
             return dab < 500.0 or dac < 500.0
 
 
-def test_system(acas_shield_balloon_f16: csaf.System):
+def test_acas_shield_balloon(acas_shield_balloon_f16: csaf.System):
     acas_shield_balloon_f16.check()
+
+
+def test_acas_balloon(acas_balloon_f16: csaf.System):
+    acas_balloon_f16.check()
+
+
+def test_acas_shield(acas_shield_f16: csaf.System):
+    acas_shield_f16.check()
 
 
 def test_acas_scenario(acas_shield_balloon_f16: csaf.System):

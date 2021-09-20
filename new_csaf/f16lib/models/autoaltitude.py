@@ -20,14 +20,14 @@ def model_output(model, time_t, state_x, input_f16):
     Nz = k_alt * h_error  # Allows stacking of cmds
 
     # (Psuedo) Derivative control using path angle
-    k_gamma = 25
+    k_gamma = 25.0
     # k_gamma = self.p_gain
     Nz = Nz - k_gamma * gamma
 
     # try to maintain a fixed airspeed near trim point
     K_vt = 0.25
-    airspeed_setpoint = 540
+    airspeed_setpoint = 540.0
     vt_des = model.xequil[0]
     throttle = ah.p_cntrl(kp=K_vt, e=(vt_des - vt))
 
-    return Nz, 0, 0, throttle
+    return Nz, 0.0, 0.0, throttle
