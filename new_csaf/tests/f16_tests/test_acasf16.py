@@ -25,7 +25,7 @@ def acas_balloon_f16():
 
 
 @pytest.fixture
-def acas_scenario() -> csaf.System:
+def acas_scenario():
     scen = f16acas.AcasScenario(
         [-1000, 5000], # balloon position
         500.0, # ownship airspeed
