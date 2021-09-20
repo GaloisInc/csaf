@@ -1,10 +1,14 @@
 import struct
-import socket
+import typing
+import time
 
 import pymap3d as pm
+
 from numpy import deg2rad
 
-class FGNetFDM:
+from fgbase import FlightGearBase
+
+class FGNetFDM(FlightGearBase):
     """
     Flight Dynamic Model (FDM) class for FlightGear
 
@@ -12,20 +16,9 @@ class FGNetFDM:
     The packet structure is defined in: https://github.com/FlightGear/flightgear/blob/next/src/Network/net_fdm.hxx
     """
     FG_NET_FDM_VERSION = 24
-    FG_FT_IN_M = 3.2808
-
-    # Default values
-    FG_SLEEP_S = 0.01
-    DEFAULT_FG_AILERON_MAX = 21.5
-    DEFAULT_FG_ELEVATOR_MAX = 25
-    DEFAULT_FG_RUDDER_MAX = 30.0
-    DEFAULT_FG_IP = "127.0.0.1"
+    DEFAULT_DELTA_T = 0.01
     DEFAULT_FG_PORT = 5505
     DEFAULT_FG_GENERIC_PORT = 5506
-    # Start position of the aircraft
-    DEFAULT_FG_LAT = 35.802117
-    DEFAULT_FG_LON = -117.806717
-    DEFAULT_FG_GROUND_LEVEL = 705 # m
 
     version: int = FG_NET_FDM_VERSION # increment when data values change
     padding: int = 0 #padding
@@ -40,6 +33,8 @@ class FGNetFDM:
     psi: float = 0                   # yaw or true heading (radians)
     alpha: float = 0               # angle of attack (radians)
     beta: float = 0                # side slip angle (radians)
+    pe: float = 0
+    pn: float = 0
 
     # Velocities
     phidot: float = 0               # roll rate (radians/sec)
@@ -64,32 +59,32 @@ class FGNetFDM:
 
     # Engine status
     num_engines: int = 0                       # Number of valid engines
-    eng_state: [int] # Engine state (off, cranking, running)
-    rpm: [int]          # Engine RPM rev/min
-    fuel_flow: [int]    # Fuel flow gallons/hr
-    fuel_px: [int]      # Fuel pressure psi
-    egt: [int]          # Exhuast gas temp deg F
-    cht: [int]          # Cylinder head temp deg F
-    mp_osi: [int]       # Manifold pressure
-    tit: [int]          # Turbine Inlet Temperature
-    oil_temp: [int]     # Oil temp deg F
-    oil_px: [int]       # Oil pressure psi
+    eng_state: typing.Sequence[int] # Engine state (off, cranking, running)
+    rpm: typing.Sequence[int]          # Engine RPM rev/min
+    fuel_flow: typing.Sequence[int]    # Fuel flow gallons/hr
+    fuel_px: typing.Sequence[int]      # Fuel pressure psi
+    egt: typing.Sequence[int]          # Exhuast gas temp deg F
+    cht: typing.Sequence[int]          # Cylinder head temp deg F
+    mp_osi: typing.Sequence[int]       # Manifold pressure
+    tit: typing.Sequence[int]          # Turbine Inlet Temperature
+    oil_temp: typing.Sequence[int]     # Oil temp deg F
+    oil_px: typing.Sequence[int]       # Oil pressure psi
 
     # Consumables
     num_tanks: int = 0         # Max number of fuel tanks
-    fuel_quantity: [float]
+    fuel_quantity: typing.Sequence[float]
 
     # Gear status
     num_wheels: int = 0
-    wow: [int]
-    gear_pos: [float]
-    gear_steer: [float]
-    gear_compression: [float]
+    wow: typing.Sequence[int]
+    gear_pos: typing.Sequence[float]
+    gear_steer: typing.Sequence[float]
+    gear_compression: typing.Sequence[float]
 
     # Environment
     cur_time: int = 0           # current unix time
     warp: int = 0                # offset in seconds to unix time
-    visibility: float = 0            # visibility in meters (for env. effects)
+    visibility: float = 10000.0            # visibility in meters (for env. effects)
 
     # Control surface positions (normalized values)
     elevator: float = 0
@@ -103,11 +98,21 @@ class FGNetFDM:
     speedbrake: float = 0
     spoilers: float = 0
 
-    def __init__(self):
+    def __init__(self,
+            lat0_deg: float = FlightGearBase.DEFAULT_FG_LAT,
+            lon0_deg: float = FlightGearBase.DEFAULT_FG_LON,
+            h0_m: float = FlightGearBase.DEFAULT_FG_GROUND_LEVEL,
+            elevator_max_deg: float = FlightGearBase.DEFAULT_FG_ELEVATOR_MAX_DEG,
+            rudder_max_deg: float = FlightGearBase.DEFAULT_FG_RUDDER_MAX_DEG,
+            aileron_max_deg: float = FlightGearBase.DEFAULT_FG_AILERON_MAX_DEG,
+            fg_port: int = DEFAULT_FG_PORT,
+            fg_generic_port: int = DEFAULT_FG_GENERIC_PORT
+        ):
         """
         Set everything to zeros, and set lists to the correct length
         If parameters are supplied, initialize from parameters
         """
+        super().__init__()
         self.eng_state = [0,0,0,0]
         self.rpm = [0,0,0,0]
         self.fuel_flow = [0,0,0,0]
@@ -124,84 +129,53 @@ class FGNetFDM:
         self.gear_pos = [0.0, 0.0, 0.0]
         self.gear_steer = [0.0, 0.0, 0.0]
         self.gear_compression = [0.0, 0.0, 0.0]
-
-        self.running = False
-    
-    def init_from_params(self, parameters):
-        """
-        Initialize from parameters
-        """
-        self.running = True
-        # Open socket for FDM
-        self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) # UDP
-
-        self.lat0 = deg2rad(float(parameters.get("FG_LAT", FGNetFDM.DEFAULT_FG_LAT)))
-        self.lon0 = deg2rad(float(parameters.get("FG_LON", FGNetFDM.DEFAULT_FG_LON)))
-        self.h0 = parameters.get("FG_GROUND_LEVEL", FGNetFDM.DEFAULT_FG_GROUND_LEVEL)
-
-        self.elevator_max = deg2rad(parameters.get("elevator_max", FGNetFDM.DEFAULT_FG_ELEVATOR_MAX))
-        self.runnder_max = deg2rad(parameters.get("rudder_max", FGNetFDM.DEFAULT_FG_RUDDER_MAX))
-        self.aileron_max = deg2rad(parameters.get("aileron_max", FGNetFDM.DEFAULT_FG_AILERON_MAX))
-
-        self.FG_IP = parameters.get("FG_IP", FGNetFDM.DEFAULT_FG_IP)
-        self.FG_PORT = parameters.get("FG_PORT", FGNetFDM.DEFAULT_FG_PORT)
-        self.FG_GENERIC_PORT = parameters.get("FG_GENERIC_PORT", FGNetFDM.DEFAULT_FG_GENERIC_PORT)
-
         self.num_engines = 1
-    
-    def update_and_send(self,inputs):
-        """
-        Update the internal values and send a FG compatible packet
-        """
-        assert(self.running == True)
 
-        # TODO: figure out a better way to get state indexes
-        # float64 vt 0
-        # float64 alpha 1
-        # float64 beta 2
-        # float64 phi 3
-        # float64 theta 4
-        # float64 psi 5
-        # float64 p 6
-        # float64 q 7
-        # float64 r 8
-        # float64 pn 9
-        # float64 pe 10
-        # float64 h 11
-        # float64 pow 12
-        # float64 delta_e 13
-        # float64 delta_a 14
-        # float64 delta_r 15
-        # float64 throttle 16
-        self.vcas = inputs[0]
-        self.alpha = inputs[1]
-        self.beta = inputs[2]
-        self.phi = inputs[3]
-        self.theta = inputs[4]
-        self.psi = inputs[5]
-        self.phidot = inputs[6]
-        self.thetadot = inputs[7]
-        self.psidot = inputs[8]
-        pn = inputs[9]
-        pe = inputs[10]
-        
-        self.agl = inputs[11]/self.FG_FT_IN_M
-        self.altitude = self.h0 + self.agl
-        pu = self.agl
-        lat, lon, _alt = pm.enu2geodetic(pe, pn, pu, self.lat0, self.lon0, self.h0, ell=None, deg=False)
+        self.lat0 = deg2rad(lat0_deg)
+        self.lon0 = deg2rad(lon0_deg)
+        # TODO: the altitude is not matching very well until initialized with traces
+        self.h0 = h0_m
+        self.agl = h0_m
+
+        self.elevator_max = deg2rad(elevator_max_deg)
+        self.rudder_max = deg2rad(rudder_max_deg)
+        self.aileron_max = deg2rad(aileron_max_deg)
+
+        self.FG_PORT = fg_port
+        self.FG_GENERIC_PORT = fg_generic_port
+
+    def update_and_send(self, inputs: typing.Optional[typing.List[float]] =None):
+        if inputs is not None:
+            self.vcas = inputs[0]
+            self.alpha = inputs[1]
+            self.beta = inputs[2]
+            self.phi = inputs[3]
+            self.theta = inputs[4]
+            self.psi = inputs[5]
+            self.phidot = inputs[6]
+            self.thetadot = inputs[7]
+            self.psidot = inputs[8]
+            self.pn = inputs[9]
+            self.pe = inputs[10]
+
+            self.agl = inputs[11]/FlightGearBase.FG_FT_IN_M
+            self.altitude = self.h0 + self.agl
+
+            self.eng_state = [1,0,0,0] # Dummy values
+            self.rpm = [6000,1,0,0,] # Dummy values
+
+            self.elevator = -1.0*inputs[13]*self.elevator_max
+            self.rudder = inputs[15]*self.rudder_max
+            self.left_aileron = inputs[14]*self.aileron_max
+            self.right_aileron = self.left_aileron
+
+        lat, lon, _alt = pm.enu2geodetic(self.pe, self.pn, self.agl, self.lat0, self.lon0, self.h0, ell=None, deg=False)
         self.latitude = lat
         self.longitude = lon
-
-        self.eng_state = [1,0,0,0] # Dummy values
-        self.rpm = [6000,1,0,0,] # Dummy values
-
-        self.elevator = -1.0*inputs[13]*self.elevator_max
-        self.rudder = inputs[15]*self.runnder_max
-        self.left_aileron = inputs[14]*self.aileron_max
-        self.right_aileron = self.left_aileron
+        self.cur_time = int(time.time())
 
         # Send FDM
-        self.sock.sendto(self.pack_to_struct(), (self.FG_IP, self.FG_PORT))
+        self.sock.sendto(self.pack_to_struct(), (FlightGearBase.DEFAULT_FG_IP, self.FG_PORT))
 
         # Send Control surfaces
         # flaperons is in radians:
@@ -211,49 +185,50 @@ class FGNetFDM:
         # surface-positions/rightrad
         val = struct.pack('!fffff', -1*self.elevator,
             self.left_aileron, self.left_aileron, self.right_aileron, self.right_aileron)
-        self.sock.sendto(val, (self.FG_IP, self.FG_GENERIC_PORT))
+        self.sock.sendto(val, (FlightGearBase.DEFAULT_FG_IP, self.FG_GENERIC_PORT))
 
-    def get_format_string(self):
+    def get_format_string(self) -> str:
         """
         Because we have so many variables, getting the correct
         format string for packing is handled in this function
         """
-        format_string = '!'
-        format_string +=  'I I' # version, padding
-        format_string +=  'd d d' # lon,lat,alt
-        format_string +=  'f f f' # agl, phi, theta
-        format_string +=  'f f f' # psi, alpha, beta
-        format_string +=  'f f f' # phidot, thetadot, psidot
-        format_string +=  'f f'   # vcasm climb_rate
-        format_string +=  'f f f' # v_n, v_e, v_d
-        format_string +=  'f f f' # v_u, v_v, v_w
-        format_string +=  'f f f' # A_Y_pilot, A_Y_pilot, A_Z_pilot
-        format_string +=  'f f' # stall, slip
-        format_string +=  'I' # num_engines
-        format_string +=  'IIII' # eng_state[FG_NET_FDM_MAX_ENGINES]
-        format_string +=  'ffff' # rpm[FG_NET_FDM_MAX_ENGINES]
-        format_string +=  'ffff' # fuel_flow[FG_NET_FDM_MAX_ENGINES]
-        format_string +=  'ffff' # fuel_px[FG_NET_FDM_MAX_ENGINES]
-        format_string +=  'ffff' # egt[FG_NET_FDM_MAX_ENGINES]
-        format_string +=  'ffff' # cht[FG_NET_FDM_MAX_ENGINES]
-        format_string +=  'ffff' # mp_osi[FG_NET_FDM_MAX_ENGINES]
-        format_string +=  'ffff' # tit[FG_NET_FDM_MAX_ENGINES]
-        format_string +=  'ffff' # oil_temp[FG_NET_FDM_MAX_ENGINES]
-        format_string +=  'ffff' # oil_px[FG_NET_FDM_MAX_ENGINES]
-        format_string +=  'I' # num_tanks
-        format_string +=  'ffff' # fuel_quantity[FG_NET_FDM_MAX_TANKS]
-        format_string +=  'I' # num wheels
-        format_string +=  'III' # wow[FG_NET_FDM_MAX_WHEELS]
-        format_string +=  'fff' # gear_pos[FG_NET_FDM_MAX_WHEELS]
-        format_string +=  'fff' # gear_steer[FG_NET_FDM_MAX_WHEELS]
-        format_string +=  'fff' # gear_compression[FG_NET_FDM_MAX_WHEELS]
-        format_string +=  'I' # cur time
-        format_string +=  'i' # warp
-        format_string +=  'f' # visibility
-        format_string +=  'f f f f' # elevator, elevator_trim, left_flap, right_flap
-        format_string +=  'f f f' # left aileron, right aileron, rudder
-        format_string +=  'f f f' # nose_wheel, speedbrake, spoilers
-        return format_string
+        format_string = []
+        format_string.append('!')
+        format_string.append('I I') # version, padding
+        format_string.append('d d d') # lon,lat,alt
+        format_string.append('f f f') # agl, phi, theta
+        format_string.append('f f f') # psi, alpha, beta
+        format_string.append('f f f') # phidot, thetadot, psidot
+        format_string.append('f f')   # vcasm climb_rate
+        format_string.append('f f f') # v_n, v_e, v_d
+        format_string.append('f f f') # v_u, v_v, v_w
+        format_string.append('f f f') # A_Y_pilot, A_Y_pilot, A_Z_pilot
+        format_string.append('f f') # stall, slip
+        format_string.append('I') # num_engines
+        format_string.append('IIII') # eng_state[FG_NET_FDM_MAX_ENGINES]
+        format_string.append('ffff') # rpm[FG_NET_FDM_MAX_ENGINES]
+        format_string.append('ffff') # fuel_flow[FG_NET_FDM_MAX_ENGINES]
+        format_string.append('ffff') # fuel_px[FG_NET_FDM_MAX_ENGINES]
+        format_string.append('ffff') # egt[FG_NET_FDM_MAX_ENGINES]
+        format_string.append('ffff') # cht[FG_NET_FDM_MAX_ENGINES]
+        format_string.append('ffff') # mp_osi[FG_NET_FDM_MAX_ENGINES]
+        format_string.append('ffff') # tit[FG_NET_FDM_MAX_ENGINES]
+        format_string.append('ffff') # oil_temp[FG_NET_FDM_MAX_ENGINES]
+        format_string.append('ffff') # oil_px[FG_NET_FDM_MAX_ENGINES]
+        format_string.append('I') # num_tanks
+        format_string.append('ffff') # fuel_quantity[FG_NET_FDM_MAX_TANKS]
+        format_string.append('I') # num wheels
+        format_string.append('III') # wow[FG_NET_FDM_MAX_WHEELS]
+        format_string.append('fff') # gear_pos[FG_NET_FDM_MAX_WHEELS]
+        format_string.append('fff') # gear_steer[FG_NET_FDM_MAX_WHEELS]
+        format_string.append('fff') # gear_compression[FG_NET_FDM_MAX_WHEELS]
+        format_string.append('I') # cur time
+        format_string.append('i') # warp
+        format_string.append('f') # visibility
+        format_string.append('f f f f') # elevator, elevator_trim, left_flap, right_flap
+        format_string.append('f f f') # left aileron, right aileron, rudder
+        format_string.append('f f f') # nose_wheel, speedbrake, spoilers
+        return ''.join(format_string)
 
     def unpack_from_struct(self, data):
         """
