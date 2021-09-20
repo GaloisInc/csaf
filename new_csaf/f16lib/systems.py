@@ -163,7 +163,7 @@ class F16AcasShield(System):
 
         ("switch", "inputs"): ("autopilot", "outputs"),
         ("switch", "inputs_recovery"): ("autopilot_recovery", "outputs"),
-        ("switch", "inputs_monitors"): ("predictor", "outputs"),
+        ("switch", "inputs_select"): ("predictor", "outputs"),
 
         # setup the intruder plane
         ("intruder_llc", "inputs_pstates"): ("intruder_plant", "states"),
