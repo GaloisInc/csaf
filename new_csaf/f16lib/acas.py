@@ -5,7 +5,7 @@ import typing
 import numpy as np
 
 from svgpath2mpl import parse_path  # type: ignore
-import matplotlib as mpl
+import matplotlib as mpl  # type: ignore
 import matplotlib.pyplot as plt # type: ignore
 from matplotlib.collections import LineCollection  # type: ignore
 import matplotlib.animation as animation  # type: ignore
@@ -159,20 +159,19 @@ class AcasScenarioViewer:
         return fig, ax
 
     def plot_static(self, ax: plt.Axes):
-        ax.plot(*self.balloon_pos[-1],
+        ax.plot(*self.balloon_pos[-1],  # type: ignore
                 marker=self.create_balloon_marker(),
                 c='grey',
                 markersize=30,
-                linestyle='None',
                 label="Balloon")
 
-        ax.scatter(*np.array(self.scenario.waypoints)[:, :2].T,
+        ax.scatter(*np.array(self.scenario.waypoints)[:, :2].T,  # type: ignore
                    marker='x',
                    c='r',
                    s=200,
                    label='Intruder Waypoints')
 
-        ax.scatter(*np.array(self.scenario.own_waypoints)[:, :2].T,
+        ax.scatter(*np.array(self.scenario.own_waypoints)[:, :2].T,  # type: ignore
                    marker='x',
                    c='k',
                    s=200,

@@ -9,3 +9,10 @@ updated). In this directory, run
 jupyter notebook
 ```
 Navigate to the notebooks directory and run through the examples.
+
+## Tests
+
+In this directory, run
+```
+PYTHONPATH=$PWD pytest --mypy -s tests
+```
