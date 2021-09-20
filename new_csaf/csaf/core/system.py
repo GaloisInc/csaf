@@ -184,11 +184,17 @@ class ComponentComposition(cbase.CsafBase):
     def set_state(self, component_name: str, state: typing.Sequence):
         self.set_component_iv(component_name, "states", state)
 
+    @property
+    def component_instances(self) -> typing.Dict[str, Component]:
+        return self._components
+
     def plot_config(self, fname=None, **kwargs):
         """visualize the configuration file"""
         import pydot  # type: ignore
-        import pathlib, os
-        def join_if_not_abs(*args, project_dir=None, exist=True):
+        import pathlib
+        import os
+
+        def join_if_not_abs(*args, project_dir=None):
             """if last argument is an absolute path, don't join the path arguments together"""
             if os.path.isabs(args[-1]):
                 return args[-1]
@@ -210,9 +216,11 @@ class ComponentComposition(cbase.CsafBase):
         for nname, ncomp in self.components.items():
             devname = ncomp.name  # ninfo['config']["system_name"]
             if ncomp.is_discrete:
-                verts[nname] = pydot.Node(f"'{nname}'\n{devname}\n{len(ncomp.default_parameters)} Parameter(s)\n{ncomp.sampling_frequency} Hz", style="solid")
+                verts[nname] = pydot.Node(f"'{nname}'\n{devname}\n{len(ncomp.default_parameters)} "
+                                          f"Parameter(s)\n{ncomp.sampling_frequency} Hz", style="solid")
             else:
-                verts[nname] = pydot.Node(f"'{nname}'\n{devname}\n{len(ncomp.default_parameters)} Parameter(s)", style="bold")
+                verts[nname] = pydot.Node(f"'{nname}'\n{devname}\n{len(ncomp.default_parameters)} "
+                                          f"Parameter(s)", style="bold")
             graph.add_node(verts[nname])
 
         pairs = []
@@ -233,7 +241,7 @@ class ComponentComposition(cbase.CsafBase):
                                       label=f"{', '.join(topics)}\n({', '.join(widths)})", arrowsize=0.5))
             pairs.append((inc[0], outc[0]))
 
-        graph_path = pathlib.Path(join_if_not_abs("./", fname, exist=False))
+        graph_path = pathlib.Path(join_if_not_abs("./", fname))
         extension = graph_path.suffix[1:]
         graph.write(graph_path, format=extension, **kwargs)
 

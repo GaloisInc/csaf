@@ -12,10 +12,13 @@ ca-certificates=2021.7.5=hecd8cb5_1
 certifi=2021.5.30=py39hecd8cb5_0
 cffi=1.14.6=pypi_0
 charset-normalizer=2.0.5=pypi_0
+cloudpickle=2.0.0=pypi_0
+coverage=5.5=py39h9ed2024_2
 curtsies=0.3.5=pypi_0
 cwcwidth=0.1.4=pypi_0
 cycler=0.10.0=pypi_0
 cython=0.29.24=pypi_0
+data-science-types=0.2.23=pypi_0
 debugpy=1.4.3=pypi_0
 decorator=5.1.0=pypi_0
 defusedxml=0.7.1=pypi_0
