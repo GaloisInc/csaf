@@ -157,27 +157,27 @@ jobs:
   #     - name: f16-job-config 3 3
   #       run: ./run-csaf.sh -e f16-llc-analyze -f f16_job_conf_parallel_fixed.toml -n
 
-  # test-notebooks:
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v2
-  #     - name: Install dependencies
-  #       run: sudo ./dependencies.sh
-  #     - uses: actions/setup-python@v2
-  #       with:
-  #         python-version: '3.7'
-  #     - uses: syphar/restore-virtualenv@v1
-  #       id: cache-virtualenv
-  #       with:
-  #         requirement_files: ./new_csaf/requirements.txt
+  test-notebooks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install dependencies
+        run: sudo ./dependencies.sh
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.9.6'
+      - uses: syphar/restore-virtualenv@v1
+        id: cache-virtualenv
+        with:
+          requirement_files: ./new_csaf/requirements.txt
       
-  #     - uses: syphar/restore-pip-download-cache@v1
-  #       if: steps.cache-virtualenv.outputs.cache-hit != 'true'
+      - uses: syphar/restore-pip-download-cache@v1
+        if: steps.cache-virtualenv.outputs.cache-hit != 'true'
 
-  #       # the package installation will only be executed when the
-  #       # requirements-files have changed.
-  #     - run: pip install -r new_csaf/requirements.txt
-  #       if: steps.cache-virtualenv.outputs.cache-hit != 'true'
+        # the package installation will only be executed when the
+        # requirements-files have changed.
+      - run: pip install -r new_csaf/requirements.txt
+        if: steps.cache-virtualenv.outputs.cache-hit != 'true'
 
-  #     - name: Build notebook tests
-  #       run: ./.test_notebooks.sh
+      - name: Build notebook tests
+        run: ./.test_notebooks.sh
