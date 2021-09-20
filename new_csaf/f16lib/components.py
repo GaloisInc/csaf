@@ -135,7 +135,6 @@ class F16AutopilotComponent(DiscreteComponent):
         ("inputs_pstates", F16PlantStateMessage),
         ("inputs_poutputs", F16PlantOutputMessage),
     )
-    initialize = None
 
 
 class F16GcasComponent(F16AutopilotComponent):
@@ -282,7 +281,6 @@ def create_collision_predictor(nagents: int) -> typing.Type[DiscreteComponent]:
     return _F16CollisionPredictor
 
 
-
 def create_nagents_acas_xu(nagents: int) -> typing.Type[DiscreteComponent]:
     class _F16AcasComponent(DiscreteComponent):
         name = "F16 Acas Xu Controller"
@@ -405,7 +403,7 @@ class F16AutoWaypointComponent(F16AutopilotComponent):
 class StaticObject(DiscreteComponent):
     name = "Static Object"
     sampling_frequency = 1.0
-    default_parameters = {}
+    default_parameters: typing.Dict[str, typing.Any] = {}
     inputs = ()
     outputs = ()
     states = F16PlantStateMessage
