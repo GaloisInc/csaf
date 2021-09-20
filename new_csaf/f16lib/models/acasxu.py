@@ -30,7 +30,7 @@ class AcasXuAutopilot():
     '''AcasXu autopilot'''
 
     def __init__(self, init, num_aircraft_acasxu=1, stop_on_coc=False,
-                 hardcoded_u_seq=None, stdout=False, roll_rates=(0, -1.5, 1.5, -3.0, 3.0) ):
+                 hardcoded_u_seq=None, stdout=False, roll_rates=(0.0, -1.5, 1.5, -3.0, 3.0) ):
         'waypoints is a list of 3-tuples'
 
         self.roll_rates = roll_rates
@@ -61,7 +61,7 @@ class AcasXuAutopilot():
             self.init_airspeed.append(init[self.num_vars * a + StateIndex.VEL])
 
         # default control when not running acasxu
-        self.cfg_u_ol_default = (0, 0, 0, 0.3)
+        self.cfg_u_ol_default = (0.0, 0.0, 0.0, 0.3)
 
         # control config
         # Gains for speed control
@@ -72,21 +72,21 @@ class AcasXuAutopilot():
         self.cfg_k_h_dot = 0.02
 
         # Gains for heading tracking
-        self.cfg_k_prop_psi = 5
+        self.cfg_k_prop_psi = 5.0
         self.cfg_k_der_psi = 0.5
 
         # Gains for roll tracking
         self.cfg_k_prop_phi = 0.75
         self.cfg_k_der_phi = 0.5
-        self.cfg_max_bank_deg = 65  # maximum bank angle setpoint
+        self.cfg_max_bank_deg = 65.0  # maximum bank angle setpoint
         # v2 was 0.5, 0.9
 
         # Ranges for Nz
-        self.cfg_max_nz_cmd = 4
-        self.cfg_min_nz_cmd = -1
+        self.cfg_max_nz_cmd = 4.0
+        self.cfg_min_nz_cmd = -1.0
 
         self.nn_update_rate = 2.0
-        self.next_nn_update = 0
+        self.next_nn_update = 0.0
 
         # current ownship commands
         self.commands = [0] * self.num_aircraft_acasxu
@@ -200,7 +200,7 @@ class AcasXuAutopilot():
                         x2 = intruder_state[StateIndex.POS_E]
                         y2 = intruder_state[StateIndex.POS_N]
 
-                        dist_sq = (x1 - x2) ** 2 + (y1 - y2) ** 2
+                        dist_sq = (x1 - x2) ** 2.0 + (y1 - y2) ** 2.0
 
                         if stdout:
                             print(f"b={b}. State is {x2, y2}, distSq is {dist_sq}")
@@ -411,27 +411,27 @@ class AcasXuAutopilot():
         '''get the reference input for ownship'''
 
         command = self.commands[index]
-        assert 0 <= command <= 4, f"invalid command in get u_ref ownship: {command}"
+        assert 0.0 <= command <= 4.0, f"invalid command in get u_ref ownship: {command}"
 
         roll_rate_cmd_list = self.roll_rates # deg / sec
         roll_rate_cmd_deg = roll_rate_cmd_list[command]
 
         # these bank angle cmds were empirically found to achieve the desired turn rate
         if roll_rate_cmd_deg == 0:
-            psi_cmd_deg = 0
+            psi_cmd_deg = 0.0
         elif roll_rate_cmd_deg == 1.5:
-            psi_cmd_deg = 34
+            psi_cmd_deg = 34.0
         elif roll_rate_cmd_deg == -1.5:
-            psi_cmd_deg = -34
+            psi_cmd_deg = -34.0
         elif roll_rate_cmd_deg == 3.0:
-            psi_cmd_deg = 54
+            psi_cmd_deg = 54.0
         elif roll_rate_cmd_deg == 6.0:
-            psi_cmd_deg = 80
+            psi_cmd_deg = 80.0
         elif roll_rate_cmd_deg == -6.0:
-            psi_cmd_deg = -80
+            psi_cmd_deg = -80.0
         else:
             assert roll_rate_cmd_deg == -3.0, f"unsupported roll rate cmd: {roll_rate_cmd_deg}"
-            psi_cmd_deg = -54
+            psi_cmd_deg = -54.0
 
         phi_cmd = np.deg2rad(psi_cmd_deg)
 
@@ -446,9 +446,9 @@ class AcasXuAutopilot():
 
         # trim to limits
         nz_cmd = max(self.cfg_min_nz_cmd, min(self.cfg_max_nz_cmd, nz_cmd))
-        throttle = max(min(throttle, 1), 0)
+        throttle = max(min(throttle, 1.0), 0.0)
 
-        return [nz_cmd, ps_cmd, 0, throttle]
+        return [nz_cmd, ps_cmd, 0.0, throttle]
 
     def get_u_ref_intruder(self, x_f16, index):
         '''get the reference input for intruder
@@ -469,9 +469,9 @@ class AcasXuAutopilot():
 
         # trim to limits
         nz_cmd = max(self.cfg_min_nz_cmd, min(self.cfg_max_nz_cmd, nz_cmd))
-        throttle = max(min(throttle, 1), 0)
+        throttle = max(min(throttle, 1.0), 0.0)
 
-        return [nz_cmd, ps_cmd, 0, throttle]
+        return [nz_cmd, ps_cmd, 0.0, throttle]
 
 
 def get_waypoint_data(x_f16, waypoint):
@@ -494,7 +494,7 @@ def get_waypoint_data(x_f16, waypoint):
 
     _, inclination, slant_range = cart2sph(delta)
 
-    heading = wrap_to_pi(pi / 2 - atan2(delta[1], delta[0]))
+    heading = wrap_to_pi(pi / 2.0 - atan2(delta[1], delta[0]))
 
     horiz_range = np.linalg.norm(delta[0:2])
     vert_range = np.linalg.norm(delta[2])
@@ -511,9 +511,9 @@ def get_nz_for_level_turn_ol(x_f16):
     phi = x_f16[StateIndex.PHI]
 
     if abs(phi):  # if cos(phi) ~= 0, basically
-        nz = 1 / cos(phi) - 1  # Keeps plane at altitude
+        nz = 1.0 / cos(phi) - 1.0  # Keeps plane at altitude
     else:
-        nz = 0
+        nz = 0.0
 
     return nz
 
@@ -539,10 +539,10 @@ def wrap_to_pi(psi_rad):
     returns equivelent angle in range [-pi, pi]
     '''
 
-    rv = psi_rad % (2 * pi)
+    rv = psi_rad % (2.0 * pi)
 
     if rv >= pi:
-        rv -= 2 * pi
+        rv -= 2.0 * pi
 
     return rv
 
@@ -586,7 +586,7 @@ def make_intruder_waypoints(init, num_vars, hypot=1e5):
 
         psi = state[StateIndex.PSI]
 
-        rad = -psi + pi / 2
+        rad = -psi + pi / 2.0
 
         new_x = x + hypot * cos(rad)
         new_y = y + hypot * sin(rad)

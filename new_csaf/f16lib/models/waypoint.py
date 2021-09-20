@@ -22,10 +22,10 @@ class WaypointAutopilot:
         self.waypoint_index = 0
 
         # waypoint config
-        self.cfg_slant_range_threshold = 250
+        self.cfg_slant_range_threshold = 250.0
 
         # default control when not waypoint tracking
-        self.cfg_u_ol_default = (0, 0, 0, 0.3)
+        self.cfg_u_ol_default = (0.0, 0.0, 0.0, 0.3)
 
         # control config
         # Gains for speed control
@@ -37,7 +37,7 @@ class WaypointAutopilot:
         self.cfg_k_h_dot = 0.02
 
         # Gains for heading tracking
-        self.cfg_k_prop_psi = 5
+        self.cfg_k_prop_psi = 5.0
         self.cfg_k_der_psi = 0.5
 
         # Gains for roll tracking
@@ -47,8 +47,8 @@ class WaypointAutopilot:
         # v2 was 0.5, 0.9
 
         # Ranges for Nz
-        self.cfg_max_nz_cmd = 4
-        self.cfg_min_nz_cmd = -1
+        self.cfg_max_nz_cmd = 4.0
+        self.cfg_min_nz_cmd = -1.0
 
         self.done_time = 0.0
 
@@ -81,10 +81,10 @@ class WaypointAutopilot:
 
         # trim to limits
         nz_cmd = max(self.cfg_min_nz_cmd, min(self.cfg_max_nz_cmd, nz_cmd))
-        throttle = max(min(throttle, 1), 0)
+        throttle = max(min(throttle, 1.0), 0.0)
 
         # Create reference vector
-        rv = [nz_cmd, ps_cmd, 0, throttle]
+        rv = [nz_cmd, ps_cmd, 0.0, throttle]
 
         return rv
 
@@ -101,15 +101,15 @@ class WaypointAutopilot:
         nz_alt = self.track_altitude_wings_level(x_f16)
         nz_roll = get_nz_for_level_turn_ol(x_f16)
 
-        if h_error > 0:
+        if h_error > 0.0:
             # Ascend wings level or banked
             nz = nz_alt + nz_roll
-        elif abs(phi) < np.deg2rad(15):
+        elif abs(phi) < np.deg2rad(15.0):
             # Descend wings (close enough to) level
             nz = nz_alt + nz_roll
         else:
             # Descend in bank (no negative Gs)
-            nz = max(0, nz_alt + nz_roll)
+            nz = max(0.0, nz_alt + nz_roll)
 
         return nz
 
@@ -253,9 +253,9 @@ def get_nz_for_level_turn_ol(x_f16):
     phi = x_f16[StateIndex.PHI]
 
     if abs(phi):  # if cos(phi) ~= 0, basically
-        nz = 1 / cos(phi) - 1  # Keeps plane at altitude
+        nz = 1.0 / cos(phi) - 1.0  # Keeps plane at altitude
     else:
-        nz = 0
+        nz = 0.0
 
     return nz
 

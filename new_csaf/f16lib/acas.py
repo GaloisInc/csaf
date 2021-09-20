@@ -23,16 +23,18 @@ class AcasScenario:
 
     def __init__(self, balloon_pos: typing.Sequence[float],
                  ownship_airspeed: float,
+                 own_waypoints: typing.Sequence[typing.Tuple[float, float, float]],
                  intruder_waypoints: typing.Sequence[typing.Tuple[float, float, float]]):
         self.balloon_pos, self.ownship_airspeed = balloon_pos, ownship_airspeed
         self.waypoints: typing.Sequence[typing.Tuple[float, float, float]] = intruder_waypoints
+        self.own_waypoints: typing.Sequence[typing.Tuple[float, float, float]] = own_waypoints
 
     def create_system(self, coord):
         """create a system from the relative coordinates coord"""
         sys = self.system_type()
         ownship, intruder, balloon = self.rel_to_abs(coord)
         sys._components['intruder_autopilot'].parameters["waypoints"] = self.waypoints
-        sys._components['waypoint'].parameters["waypoints"] = ((-3000.0, 20000.0, 1000.0),)
+        sys._components['waypoint'].parameters["waypoints"] = self.own_waypoints
         sys.set_state("balloon", balloon)
         sys.set_state("plant", ownship)
         sys.set_state("intruder_plant", intruder)
@@ -142,6 +144,12 @@ class AcasScenarioViewer:
                     s=200,
                     label='Intruder Waypoints')
 
+        ax.scatter(*np.array(self.scenario.own_waypoints)[:, :2].T,
+                   marker='x',
+                   c = 'k',
+                   s=200,
+                   label='Own Waypoints')
+
         ax.plot(*self.own_pos[-1],
                  marker=self.create_f16_marker(self.ownship_heading[-1]),
                  c='k',
@@ -207,6 +215,12 @@ class AcasScenarioViewer:
                     c = 'r',
                     s=200,
                     label='Intruder Waypoints')
+
+        ax.scatter(*np.array(self.scenario.own_waypoints)[:, :2].T,
+                   marker='x',
+                   c = 'k',
+                   s=200,
+                   label='Own Waypoints')
 
         # initialization function
         def init():
