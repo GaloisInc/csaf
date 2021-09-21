@@ -31,6 +31,7 @@ class ComponentComposition(cbase.CsafBase):
         self._signals_buffer: typing.Dict[typing.Tuple[str, str], typing.Sequence] = {}
         self._update_times: typing.Dict[str, float] = {}
         self._iv_changes = []
+        self._param_changes = []
 
         self._initialized = False
 
@@ -164,7 +165,7 @@ class ComponentComposition(cbase.CsafBase):
 
     def _set_component_iv(self, component_name: str, iv_name: str, state: typing.Sequence):
         assert component_name in self._components
-        component = self._components[component_name]
+        component = self.component_instances[component_name]
         assert iv_name in component.initial_values
         component.initial_values[iv_name] = state
         for cin, cout in self.connections.items():
@@ -175,11 +176,23 @@ class ComponentComposition(cbase.CsafBase):
         self._set_component_iv(component_name, iv_name, state)
         self._iv_changes.append((component_name, iv_name, state))
 
+    def _set_component_param(self, component_name: str, param_name: str, param: typing.Sequence):
+        assert component_name in self._components
+        component = self.component_instances[component_name]
+        assert param_name in component.parameters
+        component.parameters[param_name] = param
+
+    def set_component_param(self, component_name: str, param_name: str, param: typing.Sequence):
+        self._set_component_param(component_name, param_name, param)
+        self._param_changes.append((component_name, param_name, param))
+
     def reset(self):
-        for c in self._components.values():
-            c.reset()
+        # create instances of all components mentioned in the composition description
+        self._components: typing.Dict[str, Component] = {k: v() for k, v in self.components.items()}
         for change in self._iv_changes:
             self._set_component_iv(*change)
+        for param in self._param_changes:
+            self._set_component_param(*param)
 
     def set_state(self, component_name: str, state: typing.Sequence):
         self.set_component_iv(component_name, "states", state)

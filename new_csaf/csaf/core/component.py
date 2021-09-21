@@ -94,7 +94,7 @@ class Component(cbase.CsafBase, metaclass=abc.ABCMeta):
         if self.initialize:
             self.initialize()
 
-        self.reset()
+        self.initial_values = self.default_initial_values.copy()
         self._solver = self.system_solver(self)
 
     def reset(self):
@@ -178,9 +178,9 @@ class Component(cbase.CsafBase, metaclass=abc.ABCMeta):
             raise RuntimeError(f"component {self.name} has no parameter {item}")
 
     def validate(self) -> None:
-        def validate_signature(name, signature, value):
+        def validate_signature(namev, signature, value):
             assert len(signature.__annotations__) == len(
-                value), f"value with name {name} doesn't match length of signature {signature}"
+                value), f"value with name {namev} doesn't match length of signature {signature}"
 
         try:
             self.check_fields()
@@ -203,16 +203,16 @@ class Component(cbase.CsafBase, metaclass=abc.ABCMeta):
             for name, f in self.flows.items():
                 pass
                 # TODO: this isn't safe :( as initialize could store state
-                #ret = f(self, 0.0, states, dins)
-                #sd = sig_dict[name]
-                #assert len(ret) == len(sig_dict[name].__annotations__), f"flow {name} doesn't have correct " \
-                #                                                        f"return length" \
-                #                                                        f" against defaults (expected " \
-                #                                                        f"{len(sig_dict[name].__annotations__)}, " \
-                #                                                        f"received {len(ret)})"
-                #for idx, (sname, stype) in enumerate(sd.__annotations__.items()):
-                #    assert isinstance(ret[idx], stype), f"flow {name} signature requires {sname} ({idx}) have " \
-                #                                        f"type {stype}, but returned {ret[idx]} instead"
+                ret = f(self, 0.0, states, dins)
+                sd = sig_dict[name]
+                assert len(ret) == len(sig_dict[name].__annotations__), f"flow {name} doesn't have correct " \
+                                                                        f"return length" \
+                                                                        f" against defaults (expected " \
+                                                                        f"{len(sig_dict[name].__annotations__)}, " \
+                                                                        f"received {len(ret)})"
+                for idx, (sname, stype) in enumerate(sd.__annotations__.items()):
+                    assert isinstance(ret[idx], stype), f"flow {name} signature requires {sname} ({idx}) have " \
+                                                        f"type {stype}, but returned {ret[idx]} instead"
         except Exception as exc:
             raise exc.__class__(f"|Component <{self.__class__.__name__}>| {exc}")
 
