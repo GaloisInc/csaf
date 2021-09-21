@@ -6,7 +6,7 @@ import numpy as np
 
 from svgpath2mpl import parse_path  # type: ignore
 import matplotlib as mpl  # type: ignore
-import matplotlib.pyplot as plt # type: ignore
+import matplotlib.pyplot as plt  # type: ignore
 from matplotlib.collections import LineCollection  # type: ignore
 import matplotlib.animation as animation  # type: ignore
 from numpy import sin, cos
@@ -53,8 +53,8 @@ class AcasScenario:
         """create a system from the relative coordinates coord"""
         sys = self.system_type()
         ownship, intruder, balloon = self.rel_to_abs(coord)
-        sys._components['intruder_autopilot'].parameters["waypoints"] = self.waypoints
-        sys._components['waypoint'].parameters["waypoints"] = self.own_waypoints
+        sys.set_component_param("intruder_autopilot", "waypoints", self.waypoints)
+        sys.set_component_param("waypoint", "waypoints", self.own_waypoints)
         sys.set_state("balloon", balloon)
         sys.set_state("plant", ownship)
         sys.set_state("intruder_plant", intruder)
