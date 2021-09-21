@@ -51,4 +51,3 @@ class F16MonitorOutputMessage(NamedTuple):
 
 class PredictorOutputMessage(NamedTuple):
     will_collide: bool
-
