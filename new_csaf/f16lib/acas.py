@@ -178,7 +178,13 @@ class AcasScenarioViewer:
                    label='Own Waypoints')
 
     def compute_bounds(self):
-        pos = np.vstack((self.own_pos, self.intruder_pos))
+        pos = np.vstack(
+            (self.own_pos[:-1],
+             self.intruder_pos[:-1],
+             np.array(self.scenario.waypoints)[:, :-1],
+             np.array(self.scenario.own_waypoints)[:, :-1],
+            self.scenario.balloon_pos)
+        )
 
         xmin, xmax = min(pos[:, 0]), max(pos[:, 0])
         ymin, ymax = min(pos[:, 1]), max(pos[:, 1])
@@ -203,7 +209,7 @@ class AcasScenarioViewer:
 
         own = ax.scatter([], [], marker='x', s=0.001, zorder=300, color='k')
         intruder = ax.scatter([], [], marker='x', s=0.001, zorder=300, color='r')
-        skip_size = 3
+        skip_size = 6
 
         self.plot_static(ax)
 
@@ -258,6 +264,7 @@ class AcasScenarioViewer:
         # setting a title for the plot
         plt.grid()
         plt.legend()
+        ax.axis('equal')
         plt.xlabel("East / West Position (ft)")
         plt.ylabel("North / South Position (ft)")
 
