@@ -66,3 +66,41 @@ def test_acas_scenario(acas_shield_balloon_f16: csaf.System):
                                                       terminating_conditions_all=air_collision_condition,
                                                       return_passed=True)
     assert not p, f"{acas_shield_balloon_f16.__class__.__name__} did not collide"
+
+
+def test_example_collision():
+    def air_collision_condition(ctraces):
+        """ground collision premature termination condition
+        """
+        # get the aircraft states
+        sa, sb, sc = ctraces['plant']['states'], ctraces['intruder_plant']['states'], ctraces['balloon']['states']
+        if sa and sb and sc:
+            # look at distance between last state
+            dab =  (np.linalg.norm(np.array(sa[-1][9:11]) - np.array(sb[-1][9:11])))
+            dac = (np.linalg.norm(np.array(sa[-1][9:11]) - np.array(sc[-1][9:11])))
+            return dab < 500.0 or dac < 500.0
+
+    y_offset = 1700
+    int_way = (-7000, 0.0+y_offset, 1000.0)
+
+    # construct a scenario
+    scen = f16acas.AcasShieldScenario(
+        [-2000.0, 5000+y_offset], # balloon position
+        500.0, # ownship airspeed
+        ((0.0, 15000.0+y_offset, 1000.0),(0.0, 20000.0+y_offset, 1000.0)),
+        (int_way,)
+    )
+
+    m = (8000+y_offset - int_way[1]) / (6000 - int_way[0])
+    theta = np.arctan2((6000 - int_way[0]), (8000+y_offset - int_way[1]))
+    x = 9000
+
+    sys = scen.create_system([x, (x-int_way[0])*m+int_way[1], # relative position
+                              (theta+np.pi), # relative heading
+                              -200.0]) # relative airspeed
+    sys.check()
+    _, p = sys.simulate_tspan((0.0, 30.0),
+                              terminating_conditions_all=air_collision_condition,
+                              return_passed=True)
+    assert not p, f"aircraft should have collided!"
+
