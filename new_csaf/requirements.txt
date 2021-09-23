@@ -124,6 +124,7 @@ entrypoints==0.3
 filelock==3.0.12
 flatbuffers==2.0
 GPy==1.10.0
+GPyOpt==1.2.6
 greenlet==1.1.1
 idna==3.2
 iniconfig==1.1.1
@@ -173,6 +174,7 @@ prompt-toolkit==3.0.20
 protobuf==3.17.3
 ptyprocess==0.7.0
 py==1.10.0
+pyaml==21.8.3
 pycparser==2.20
 pydantic==1.8.2
 pydot==1.4.2
@@ -183,10 +185,13 @@ pytest==6.2.5
 pytest-mypy==0.8.1
 python-dateutil==2.8.2
 pyxdg==0.27
+PyYAML==5.4.1
 pyzmq==22.2.1
 qtconsole==5.1.1
 QtPy==1.11.1
 requests==2.26.0
+scikit-learn==0.24.2
+scikit-optimize==0.8.1
 scipy==1.7.1
 Send2Trash==1.8.0
 setuptools==52.0.0.post20210125
@@ -194,6 +199,7 @@ six==1.16.0
 svgpath2mpl==1.0.0
 terminado==0.12.1
 testpath==0.5.0
+threadpoolctl==2.2.0
 toml==0.10.2
 tornado==6.1
 tqdm==4.62.2
