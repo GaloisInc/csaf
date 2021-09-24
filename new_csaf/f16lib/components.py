@@ -290,6 +290,7 @@ def create_nagents_acas_xu(nagents: int) -> typing.Type[DiscreteComponent]:
         sampling_frequency = 10.0
         default_parameters = {
             "roll_rates": (0, -1.5, 1.5, -3.0, 3.0),
+            "gains": "nominal",
             "setpoint": 2500.0,
             "xequil": [502.0, 0.03887505597600522, 0.0, 0.0, 0.03887505597600522, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1000.0,
                        9.05666543872074]
