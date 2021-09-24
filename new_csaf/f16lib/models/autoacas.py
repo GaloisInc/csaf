@@ -10,7 +10,29 @@ def model_init(model):
 
 def get_auto(model, f16_state):
     if model.auto is None:
-        model.parameters['auto'] = AcasXuAutopilot(f16_state, roll_rates=model.roll_rates)
+        model.parameters['auto'] = AcasXuAutopilot(f16_state, roll_rates=model.parameters['roll_rates'])
+        if model.gains == "recovery":
+            self = model.parameters['auto']
+
+            # TODO: restructure this?
+            # change the gains so the recovery controller is much more aggressive
+            # control config
+            # Gains for speed control
+            self.cfg_k_vt = 0.7
+
+            # Gains for altitude tracking
+            self.cfg_k_alt = 0.005
+            self.cfg_k_h_dot = 0.02
+
+            # Gains for heading tracking
+            self.cfg_k_prop_psi = 12.0
+            self.cfg_k_der_psi = 2.0
+
+            # Gains for roll tracking
+            self.cfg_k_prop_phi = 10.0
+            self.cfg_k_der_phi = 2.0
+            self.cfg_max_bank_deg = 90.0  # maximum bank angle setpoint
+
     return model.auto
 
 

@@ -230,9 +230,10 @@ class F16AcasShieldIntruderBalloon(System):
     Base: typing.Any = f16c.create_nagents_acas_xu(2)
 
     class F16AcasRecoveryComponent(Base):
-        parameters = {
+        default_parameters = {
             **f16c.create_nagents_acas_xu(1).default_parameters,
-            "roll_rates": (0, -3.0, 3.0, -6.0, 6.0)
+            "roll_rates": (0, -3.0, 3.0, -6.0, 6.0),
+            "gains": "recovery"
         }
 
     components = {

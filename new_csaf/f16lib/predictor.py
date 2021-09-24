@@ -185,7 +185,6 @@ class CollisionPredictor:
         alt_system.set_state('intruder_plant', pstates[-1, 13:26])
         alt_system.set_state('balloon', pstates[-1, 26:39])
         alt_system.set_component_param('waypoint', 'waypoints', waypoints)
-        print("WAYPOINTS", waypoints)
         trajs = alt_system.simulate_tspan(tr - min(tr),
                                          show_status=False)
 
@@ -259,7 +258,7 @@ class CollisionPredictor:
         return (ownx, owny), (intx, inty)
 
     def make_prediction(self):
-        if self.step_count % 20 == 0:
+        if self.step_count % 15 == 0:
             self.train_predictors()
             (ownx, owny), (intx, inty) = self.make_pos_prediction()
             d = min(np.linalg.norm([intx - ownx, inty - owny], axis=0))
