@@ -30,7 +30,7 @@ class AcasXuAutopilot():
     '''AcasXu autopilot'''
 
     def __init__(self, init, num_aircraft_acasxu=1, stop_on_coc=False,
-                 hardcoded_u_seq=None, stdout=False, roll_rates=(0.0, -1.5, 1.5, -3.0, 3.0) ):
+                 hardcoded_u_seq=None, stdout=False, roll_rates=(0.0, -1.5, 1.5, -3.0, 3.0)):
         'waypoints is a list of 3-tuples'
 
         self.roll_rates = roll_rates
@@ -415,6 +415,7 @@ class AcasXuAutopilot():
 
         roll_rate_cmd_list = self.roll_rates # deg / sec
         roll_rate_cmd_deg = roll_rate_cmd_list[command]
+        #print(index, command, roll_rate_cmd_deg, self.roll_rates)
 
         # these bank angle cmds were empirically found to achieve the desired turn rate
         if roll_rate_cmd_deg == 0:
@@ -426,9 +427,9 @@ class AcasXuAutopilot():
         elif roll_rate_cmd_deg == 3.0:
             psi_cmd_deg = 54.0
         elif roll_rate_cmd_deg == 6.0:
-            psi_cmd_deg = 80.0
+            psi_cmd_deg = 85.0
         elif roll_rate_cmd_deg == -6.0:
-            psi_cmd_deg = -80.0
+            psi_cmd_deg = -85.0
         else:
             assert roll_rate_cmd_deg == -3.0, f"unsupported roll rate cmd: {roll_rate_cmd_deg}"
             psi_cmd_deg = -54.0
@@ -447,6 +448,9 @@ class AcasXuAutopilot():
         # trim to limits
         nz_cmd = max(self.cfg_min_nz_cmd, min(self.cfg_max_nz_cmd, nz_cmd))
         throttle = max(min(throttle, 1.0), 0.0)
+
+        if roll_rate_cmd_deg in [6.0, -6.0]:
+            throttle = 0.0
 
         return [nz_cmd, ps_cmd, 0.0, throttle]
 
