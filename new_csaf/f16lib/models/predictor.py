@@ -1,6 +1,14 @@
+from f16lib.predictor import CollisionPredictor
+
+
 def model_output(model, time_t, state_switch, input_autopilot):
-    ownstate, ownout, intstate, inout = input_autopilot[:13], \
-                                        input_autopilot[13:13 + 4], \
-                                        input_autopilot[17:17 + 13], \
-                                        input_autopilot[30:34]
-    return [True]
+    p: CollisionPredictor = model.predictor
+    p.step(time_t, input_autopilot)
+    return [p.make_prediction()]
+
+
+def model_init(model):
+    model.parameters['predictor'] = CollisionPredictor(
+        model.parameters["intruder_waypoints"],
+        model.parameters["own_waypoints"]
+    )

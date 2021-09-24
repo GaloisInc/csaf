@@ -179,8 +179,9 @@ class ComponentComposition(cbase.CsafBase):
     def _set_component_param(self, component_name: str, param_name: str, param: typing.Sequence):
         assert component_name in self._components
         component = self.component_instances[component_name]
-        assert param_name in component.parameters
+        assert param_name in component.parameters, f"component '{component_name}' has no parameter '{param_name}'"
         component.parameters[param_name] = param
+        component.initialize()
 
     def set_component_param(self, component_name: str, param_name: str, param: typing.Sequence):
         self._set_component_param(component_name, param_name, param)

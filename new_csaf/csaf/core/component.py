@@ -131,7 +131,7 @@ class Component(cbase.CsafBase, metaclass=abc.ABCMeta):
             states = [[], ] * len(teval)
         for k, flow_func in self.flows.items():
             if k != "states":
-                ret = [flow_func(self, ti, si, inputs) for ti, si in zip(teval, states)]
+                ret = [flow_func(self, teval[-1], states[-1], inputs)]
                 sols[k] = ret
         return sols
 

@@ -1,5 +1,5 @@
 from f16lib.components import f16_xequil
-import f16lib.systems as f16sys
+from f16lib.systems import F16AcasShieldIntruderBalloon, F16AcasIntruderBalloon
 import csaf
 import typing
 import numpy as np
@@ -39,7 +39,7 @@ class AcasScenario:
         theta = intruder[5] - ownship[5]
         return x, y, theta, rel_vel
 
-    system_type: typing.Type[csaf.System] = f16sys.F16AcasIntruderBalloon
+    system_type: typing.Type[csaf.System] = F16AcasIntruderBalloon
 
     def __init__(self, balloon_pos: typing.Sequence[float],
                  ownship_airspeed: float,
@@ -91,7 +91,7 @@ class AcasScenario:
 
 
 class AcasShieldScenario(AcasScenario):
-    system_type = f16sys.F16AcasShieldIntruderBalloon
+    system_type = F16AcasShieldIntruderBalloon
 
 
 class AcasScenarioViewer:
@@ -117,8 +117,9 @@ class AcasScenarioViewer:
     def __init__(self, trajs, scenario):
         self.scenario = scenario
         self.own_states = np.array(trajs["plant"].states)
-        self.acas_states = np.array(trajs["acas_switch"].outputs_state)
-        self.acas_times = np.array(trajs["acas_switch"].times)
+        acas = trajs["acas_out"]
+        self.acas_states = np.array(acas.outputs_state if hasattr(acas, "outputs_state") else acas.states)
+        self.acas_times = np.array(trajs["acas_out"].times)
         self.plant_times = np.array(trajs["plant"].times)
         self.intruder_states = np.array(trajs["intruder_plant"].states)
         self.balloon_states = np.array(trajs["balloon"].states)
@@ -181,8 +182,8 @@ class AcasScenarioViewer:
         pos = np.vstack(
             (self.own_pos[:-1],
              self.intruder_pos[:-1],
-             np.array(self.scenario.waypoints)[:, :-1],
-             np.array(self.scenario.own_waypoints)[:, :-1],
+             #np.array(self.scenario.waypoints)[:, :-1],
+             #np.array(self.scenario.own_waypoints)[:, :-1],
             self.scenario.balloon_pos)
         )
 
@@ -198,7 +199,8 @@ class AcasScenarioViewer:
     def summary_video(self):
         fig = plt.figure(figsize=(10, 10))
         xbs, ybs = self.compute_bounds()
-        ax = plt.axes(xlim=xbs, ylim=ybs)
+        pbounds = min(xbs[0], ybs[0]), max(xbs[1], ybs[1])
+        ax = plt.axes(xlim=pbounds, ylim=pbounds)
 
         line, = ax.plot([], [], 'r', lw=2, label='Intruder')
 
@@ -264,7 +266,7 @@ class AcasScenarioViewer:
         # setting a title for the plot
         plt.grid()
         plt.legend()
-        ax.axis('equal')
+        ax.set_aspect('equal', 'datalim')
         plt.xlabel("East / West Position (ft)")
         plt.ylabel("North / South Position (ft)")
 

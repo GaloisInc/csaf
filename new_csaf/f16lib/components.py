@@ -8,7 +8,7 @@ import f16lib.models.switch as switch
 import f16lib.models.autoacas as acas
 import f16lib.models.monitor_ap as monitor
 import f16lib.models.acas_switch as aswitch
-import f16lib.models.predictor as predictor
+import f16lib.models.dummy_predictor as predictor
 
 from f16lib.messages import *
 from csaf import ContinuousComponent, DiscreteComponent
@@ -260,6 +260,8 @@ def create_collision_predictor(nagents: int) -> typing.Type[DiscreteComponent]:
         name = "F16 Collision Predictor"
         sampling_frequency = 10.0
         default_parameters: typing.Dict[str, typing.Any] = {
+            "intruder_waypoints" : ((0.0, 0.0, 1000.0),),
+            "own_waypoints" : ((0.0, 0.0, 1000.0),)
         }
         inputs = (
             ("inputs_own", F16PlantStateMessage),
@@ -277,7 +279,7 @@ def create_collision_predictor(nagents: int) -> typing.Type[DiscreteComponent]:
         flows = {
             "outputs": predictor.model_output
         }
-        initialize = None
+        initialize = predictor.model_init
 
     return _F16CollisionPredictor
 
