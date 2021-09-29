@@ -1,4 +1,5 @@
 from csaf.core.system import System
+import numpy as np
 import typing
 import f16lib.components as f16c
 
@@ -227,6 +228,82 @@ class F16AcasIntruderBalloon(System):
 
 
 class F16AcasShieldIntruderBalloon(System):
+    Base: typing.Any = f16c.F16AutoAltitudeComponent
+
+    class F16AcasRecoveryComponent(Base):
+        default_parameters = {
+            **f16c.F16AutoAltitudeComponent.default_parameters,
+            "setpoint" : 750
+        }
+        default_initial_values = {
+            **f16c.F16AutoAltitudeComponent.default_initial_values,
+            "states" : ["clear"]
+        }
+        states = f16c.F16AutopilotOutputMessage
+        flows = {
+            **f16c.F16AutoAltitudeComponent.flows,
+            "states": lambda m, t, s, i: ["strong-left"] #["clear" if np.abs(i[11] - m.setpoint) < 10.0 else "strong-left"]
+        }
+
+    components = {
+        "plant": f16c.F16PlantComponent,
+        "llc": f16c.F16LlcComponent,
+        "acas": f16c.create_nagents_acas_xu(2),
+        "acas_recovery": F16AcasRecoveryComponent,
+        "acas_out": f16c.F16AcasRecoverySwitchComponent,
+        "predictor": f16c.create_collision_predictor(2),
+        "waypoint": f16c.F16AutoWaypointComponent,
+        "switch": f16c.F16AcasSwitchComponent,
+        "intruder_llc": f16c.F16LlcComponent,
+        "intruder_plant": f16c.F16PlantComponent,
+        "intruder_autopilot": f16c.F16AutoWaypointComponent,
+        "balloon": f16c.StaticObject
+    }
+
+    connections = {
+        ("plant", "inputs"): ("llc", "outputs"),
+
+        ("llc", "inputs_pstates"): ("plant", "states"),
+        ("llc", "inputs_poutputs"): ("plant", "outputs"),
+        ("llc", "inputs_coutputs"): ("switch", "outputs"),
+
+        ("acas", "inputs_own"): ("plant", "states"),
+        ("acas", "inputs_intruder0"): ("intruder_plant", "states"),
+        ("acas", "inputs_intruder1"): ("balloon", "states"),
+
+        ("acas_recovery", "inputs_pstates"): ("plant", "states"),
+        ("acas_recovery", "inputs_poutputs"): ("plant", "outputs"),
+
+        ("predictor", "inputs_own"): ("plant", "states"),
+        ("predictor", "inputs_intruder0"): ("intruder_plant", "states"),
+        ("predictor", "inputs_intruder1"): ("balloon", "states"),
+
+        ("acas_out", "inputs"): ("acas", "outputs"),
+        ("acas_out", "inputs_recovery"): ("acas_recovery", "outputs"),
+        ("acas_out", "inputs_state"): ("acas", "states"),
+        ("acas_out", "inputs_recovery_state"): ("acas_recovery", "states"),
+        ("acas_out", "inputs_select"): ("predictor", "outputs"),
+
+        ("waypoint", "inputs_poutputs"): ("plant", "outputs"),
+        ("waypoint", "inputs_pstates"): ("plant", "states"),
+
+        ("switch", "inputs"): ("waypoint", "outputs"),
+        ("switch", "inputs_recovery"): ("acas_out", "outputs"),
+        ("switch", "inputs_select"): ("acas_out", "outputs_state"),
+
+        # setup the intruder plan
+        ("intruder_llc", "inputs_pstates"): ("intruder_plant", "states"),
+        ("intruder_llc", "inputs_poutputs"): ("intruder_plant", "outputs"),
+        ("intruder_llc", "inputs_coutputs"): ("intruder_autopilot", "outputs"),
+
+        ("intruder_plant", "inputs"): ("intruder_llc", "outputs"),
+
+        ("intruder_autopilot", "inputs_poutputs"): ("intruder_plant", "outputs"),
+        ("intruder_autopilot", "inputs_pstates"): ("intruder_plant", "states")
+    }
+
+
+class F16AcasShieldAcasIntruderBalloon(System):
     Base: typing.Any = f16c.create_nagents_acas_xu(2)
 
     class F16AcasRecoveryComponent(Base):
