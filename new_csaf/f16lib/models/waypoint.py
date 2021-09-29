@@ -14,12 +14,13 @@ from f16lib.models.helpers.aerobench_helpers import *
 class WaypointAutopilot:
     '''waypoint follower autopilot'''
 
-    def __init__(self, waypoints, stdout=False):
+    def __init__(self, waypoints, stdout=False, airspeed_callable=None):
         'waypoints is a list of 3-tuples'
 
         self.stdout = stdout
         self.waypoints = waypoints
         self.waypoint_index = 0
+        self.airspeed_callable = airspeed_callable
 
         # waypoint config
         self.cfg_slant_range_threshold = 250.0
@@ -72,10 +73,10 @@ class WaypointAutopilot:
             ps_cmd = self.track_roll_angle(x_f16, phi_cmd)
 
             nz_cmd = self.track_altitude(x_f16)
-            throttle = self.track_airspeed(x_f16)
+            throttle = self.track_airspeed(_t, x_f16)
         else:
             # Waypoint Following complete: fly level.
-            throttle = self.track_airspeed(x_f16)
+            throttle = self.track_airspeed(_t, x_f16)
             ps_cmd = self.track_roll_angle(x_f16, 0)
             nz_cmd = self.track_altitude_wings_level(x_f16)
 
@@ -148,10 +149,12 @@ class WaypointAutopilot:
 
         return ps
 
-    def track_airspeed(self, x_f16):
+    def track_airspeed(self, t, x_f16):
         'get throttle command'
-
-        vt_cmd = self.cfg_airspeed
+        if self.airspeed_callable is not None:
+            vt_cmd = self.airspeed_callable(t)
+        else:
+            vt_cmd = self.cfg_airspeed
 
         # Proportional control on airspeed using throttle
         throttle = self.cfg_k_vt * (vt_cmd - x_f16[StateIndex.VT])

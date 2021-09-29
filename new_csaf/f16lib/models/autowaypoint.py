@@ -8,7 +8,7 @@ def model_init(model):
 
 def get_auto(model, f16_state):
     if model.auto is None:
-        model.parameters['auto'] = WaypointAutopilot(model.waypoints)
+        model.parameters['auto'] = WaypointAutopilot(model.waypoints, airspeed_callable=model.airspeed)
     return model.auto
 
 
