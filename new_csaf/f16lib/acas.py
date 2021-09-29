@@ -44,10 +44,12 @@ class AcasScenario:
     def __init__(self, balloon_pos: typing.Sequence[float],
                  ownship_airspeed: float,
                  own_waypoints: typing.Sequence[typing.Tuple[float, float, float]],
-                 intruder_waypoints: typing.Sequence[typing.Tuple[float, float, float]]):
+                 intruder_waypoints: typing.Sequence[typing.Tuple[float, float, float]],
+                 intruder_velocity: typing.Optional[typing.Callable] = None):
         self.balloon_pos, self.ownship_airspeed = balloon_pos, ownship_airspeed
         self.waypoints: typing.Sequence[typing.Tuple[float, float, float]] = intruder_waypoints
         self.own_waypoints: typing.Sequence[typing.Tuple[float, float, float]] = own_waypoints
+        self.intruder_velocity = intruder_velocity
 
     def create_system(self, coord):
         """create a system from the relative coordinates coord"""
@@ -55,6 +57,7 @@ class AcasScenario:
         ownship, intruder, balloon = self.rel_to_abs(coord)
         sys.set_component_param("intruder_autopilot", "waypoints", self.waypoints)
         sys.set_component_param("waypoint", "waypoints", self.own_waypoints)
+        sys.set_component_param("intruder_autopilot", "airspeed", self.intruder_velocity)
         sys.set_state("balloon", balloon)
         sys.set_state("plant", ownship)
         sys.set_state("intruder_plant", intruder)
