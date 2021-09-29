@@ -390,7 +390,8 @@ class F16CollisionPredictor(DiscreteComponent):
 class F16AutoWaypointComponent(F16AutopilotComponent):
     name = "F16 Waypoint Autopilot"
     default_parameters = {
-        "waypoints": [(5000.0, -1000.0, 1000.0)]
+        "waypoints": [(5000.0, -1000.0, 1000.0)],
+        "airspeed": None
     }
     states = F16AutopilotOutputMessage
     default_initial_values = {
