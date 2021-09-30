@@ -16,3 +16,7 @@ In this directory, run
 ```
 PYTHONPATH=$PWD pytest --mypy -s tests
 ```
+To test the notebooks, run
+```
+PYTHONPATH=$PWD pytest --nbmake "./notebooks"
+```
