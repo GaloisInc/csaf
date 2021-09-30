@@ -9,6 +9,7 @@ import f16lib.models.autoacas as acas
 import f16lib.models.monitor_ap as monitor
 import f16lib.models.acas_switch as aswitch
 import f16lib.models.dummy_predictor as predictor
+import f16lib.models.nnllc as nnllc
 
 from f16lib.messages import *
 from csaf import ContinuousComponent, DiscreteComponent
@@ -125,6 +126,14 @@ class F16LlcComponent(ContinuousComponent):
         "states": llc.model_state_update
     }
     initialize = llc.model_init
+
+
+class F16NNLlcComponent(F16LlcComponent):
+    flows = {
+        "outputs": nnllc.model_output,
+        "states": nnllc.model_state_update
+    }
+    initialize = nnllc.model_init
 
 
 class F16AutopilotComponent(DiscreteComponent):
