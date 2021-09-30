@@ -164,9 +164,9 @@ class ComponentComposition(cbase.CsafBase):
         return ret[1]
 
     def _set_component_iv(self, component_name: str, iv_name: str, state: typing.Sequence):
-        assert component_name in self._components
+        assert component_name in self._components, f"component with identifier {component_name} not found"
         component = self.component_instances[component_name]
-        assert iv_name in component.initial_values
+        assert iv_name in component.initial_values, f"initial value name {iv_name} no found in component {component_name}"
         component.initial_values[iv_name] = state
         for cin, cout in self.connections.items():
             if cout == (component_name, iv_name):
