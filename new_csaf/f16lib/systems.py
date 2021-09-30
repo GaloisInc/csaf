@@ -231,11 +231,11 @@ class F16AcasShieldIntruderBalloon(System):
     Base: typing.Any = f16c.F16AutoAltitudeComponent
 
     class F16AcasRecoveryComponent(Base):
-        default_parameters = {
+        default_parameters: typing.Dict[str, typing.Any] = {
             **f16c.F16AutoAltitudeComponent.default_parameters,
             "setpoint" : 750
         }
-        default_initial_values = {
+        default_initial_values: typing.Dict[str, typing.Any] = {
             **f16c.F16AutoAltitudeComponent.default_initial_values,
             "states" : ["clear"]
         }
