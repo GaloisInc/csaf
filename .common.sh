@@ -21,13 +21,3 @@ build_img() {
         show_error_and_exit "Unable to build image locally"
     fi
 }
-
-validate_tag() {
-
-    if [ ${1} != "stable" ] && \
-       [ ${1} != "edge" ]  && \
-       [ ${1} != "latest" ]
-    then
-        show_error_and_exit "Image tag invalid"
-    fi
-}

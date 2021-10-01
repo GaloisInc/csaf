@@ -1,6 +1,6 @@
 #!/bin/bash
 PUBLISH=0
-SCRIPT_DIR="csaf_architecture"
+SCRIPT_DIR="csaf"
 
 DIR=$(basename ${PWD})
 if [ ${DIR} != ${SCRIPT_DIR} ]
@@ -47,8 +47,6 @@ while getopts ":t:ph" opt; do
         ;;
     esac
 done
-
-validate_tag "${IMAGE_TAG}"
 
 build_img
 

@@ -20,3 +20,4 @@ __status__ = "prototype"
 
 # bring core CSAF objects to the top level
 from csaf.core import *
+from csaf.test import *
