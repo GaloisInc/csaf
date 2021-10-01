@@ -129,6 +129,7 @@ class F16LlcComponent(ContinuousComponent):
 
 
 class F16NNLlcComponent(F16LlcComponent):
+    name = "F16 NN Low Level Controller"
     flows = {
         "outputs": nnllc.model_output,
         "states": nnllc.model_state_update
