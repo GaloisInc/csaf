@@ -7,7 +7,7 @@ import f16lib.components as f16c
 class F16Simple(System):
     components = {
         "plant": f16c.F16PlantComponent,
-        "llc": f16c.F16LlcComponent,
+        "llc": f16c.F16NNLlcComponent,
         "autopilot": f16c.F16GcasComponent
     }
 
@@ -26,14 +26,14 @@ class F16Simple(System):
 class F16AirspeedSimple(F16Simple):
     components = {
         "plant": f16c.F16PlantComponent,
-        "llc": f16c.F16LlcComponent,
+        "llc": f16c.F16NNLlcComponent,
         "autopilot": f16c.F16AutoAirspeedComponent
     }
 
 
 class F16Shield(System):
     components = {
-        "llc": f16c.F16LlcComponent,
+        "llc": f16c.F16NNLlcComponent,
         "plant": f16c.F16PlantComponent,
         "autopilot": f16c.F16GcasComponent,
         "autoairspeed": f16c.F16AutoAirspeedComponent,
@@ -138,7 +138,7 @@ class F16AcasShield(System):
 
     components = {
         "plant": f16c.F16PlantComponent,
-        "llc": f16c.F16LlcComponent,
+        "llc": f16c.F16NNLlcComponent,
         "autopilot": f16c.create_nagents_acas_xu(2),
         "autopilot_recovery": F16AcasRecoveryComponent,
         "switch": f16c.F16AcasRecoverySwitchComponent,
@@ -187,7 +187,7 @@ class F16AcasShield(System):
 class F16AcasIntruderBalloon(System):
     components = {
         "plant": f16c.F16PlantComponent,
-        "llc": f16c.F16LlcComponent,
+        "llc": f16c.F16NNLlcComponent,
         "acas_out": f16c.create_nagents_acas_xu(2),
         "waypoint": f16c.F16AutoWaypointComponent,
         "switch": f16c.F16AcasSwitchComponent,
@@ -233,21 +233,22 @@ class F16AcasShieldIntruderBalloon(System):
     class F16AcasRecoveryComponent(Base):
         default_parameters: typing.Dict[str, typing.Any] = {
             **f16c.F16AutoAltitudeComponent.default_parameters,
-            "setpoint" : 750
+            "setpoint": 750
         }
         default_initial_values: typing.Dict[str, typing.Any] = {
             **f16c.F16AutoAltitudeComponent.default_initial_values,
-            "states" : ["clear"]
+            "states": ["clear"]
         }
         states = f16c.F16AutopilotOutputMessage
         flows = {
             **f16c.F16AutoAltitudeComponent.flows,
-            "states": lambda m, t, s, i: ["strong-left"] #["clear" if np.abs(i[11] - m.setpoint) < 10.0 else "strong-left"]
+            "states": lambda m, t, s, i: ["strong-left"]
+            # ["clear" if np.abs(i[11] - m.setpoint) < 10.0 else "strong-left"]
         }
 
     components = {
         "plant": f16c.F16PlantComponent,
-        "llc": f16c.F16LlcComponent,
+        "llc": f16c.F16NNLlcComponent,
         "acas": f16c.create_nagents_acas_xu(2),
         "acas_recovery": F16AcasRecoveryComponent,
         "acas_out": f16c.F16AcasRecoverySwitchComponent,
@@ -315,7 +316,7 @@ class F16AcasShieldAcasIntruderBalloon(System):
 
     components = {
         "plant": f16c.F16PlantComponent,
-        "llc": f16c.F16LlcComponent,
+        "llc": f16c.F16NNLlcComponent,
         "acas": f16c.create_nagents_acas_xu(2),
         "acas_recovery": F16AcasRecoveryComponent,
         "acas_out": f16c.F16AcasRecoverySwitchComponent,

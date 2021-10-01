@@ -1,6 +1,7 @@
 import pytest
 import csaf
 import f16lib.systems as f16s
+import f16lib.components as f16c
 import f16lib.acas as f16acas
 import numpy as np
 
@@ -102,5 +103,9 @@ def test_example_collision():
     _, p = sys.simulate_tspan((0.0, 30.0),
                               terminating_conditions_all=air_collision_condition,
                               return_passed=True)
-    assert not p, f"aircraft should have collided!"
+    if issubclass(sys.components["llc"], f16c.F16NNLlcComponent):
+        assert p, f"aircraft should not have collided!"
+    else:
+        # this should hold for the LLC
+        assert not p, f"aircraft should have collided!"
 
