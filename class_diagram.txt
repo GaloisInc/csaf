@@ -1,0 +1,35 @@
+@startuml
+abstract Scenario {
+    configuration_space: dict
+    get_system_under_test(self, states: typing.List[float]) -> csaf.System
+    get_configuration_space(self) -> dict:
+}
+
+abstract Goal {
+    optimizer: Optimizer
+    scenario: Scenario
+    objective_function(self, states: typing.List[float]) -> float
+    properties_func(ctraces: csaf.TimeTrace) -> bool
+}
+abstract Optimizer {
+    prepare(self,configuration_space: dict, obj_func: Callable[[[float]], float]):
+    run_optimization(self,max_iter: int,max_time: float,tolerance: float,verbose: bool = False):
+}
+
+Scenario <|-- ScenarioAcas
+Optimizer <|-- GPOptimizer
+Goal <|-- FalsifyAcas
+Goal *- Scenario
+Goal *- Optimizer
+
+
+class FalsifyAcas {
+    falsify(self,max_time=60.0*2,max_iter=100,tolerance=10)
+}
+
+class GPOptimizer {
+    cost_func(x)
+    objective_function_opt(self, x)
+}
+
+@enduml
