@@ -10,7 +10,7 @@ import pymap3d as pm
 from abc import ABC
 from scipy.spatial.transform import Rotation
 
-import csaf.trace
+import csaf.core.trace
 
 class Dubins2DConverter():
     """
@@ -82,7 +82,7 @@ class FlightGearBase(ABC):
     # Start position of the aircraft
     DEFAULT_FG_LAT = 35.802117
     DEFAULT_FG_LON = -117.806717
-    DEFAULT_FG_GROUND_LEVEL = 715 # m
+    DEFAULT_FG_GROUND_LEVEL = 1500 # m
     # Default max values for actutors
     DEFAULT_FG_AILERON_MAX_DEG = 21.5
     DEFAULT_FG_ELEVATOR_MAX_DEG = 25
@@ -90,7 +90,7 @@ class FlightGearBase(ABC):
 
     FG_FT_IN_M = 3.2808
     # Networking variables
-    DEFAULT_FG_IP = "127.0.0.1"
+    DEFAULT_FG_IP = "192.168.40.219"#"127.0.0.1"
 
     DEFAULT_DELTA_T = 0.5
 
@@ -203,7 +203,11 @@ class FlightGearBase(ABC):
                     idx = self.plant.times.index(timestamp)
                     states = self.plant.states[idx]
                     # Controller output
-                    idx = self.controller.times.index(timestamp)
+                    # TODO: if no controller is present, just fill in zeros
+                    try:
+                        idx = self.controller.times.index(timestamp)
+                    except ValueError:
+                        idx = 0
                     ctrls = self.controller.states[idx]
                     updated_input = np.concatenate((np.asarray(states),ctrls))
                 else:
