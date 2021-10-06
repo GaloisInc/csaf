@@ -153,17 +153,19 @@ def generate_acas_goal(scen_type: typing.Type[Scenario]) -> typing.Type[BOptFals
             # run simulation
             sys = self.scenario_type().generate_system(conf)
             trajs, _p = sys.simulate_tspan((0.0, 30.0), return_passed=True)
-            assert isinstance(trajs, csaf.TimeTrace)
+            assert isinstance(trajs, dict)
 
             # get distances between ownship and intruder
-            intruder_pos = np.array(trajs['intruder_plant'].states)[:, 9:11]
-            ownship_pos = np.array(trajs['plant'].states)[:, 9:11]
+            intruder_pos = np.array(trajs['intruder_plant'].states)[:, 9:11]  # type: ignore
+            ownship_pos = np.array(trajs['plant'].states)[:, 9:11]  # type: ignore
             rel_pos = intruder_pos - ownship_pos
 
             # get distances between ownship and balloon
-            dists = np.linalg.norm(rel_pos, axis=1)
-            ballon_dists = ownship_pos - np.tile(np.array(trajs['balloon'].states)[-1, 9:11][:], (len(ownship_pos), 1))
-            bdists = np.linalg.norm(ballon_dists, axis=1)
+            dists = np.linalg.norm(rel_pos, axis=1) # type: ignore
+            ballon_dists = ownship_pos - \
+                           np.tile(np.array(trajs['balloon'].states)[-1, 9:11][:],  # type: ignore
+                                   (len(ownship_pos), 1))
+            bdists = np.linalg.norm(ballon_dists, axis=1)  # type: ignore
 
             # get objective (min distance to obstacles)
             print("OBJECTIVE (min distance): ", min(np.hstack((dists, bdists))), ",", np.sqrt(min(dists) * min(bdists)))
