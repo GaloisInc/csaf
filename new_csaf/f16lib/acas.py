@@ -21,9 +21,10 @@ def collision_condition(ctraces: csaf.TimeTrace) -> bool:
     sa, sb, sc = ctraces['plant']['states'], ctraces['intruder_plant']['states'], ctraces['balloon']['states']
     if sa and sb and sc:
         # look at distance between last state
-        dab = (np.linalg.norm(np.array(sa[-1][9:12]) - np.array(sb[-1][9:12])))
-        dac = (np.linalg.norm(np.array(sa[-1][9:12]) - np.array(sc[-1][9:12])))
+        dab = (np.linalg.norm(np.array(sa[-1][9:12]) - np.array(sb[-1][9:12])))  # type: ignore
+        dac = (np.linalg.norm(np.array(sa[-1][9:12]) - np.array(sc[-1][9:12])))  # type: ignore
         return dab < 250.0 or dac < 250.0
+    return False
 
 
 class AcasScenarioCoord(typing.NamedTuple):
@@ -34,8 +35,7 @@ class AcasScenarioCoord(typing.NamedTuple):
 
 
 def generate_acas_scenario(
-        scenario_type: typing.Union[typing.Type[F16AcasShieldIntruderBalloon],
-                                    typing.Type[F16AcasIntruderBalloon]],
+        scenario_type: typing.Type[csaf.System],
         scen_bounds: typing.Sequence[typing.Tuple[float, float]],
         balloon_pos: typing.Sequence[float],
         own_waypoints: typing.Sequence[typing.Tuple[float, float, float]],
@@ -105,8 +105,9 @@ def generate_acas_scenario(
             iwaypoints = [(*conf[:2], altitude), ] + list(intruder_waypoints)
             if "predictor" in self.system_type.components:
                 import f16lib.models.predictor as predictor
-                self.system_type.components["predictor"].flows["outputs"] = predictor.model_output
-                self.system_type.components["predictor"].initialize = predictor.model_init
+                c: typing.Dict[str, typing.Type[csaf.Component]] = self.system_type.components
+                c["predictor"].flows["outputs"] = predictor.model_output
+                c["predictor"].initialize = predictor.model_init
             sys = self.system_type()
             ownship, intruder, balloon = self.rel_to_abs(conf)
             sys.set_component_param("intruder_autopilot", "waypoints", iwaypoints)
@@ -152,6 +153,7 @@ def generate_acas_goal(scen_type: typing.Type[Scenario]) -> typing.Type[BOptFals
             # run simulation
             sys = self.scenario_type().generate_system(conf)
             trajs, _p = sys.simulate_tspan((0.0, 30.0), return_passed=True)
+            assert isinstance(trajs, csaf.TimeTrace)
 
             # get distances between ownship and intruder
             intruder_pos = np.array(trajs['intruder_plant'].states)[:, 9:11]
