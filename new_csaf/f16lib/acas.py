@@ -1,6 +1,7 @@
 from f16lib.components import f16_xequil
 from f16lib.systems import F16AcasShieldIntruderBalloon, F16AcasIntruderBalloon
 import csaf
+from csaf.test.scenario import Scenario, BOptFalsifyGoal, FixedSimGoal
 import typing
 import numpy as np
 
@@ -12,89 +13,167 @@ import matplotlib.animation as animation  # type: ignore
 from numpy import sin, cos
 
 
-class AcasScenario:
+def collision_condition(ctraces: csaf.TimeTrace) -> bool:
     """
-    air collision avoidance scenario with one intruder and a balloon (stationary vehicle)
-
-    configuration space:
-        * (x_int, y_int) relative position for balloon and intruder
-        * (theta) relative heading angle for intruder
-        * (v_r) relative airspeed for intruder
-
-    properties:
-        * (x_ball, y_ball) relative position for the balloon
-        * (v_s) ownship airspeed
-        * ((x0, y0, z0) ... (xn, yn, zn)) intruder waypoints
+    air collision condition
     """
+    # get the aircraft states
+    sa, sb, sc = ctraces['plant']['states'], ctraces['intruder_plant']['states'], ctraces['balloon']['states']
+    if sa and sb and sc:
+        # look at distance between last state
+        dab = (np.linalg.norm(np.array(sa[-1][9:12]) - np.array(sb[-1][9:12])))
+        dac = (np.linalg.norm(np.array(sa[-1][9:12]) - np.array(sc[-1][9:12])))
+        return dab < 250.0 or dac < 250.0
 
-    @staticmethod
-    def abs_to_rel(ownship: typing.Sequence[float],
-                   intruder: typing.Sequence[float],
-                   _: typing.Sequence[float]) -> typing.Tuple[float, float, float, float]:
+
+class AcasScenarioCoord(typing.NamedTuple):
+    rel_pos_x: float
+    rel_pos_y: float
+    rel_angle: float
+    rel_speed: float
+
+
+def generate_acas_scenario(
+        scenario_type: typing.Union[typing.Type[F16AcasShieldIntruderBalloon],
+                                    typing.Type[F16AcasIntruderBalloon]],
+        scen_bounds: typing.Sequence[typing.Tuple[float, float]],
+        balloon_pos: typing.Sequence[float],
+        own_waypoints: typing.Sequence[typing.Tuple[float, float, float]],
+        ownship_airspeed: float,
+        intruder_waypoints: typing.Sequence[typing.Tuple[float, float, float]],
+        intruder_airspeed: typing.Optional[typing.Callable] = None,
+        altitude: float = 1000.0) -> typing.Type[Scenario]:
+    class _AcasScenario(Scenario):
         """
-        Get relative coordinates from the absolute vehicle states
+        air collision avoidance scenario with one intruder and a balloon (stationary vehicle)
+
+        configuration space:
+            * (x_int, y_int) relative position for balloon and intruder
+            * (theta) relative heading angle for intruder
+            * (v_r) relative airspeed for intruder
+
+        properties:
+            * (x_ball, y_ball) relative position for the balloon
+            * (v_s) ownship airspeed
+            * ((x0, y0, z0) ... (xn, yn, zn)) intruder waypoints
         """
-        rel_vel = intruder[0] - ownship[0]
-        x, y = (intruder[10] - ownship[10]), (intruder[9] - ownship[9])
-        theta = intruder[5] - ownship[5]
-        return x, y, theta, rel_vel
+        configuration_space = AcasScenarioCoord
 
-    system_type: typing.Type[csaf.System] = F16AcasIntruderBalloon
+        system_type = scenario_type
 
-    def __init__(self, balloon_pos: typing.Sequence[float],
-                 ownship_airspeed: float,
-                 own_waypoints: typing.Sequence[typing.Tuple[float, float, float]],
-                 intruder_waypoints: typing.Sequence[typing.Tuple[float, float, float]],
-                 intruder_velocity: typing.Optional[typing.Callable] = None):
-        self.balloon_pos, self.ownship_airspeed = balloon_pos, ownship_airspeed
-        self.waypoints: typing.Sequence[typing.Tuple[float, float, float]] = intruder_waypoints
-        self.own_waypoints: typing.Sequence[typing.Tuple[float, float, float]] = own_waypoints
-        self.intruder_velocity = intruder_velocity
+        bounds = scen_bounds
 
-    def create_system(self, coord):
-        """create a system from the relative coordinates coord"""
-        sys = self.system_type()
-        ownship, intruder, balloon = self.rel_to_abs(coord)
-        sys.set_component_param("intruder_autopilot", "waypoints", self.waypoints)
-        sys.set_component_param("waypoint", "waypoints", self.own_waypoints)
-        sys.set_component_param("intruder_autopilot", "airspeed", self.intruder_velocity)
-        sys.set_state("balloon", balloon)
-        sys.set_state("plant", ownship)
-        sys.set_state("intruder_plant", intruder)
-        return sys
+        def __init__(self):
+            self.intruder_waypoints = intruder_waypoints
+            self.own_waypoints = own_waypoints
+            self.intruder_airspeed = intruder_airspeed
+            self.ownship_airspeed = ownship_airspeed
+            self.balloon_pos = balloon_pos
+            self.altitude = altitude
 
-    def rel_to_abs(self, coord: typing.Sequence[float]) -> \
-            typing.Tuple[typing.Sequence[float], typing.Sequence[float], typing.Sequence[float]]:
-        """
-        Create absolute coordinates for the vehicles that satisfies the relative coordinates
-        """
-        # copy out the f16 trim states
-        ownship_states = f16_xequil.copy()
-        intruder_states = f16_xequil.copy()
-        balloon_pos = f16_xequil.copy()
+        def rel_to_abs(self, coord: typing.Sequence[float]) -> \
+                typing.Tuple[typing.Sequence[float], typing.Sequence[float], typing.Sequence[float]]:
+            """
+            Create absolute coordinates for the vehicles that satisfies the relative coordinates
+            """
+            # copy out the f16 trim states
+            ownship_states = f16_xequil.copy()
+            intruder_states = f16_xequil.copy()
+            balloon_states = f16_xequil.copy()
 
-        # set the positions
-        balloon_pos[10], balloon_pos[9] = self.balloon_pos
-        intruder_states[10], intruder_states[9] = coord[:2]
+            # set the positions
+            balloon_states[10], balloon_states[9] = balloon_pos
+            intruder_states[10], intruder_states[9] = coord[:2]
 
-        # set the ownship and intruder airspeeds
-        ownship_states[0] = self.ownship_airspeed
-        intruder_states[0] = self.ownship_airspeed + coord[3]
+            # set the ownship and intruder airspeeds
+            ownship_states[0] = ownship_airspeed
+            intruder_states[0] = ownship_airspeed + coord[3]
 
-        # set the relative ehading angle
-        intruder_states[5] = coord[2]
+            # set the relative ehading angle
+            intruder_states[5] = coord[2]
 
-        # reset the balloon airspeed
-        balloon_pos[0] = 0.0
-        balloon_pos[0:9] = [0.0, ] * 9
+            # reset the balloon airspeed
+            balloon_states[0] = 0.0
+            balloon_states[0:9] = [0.0, ] * 9
 
-        ownship_states[11], balloon_pos[11], intruder_states[11] = [1000.0] * 3
+            ownship_states[11], balloon_states[11], intruder_states[11] = [altitude] * 3
 
-        return ownship_states, intruder_states, balloon_pos
+            return ownship_states, intruder_states, balloon_states
+
+        def generate_system(self, conf: typing.Sequence) -> csaf.System:
+            """create a system from the relative coordinates coord"""
+            iwaypoints = [(*conf[:2], altitude), ] + list(intruder_waypoints)
+            if "predictor" in self.system_type.components:
+                import f16lib.models.predictor as predictor
+                self.system_type.components["predictor"].flows["outputs"] = predictor.model_output
+                self.system_type.components["predictor"].initialize = predictor.model_init
+            sys = self.system_type()
+            ownship, intruder, balloon = self.rel_to_abs(conf)
+            sys.set_component_param("intruder_autopilot", "waypoints", iwaypoints)
+            sys.set_component_param("waypoint", "waypoints", own_waypoints)
+            sys.set_component_param("intruder_autopilot", "airspeed", intruder_airspeed)
+            sys.set_state("balloon", balloon)
+            sys.set_state("plant", ownship)
+            sys.set_state("intruder_plant", intruder)
+            if "predictor" in self.system_type.components:
+                sys.set_component_param("predictor",
+                                        "intruder_waypoints",
+                                        iwaypoints)
+                sys.set_component_param("predictor",
+                                        "own_waypoints",
+                                        own_waypoints)
+            return sys
+
+    return _AcasScenario
 
 
-class AcasShieldScenario(AcasScenario):
-    system_type = F16AcasShieldIntruderBalloon
+def generate_acas_goal(scen_type: typing.Type[Scenario]) -> typing.Type[BOptFalsifyGoal]:
+    class _AcasFalsifyGoal(BOptFalsifyGoal):
+        scenario_type = scen_type
+
+        terminating_conditions_all = collision_condition
+
+        tspan = (0.0, 30.0)
+
+        constraints = [
+            # keep intruder initial position at least 7000 ft away
+            {'name': 'constr_1', 'constraint': '-((x[:, 1]**2 + x[:, 0]**2) - 7000**2)'},
+            # keep intruder "pointed at" ownship, plus/minus 90 degrees
+            # TODO: this doesn't look at all quadrants - debug?
+            # {'name': 'constr_2', 'constraint': 'np.abs((np.pi + x[:, 2]) - np.arctan2(x[:, 1], x[:, 0])) - np.pi/2'}
+        ]
+
+        @staticmethod
+        def property(ctraces) -> bool:
+            return collision_condition(ctraces)
+
+        def objective_function_single(self, conf: typing.Sequence) -> float:
+            """obj: configuration space -> real number"""
+            # run simulation
+            sys = self.scenario_type().generate_system(conf)
+            trajs, _p = sys.simulate_tspan((0.0, 30.0), return_passed=True)
+
+            # get distances between ownship and intruder
+            intruder_pos = np.array(trajs['intruder_plant'].states)[:, 9:11]
+            ownship_pos = np.array(trajs['plant'].states)[:, 9:11]
+            rel_pos = intruder_pos - ownship_pos
+
+            # get distances between ownship and balloon
+            dists = np.linalg.norm(rel_pos, axis=1)
+            ballon_dists = ownship_pos - np.tile(np.array(trajs['balloon'].states)[-1, 9:11][:], (len(ownship_pos), 1))
+            bdists = np.linalg.norm(ballon_dists, axis=1)
+
+            # get objective (min distance to obstacles)
+            print("OBJECTIVE (min distance): ", min(np.hstack((dists, bdists))), ",", np.sqrt(min(dists) * min(bdists)))
+            # geometric mean of min dists
+            return np.sqrt(min(dists) * min(bdists))
+
+        def objective_function(self, x) -> np.ndarray:
+            """GPyOpt Objective"""
+            ret = np.array([self.objective_function_single(xi) for xi in x])
+            return ret
+
+    return _AcasFalsifyGoal
 
 
 class AcasScenarioViewer:
@@ -169,11 +248,12 @@ class AcasScenarioViewer:
                 markersize=30,
                 label="Balloon")
 
-        ax.scatter(*np.array(self.scenario.waypoints)[:, :2].T,  # type: ignore
-                   marker='x',
-                   c='r',
-                   s=200,
-                   label='Intruder Waypoints')
+        if len(self.scenario.intruder_waypoints) > 0:
+            ax.scatter(*np.array(self.scenario.intruder_waypoints)[:, :2].T,  # type: ignore
+                       marker='x',
+                       c='r',
+                       s=200,
+                       label='Intruder Waypoints')
 
         ax.scatter(*np.array(self.scenario.own_waypoints)[:, :2].T,  # type: ignore
                    marker='x',
@@ -185,9 +265,9 @@ class AcasScenarioViewer:
         pos = np.vstack(
             (self.own_pos[:-1],
              self.intruder_pos[:-1],
-             #np.array(self.scenario.waypoints)[:, :-1],
-             #np.array(self.scenario.own_waypoints)[:, :-1],
-            self.scenario.balloon_pos)
+             # np.array(self.scenario.waypoints)[:, :-1],
+             # np.array(self.scenario.own_waypoints)[:, :-1],
+             self.scenario.balloon_pos)
         )
 
         xmin, xmax = min(pos[:, 0]), max(pos[:, 0])
