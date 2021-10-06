@@ -13,7 +13,7 @@ class Scenario(CsafBase):
     be desirable for reducing the number of variables considered in a system or capturing
     symmetries present in a system.
     """
-    configuration_space: typing.Tuple
+    configuration_space: typing.Type[typing.Tuple]
 
     system_type: typing.Type[System]
 
@@ -48,6 +48,11 @@ class Goal(CsafBase):
             setattr(self, k, v)
         return r if not self.should_fail else not r
 
+    def validate(self) -> None:
+        assert hasattr(self, 'scenario_type')
+        assert issubclass(self.scenario_type,
+                          Scenario), f"scenario type {self.scenario_type} must be a subclass of a CSAF scenario"
+
 
 class SimGoal(Goal):
     """
@@ -55,20 +60,20 @@ class SimGoal(Goal):
     """
     terminating_conditions: typing.Optional[typing.Callable[[], bool]] = None
 
-    terminating_conditions_all: typing.Optional[typing.Callable[[], bool]] = None
+    terminating_conditions_all: typing.Optional[typing.Callable[[TimeTrace], bool]] = None
 
     sim_kwargs: typing.Dict[str, typing.Any] = {}
 
     tspan: typing.Tuple[float, float] = (0.0, 1.0)
 
     @classmethod
-    def run_sim(cls, conf: typing.Sequence, timespan = None):
+    def run_sim(cls, conf: typing.Sequence, timespan=None):
         if timespan is None:
             timespan = cls.tspan
         sys = cls.scenario_type().generate_system(conf)
         return sys.simulate_tspan(timespan,
-                                  terminating_conditions = cls.terminating_conditions,
-                                  terminating_conditions_all = cls.terminating_conditions_all,
+                                  terminating_conditions=cls.terminating_conditions,
+                                  terminating_conditions_all=cls.terminating_conditions_all,
                                   return_passed=True,
                                   **cls.sim_kwargs)
 
@@ -92,36 +97,36 @@ class FixedSimGoal(SimGoal):
         return True
 
 
-import GPyOpt
-import GPy
-import numpy as np
-
-
 class BOptFalsifyGoal(SimGoal):
     max_iter = 500
     max_time = 120.0
     tolerance = 5.0
 
-    constraints: typing.Dict = {}
+    constraints: typing.Sequence[typing.Dict] = tuple()
 
     @staticmethod
     def property(ctraces: TimeTrace) -> bool:
         pass
 
-    def objective_function(self, conf: typing.Sequence) -> float:
+    def objective_function(self, conf: typing.Sequence):
         pass
 
-    def gen_optimizer(self) -> GPyOpt.methods.ModularBayesianOptimization:
+    def gen_optimizer(self):
+        import numpy as np
+        import GPy  # type: ignore
+        import GPyOpt  # type: ignore
+
         def to_gpy_space(bounds):
             return [{'name': f'x{idx}', 'type': 'continuous', 'domain': b} for idx, b in enumerate(bounds)]
 
         # get feasible region from initial states and constraints
-        feasible_region = GPyOpt.Design_space(space = to_gpy_space(self.scenario_type.bounds), constraints = self.constraints)
+        feasible_region = GPyOpt.Design_space(space=to_gpy_space(self.scenario_type.bounds),
+                                              constraints=self.constraints)
 
         # generate initial designs
         initial_design = GPyOpt.experiment_design.initial_design('random', feasible_region, 1)
         # incorporate "good guesses"
-        #initial_design = np.vstack((
+        # initial_design = np.vstack((
         #    # "good guess" 1
         #    #[0.0, 8000, np.pi, 0.0],
         #    # "good guess" 2
@@ -138,14 +143,14 @@ class BOptFalsifyGoal(SimGoal):
         k = GPy.kern.StdPeriodic(4,  # dimension
                                  ARD1=True, ARD2=True,
                                  variance=1E-2,
-                                 period=[1E10, 1E10, 2*np.pi, 1E8],
+                                 period=[1E10, 1E10, 2 * np.pi, 1E8],
                                  lengthscale=[200.0, 200.0, 0.06, 4.0])
         k.period.fix()
         k.lengthscale.fix()
-        #k.variance.fix()
+        # k.variance.fix()
 
         # get GPModel from the covariance (kernel)
-        model = GPyOpt.models.GPModel(exact_feval=True,optimize_restarts=0,verbose=False,kernel=k)
+        model = GPyOpt.models.GPModel(exact_feval=True, optimize_restarts=0, verbose=False, kernel=k)
 
         # get the GPOpt acquisition optimizer
         aquisition_optimizer = GPyOpt.optimization.AcquisitionOptimizer(feasible_region)
@@ -157,7 +162,7 @@ class BOptFalsifyGoal(SimGoal):
         evaluator = GPyOpt.core.evaluators.Sequential(acquisition)
 
         # get a cost model from the cost func
-        cost = None #GPyOpt.core.task.cost.CostModel(self.cost_func)
+        cost = None  # GPyOpt.core.task.cost.CostModel(self.cost_func)
 
         # build the modular Bayesian optimization model
         return GPyOpt.methods.ModularBayesianOptimization(model,
@@ -172,9 +177,9 @@ class BOptFalsifyGoal(SimGoal):
         self.optimizer = self.gen_optimizer()
 
     def test_goal(self) -> bool:
-        self.optimizer.run_optimization(max_iter = self.max_iter,
-                            max_time = self.max_time,
-                            eps = self.tolerance,
-                            verbosity=False)
+        self.optimizer.run_optimization(max_iter=self.max_iter,
+                                        max_time=self.max_time,
+                                        eps=self.tolerance,
+                                        verbosity=False)
         t, p = self.run_sim(self.optimizer.x_opt)
         return self.property(t)
