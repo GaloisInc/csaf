@@ -176,7 +176,7 @@ class ComponentComposition(cbase.CsafBase):
         self._set_component_iv(component_name, iv_name, state)
         self._iv_changes.append((component_name, iv_name, state))
 
-    def _set_component_param(self, component_name: str, param_name: str, param: typing.Sequence):
+    def _set_component_param(self, component_name: str, param_name: str, param: typing.Any):
         assert component_name in self._components
         component = self.component_instances[component_name]
         assert param_name in component.parameters, f"component '{component_name}' has no parameter '{param_name}'"
@@ -184,7 +184,7 @@ class ComponentComposition(cbase.CsafBase):
         if component.initialize is not None:
             component.initialize()
 
-    def set_component_param(self, component_name: str, param_name: str, param: typing.Sequence):
+    def set_component_param(self, component_name: str, param_name: str, param: typing.Any):
         self._set_component_param(component_name, param_name, param)
         self._param_changes.append((component_name, param_name, param))
 

@@ -7,9 +7,8 @@ from f16lib.components import (f16_xequil,
                                create_nagents_acas_xu,
                                StaticObject,
                                F16PlantStateMessage)
-import GPy
+import GPy # type: ignore
 import csaf
-from collections import deque
 import typing
 import numpy as np
 
@@ -81,7 +80,7 @@ def generate_surrogate_system(predictors: typing.Tuple[GPy.models.GPRegression, 
     class _IntruderSurrogateComponent(csaf.DiscreteComponent):
         name = "F16 Surrogate Model"
         sampling_frequency = 10.0
-        default_parameters = {}
+        default_parameters: typing.Dict[str, typing.Any] = {}
         inputs = ()
         outputs = (
             ("outputs", F16PlantOutputMessage),
@@ -123,12 +122,12 @@ class PredictorBuffer:
             self.times.append(t)
 
     @property
-    def buffer(self) -> np.array:
+    def buffer(self) -> np.ndarray:
         """get the buffer as a numpy array"""
         return np.array(self.pstates)
 
     @property
-    def tbuffer(self) -> np.array:
+    def tbuffer(self) -> np.ndarray:
         return np.array(self.times)
 
     @property
@@ -259,9 +258,12 @@ class CollisionPredictor:
 
     def make_prediction(self):
         if self.step_count % 15 == 0:
+            balloon_state = self.pbuffer.buffer[-1][-13:]
+            by, bx = balloon_state[9:11]
             self.train_predictors()
             (ownx, owny), (intx, inty) = self.make_pos_prediction()
             d = min(np.linalg.norm([intx - ownx, inty - owny], axis=0))
-            r = (d < 500.0)
+            db = min(np.linalg.norm([bx - ownx, by - owny], axis=0))
+            r = (d < 500.0) or (db < 500.0)
             self.prev_ret = r
         return bool(self.prev_ret)
