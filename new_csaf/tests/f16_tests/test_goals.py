@@ -24,4 +24,4 @@ def test_goal_test(goal_name, goal):
     if goal in abstract_goals or issubclass(goal, BOptFalsifyGoal):
         return
     else:
-        goal().test()
+        assert goal().test()
