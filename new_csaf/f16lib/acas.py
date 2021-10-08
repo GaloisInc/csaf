@@ -23,7 +23,7 @@ def collision_condition(ctraces: csaf.TimeTrace) -> bool:
         # look at distance between last state
         dab = (np.linalg.norm(np.array(sa[-1][9:12]) - np.array(sb[-1][9:12])))  # type: ignore
         dac = (np.linalg.norm(np.array(sa[-1][9:12]) - np.array(sc[-1][9:12])))  # type: ignore
-        return dab < 250.0 or dac < 250.0
+        return dab < 400.0 or dac < 400.0
     return False
 
 
@@ -283,11 +283,11 @@ class AcasScenarioViewer:
         return (xmin, xmax), (ymin, ymax)
         # return min(xmin, ymin), max(xmax, ymax)
 
-    def summary_video(self):
+    def summary_video(self, bounds=((-10000, 10000), (0, 20000)), msize=0.001):
         fig = plt.figure(figsize=(10, 10))
         xbs, ybs = self.compute_bounds()
         pbounds = min(xbs[0], ybs[0]), max(xbs[1], ybs[1])
-        ax = plt.axes(xlim=pbounds, ylim=pbounds)
+        ax = plt.axes(xlim=bounds[0], ylim=bounds[1])
 
         line, = ax.plot([], [], 'r', lw=2, label='Intruder')
 
@@ -296,8 +296,8 @@ class AcasScenarioViewer:
         lineown = LineCollection([], cmap=cmap, norm=norm, lw=2)
         ax.add_collection(lineown)
 
-        own = ax.scatter([], [], marker='x', s=0.001, zorder=300, color='k')
-        intruder = ax.scatter([], [], marker='x', s=0.001, zorder=300, color='r')
+        own = ax.scatter([], [], marker='x', s=msize, zorder=300, color='k')
+        intruder = ax.scatter([], [], marker='x', s=msize, zorder=300, color='r')
         skip_size = 6
 
         self.plot_static(ax)

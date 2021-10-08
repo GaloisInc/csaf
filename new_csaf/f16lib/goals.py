@@ -128,7 +128,20 @@ class AcasSimpleCollideWithBalloonGoal(FixedSimAcasGoal):
 
     should_fail = True
 
-    fixed_configurations = [[-5.38009090e+03,  4.66800612e+03,  1.10750142e+00, -1.49572862e+02]]
+    fixed_configurations = [
+        #[-5.38009090e+03,  4.66800612e+03,  1.10750142e+00, -1.49572862e+02],
+        [ 8.46779582e+03,  4.52959138e+03, -1.43116897e+00, -2.80331323e+01], # intruder causes ownship to collide with balloon
+    ]
+
+
+class AcasSimpleCollideAvoidBalloonGoal(FixedSimAcasGoal):
+    scenario_type = AcasSimpleScenario
+
+    should_fail = False
+
+    fixed_configurations = [
+        [ 2.88149643e+03,  8.36264870e+03, -2.74357068e+00, -1.57079289e+02] # interesting near miss of both
+    ]
 
 
 class AcasShieldAvoidBalloonGoal(FixedSimAcasGoal):
@@ -137,22 +150,30 @@ class AcasShieldAvoidBalloonGoal(FixedSimAcasGoal):
 
     should_fail = False
 
-    fixed_configurations = [[-5.38009090e+03,  4.66800612e+03,  1.10750142e+00, -1.49572862e+02]]
+    fixed_configurations = [
+        #[-5.38009090e+03,  4.66800612e+03,  1.10750142e+00, -1.49572862e+02],
+        [ 8.46779582e+03,  4.52959138e+03, -1.43116897e+00, -2.80331323e+01], # intruder causes ownship to collide with balloon
+    ]
 
 
-class AcasAirspeedAvoidBalloonGoal(FixedSimAcasGoal):
+class AcasAirspeedAvoidNoBalloonGoal(FixedSimAcasGoal):
     """cases where we know that a collision are successfully avoided"""
-    scenario_type = AcasAirspeedScenario
+    scenario_type = AcasNoBalloonAirspeedScenario
 
     should_fail = False
 
-    fixed_configurations = [[ 7.61069193e+03,  7.63179351e+02, -7.56855508e-01,  0.00000000e+00]]
+    fixed_configurations = [
+        [ 7.61069193e+03,  7.63179351e+02, -7.56855508e-01,  0.00000000e+00],
+        [7600, 1000, -np.pi/4+0.05, 0.0] # large path deviation
+    ]
 
 
-class AcasAirspeedCollideWithBalloonGoal(FixedSimAcasGoal):
+class AcasAirspeedCollideNoBalloonGoal(FixedSimAcasGoal):
     """cases where we know collisions occur"""
-    scenario_type = AcasAirspeedScenario
+    scenario_type = AcasNoBalloonAirspeedScenario
 
     should_fail = True
 
-    fixed_configurations = [[-5.99973701e+03,  9.76304303e+03,  1.85411508e+00,  0.00000000e+00]]
+    fixed_configurations = [
+        [ 4.32487353e+03,  7.51223147e+03, -2.09140656e+00,  0.00000000e+00] # easy collision found
+    ]
