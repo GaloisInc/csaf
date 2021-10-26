@@ -77,6 +77,7 @@ pycparser==2.20
 pydantic==1.8.2
 pydot==1.4.2
 Pygments==2.10.0
+pymap3d==2.4.0
 pyparsing==2.4.7
 pyrsistent==0.18.0
 pytest==6.2.5
