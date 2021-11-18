@@ -1,10 +1,10 @@
-import f16lib.goals as f16g
+import csaf_f16.goals as f16g
 from csaf.test.scenario import BOptFalsifyGoal
 import typing
 import csaf
 import pytest
 
-# extract goal types from f16lib
+# extract goal types from csaf_f16
 goals = [(name, oj) for name, oj in f16g.__dict__.items() if
          isinstance(oj, type) and issubclass(oj, csaf.Goal)]
 abstract_goals: typing.Set[typing.Type[csaf.Goal]] = {f16g.FixedSimAcasGoal, f16g.FixedSimGoal}

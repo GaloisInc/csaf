@@ -1,12 +1,12 @@
-from f16lib.components import (f16_xequil,
-                               F16PlantOutputMessage,
-                               F16PlantComponent,
-                               F16LlcComponent,
-                               F16AutoWaypointComponent,
-                               F16AcasSwitchComponent,
-                               create_nagents_acas_xu,
-                               StaticObject,
-                               F16PlantStateMessage)
+from csaf_f16.components import (f16_xequil,
+                                 F16PlantOutputMessage,
+                                 F16PlantComponent,
+                                 F16LlcComponent,
+                                 F16AutoWaypointComponent,
+                                 F16AcasSwitchComponent,
+                                 create_nagents_acas_xu,
+                                 StaticObject,
+                                 F16PlantStateMessage)
 import GPy # type: ignore
 import csaf
 import typing
@@ -65,7 +65,7 @@ class F16AcasShieldSurrogate(csaf.System):
 def generate_surrogate_system(predictors: typing.Tuple[GPy.models.GPRegression, GPy.models.GPRegression]):
     """create the 'digital twin' used by the predictor component"""
     # import relevant f16 objects
-    from f16lib.messages import F16ControllerOutputMessage, F16PlantOutputMessage, F16PlantStateMessage
+    from csaf_f16.messages import F16ControllerOutputMessage, F16PlantOutputMessage, F16PlantStateMessage
 
     # infer flows from the GP predictors
     def surrogate_state_update(model, t, states, inputs):

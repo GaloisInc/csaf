@@ -6,8 +6,8 @@ taken from https://github.com/stanleybak/AeroBenchVVPython
 
 import numpy as np
 
-import f16lib.models.helpers.llc_helper as lh
-from f16lib.models.helpers import lqr
+import csaf_f16.models.helpers.llc_helper as lh
+from csaf_f16.models.helpers import lqr
 
 
 def model_init(model):

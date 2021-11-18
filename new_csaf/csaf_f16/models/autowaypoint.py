@@ -1,4 +1,4 @@
-from f16lib.models.waypoint import *
+from csaf_f16.models.waypoint import *
 
 
 def model_init(model):

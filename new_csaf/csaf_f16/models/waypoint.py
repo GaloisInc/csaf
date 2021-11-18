@@ -8,7 +8,7 @@ taken from https://github.com/stanleybak/AeroBenchVVPython
 """
 import numpy as np
 from math import sin, cos, atan2, asin, pi, sqrt
-from f16lib.models.helpers.aerobench_helpers import *
+from csaf_f16.models.helpers.aerobench_helpers import *
 
 
 class WaypointAutopilot:

@@ -1,4 +1,4 @@
-import f16lib.systems as f16s
+import csaf_f16.systems as f16s
 import csaf
 import pytest
 

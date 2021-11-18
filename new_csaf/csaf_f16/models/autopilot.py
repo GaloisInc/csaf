@@ -5,7 +5,7 @@ taken from https://github.com/stanleybak/AeroBenchVVPython
 """
 import numpy as np
 
-import f16lib.models.helpers.autopilot_helper as ah
+import csaf_f16.models.helpers.autopilot_helper as ah
 
 
 class GcasAutopilot():

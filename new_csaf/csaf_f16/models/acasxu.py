@@ -15,7 +15,7 @@ import numpy as np
 
 import onnxruntime as ort  # type: ignore
 
-from f16lib.models.helpers.aerobench_helpers import *
+from csaf_f16.models.helpers.aerobench_helpers import *
 
 
 def get_script_path(script_filename):

@@ -66,7 +66,7 @@ class MyComponent(csaf.DiscreteComponent):
 * CSAF elements can be checked via `CsafObj.check()` and find the error location
 ```python
 import csaf
-import f16lib.systems as f16
+import csaf_f16.systems as f16
 
 # modified a component inside of F16AcasShield to NOT have all the default initial values defined
 
@@ -99,7 +99,7 @@ class F16AcasSwitchComponent(DiscreteComponent):
 """
 $ mypy components.py
 
-f16lib/components.py:306: error: Dict entry 3 has incompatible type "str": "bool"; expected "str": "Sequence[Any]"
+csaf_f16/components.py:306: error: Dict entry 3 has incompatible type "str": "bool"; expected "str": "Sequence[Any]"
 """
 ```
 * generated block diagrams are cleaner and display more system information

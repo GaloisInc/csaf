@@ -1,5 +1,5 @@
 import numpy as np
-import f16lib.models.helpers.llc_helper as lh
+import csaf_f16.models.helpers.llc_helper as lh
 
 
 class LowLevelControllerNN(lh.FeedbackController):

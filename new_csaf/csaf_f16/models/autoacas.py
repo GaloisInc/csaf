@@ -1,5 +1,5 @@
-import f16lib.models.helpers.autopilot_helper as ah
-from f16lib.models.acasxu import *
+import csaf_f16.models.helpers.autopilot_helper as ah
+from csaf_f16.models.acasxu import *
 import numpy as np
 
 

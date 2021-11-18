@@ -4,7 +4,7 @@ CSAF F-16 Model
 taken from https://github.com/stanleybak/AeroBenchVVPython
 """
 
-import f16lib.models.helpers.autopilot_helper as ah
+import csaf_f16.models.helpers.autopilot_helper as ah
 
 
 def model_output(model, time_t, state_x, input_f16):

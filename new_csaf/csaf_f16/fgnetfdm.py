@@ -6,7 +6,7 @@ import pymap3d as pm
 
 from numpy import deg2rad
 
-from f16lib.fgbase import FlightGearBase
+from csaf_f16.fgbase import FlightGearBase
 
 class FGNetFDM(FlightGearBase):
     """

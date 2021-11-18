@@ -1,8 +1,8 @@
 import numpy as np
-import f16lib.models.helpers.f16plant_helper as ph
-from f16lib.models.helpers.variables import state_vector
-from f16lib.models.helpers.stevens_dyn import stevens_f16
-from f16lib.models.helpers.morelli_dyn import morelli_f16
+import csaf_f16.models.helpers.f16plant_helper as ph
+from csaf_f16.models.helpers.variables import state_vector
+from csaf_f16.models.helpers.stevens_dyn import stevens_f16
+from csaf_f16.models.helpers.morelli_dyn import morelli_f16
 
 
 def model_output(model, time_t, state_f16, input_controller):

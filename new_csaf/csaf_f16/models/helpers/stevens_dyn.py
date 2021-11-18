@@ -3,7 +3,7 @@ import os
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from f16lib.models.helpers.f16plant_helper import fix, sign
+from csaf_f16.models.helpers.f16plant_helper import fix, sign
 from numba import jit  # type: ignore
 
 

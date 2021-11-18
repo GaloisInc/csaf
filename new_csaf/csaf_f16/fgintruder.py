@@ -4,7 +4,7 @@ import struct
 
 from datetime import datetime, timezone
 
-from f16lib.fgbase import FlightGearBase, Dubins2DConverter
+from csaf_f16.fgbase import FlightGearBase, Dubins2DConverter
 
 class FGIntruder(FlightGearBase):
     """

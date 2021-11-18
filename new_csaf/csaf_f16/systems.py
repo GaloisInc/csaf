@@ -1,7 +1,7 @@
 from csaf.core.system import System
 import numpy as np
 import typing
-import f16lib.components as f16c
+import csaf_f16.components as f16c
 
 
 class F16Simple(System):
@@ -73,8 +73,8 @@ class F16MultiAgentCentral(System):
     class CentralController(DiscreteComponent):
         """NOTE: this doesn't do much as it will be used in a SystemEnv"""
 
-        from f16lib.messages import (EmptyMessage, F16PlantStateMessage,
-                                     F16PlantOutputMessage, F16ControllerOutputMessage)
+        from csaf_f16.messages import (EmptyMessage, F16PlantStateMessage,
+                                       F16PlantOutputMessage, F16ControllerOutputMessage)
 
         name = "2 F16 Central Controller"
         sampling_frequency = 10.0

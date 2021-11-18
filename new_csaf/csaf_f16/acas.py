@@ -1,5 +1,5 @@
-from f16lib.components import f16_xequil
-from f16lib.systems import F16AcasShieldIntruderBalloon, F16AcasIntruderBalloon
+from csaf_f16.components import f16_xequil
+from csaf_f16.systems import F16AcasShieldIntruderBalloon, F16AcasIntruderBalloon
 import csaf
 from csaf.test.scenario import Scenario, BOptFalsifyGoal, FixedSimGoal
 import typing
@@ -104,7 +104,7 @@ def generate_acas_scenario(
             """create a system from the relative coordinates coord"""
             iwaypoints = [(*conf[:2], altitude), ] + list(intruder_waypoints)
             if "predictor" in self.system_type.components:
-                import f16lib.models.predictor as predictor
+                import csaf_f16.models.predictor as predictor
                 c: typing.Dict[str, typing.Type[csaf.Component]] = self.system_type.components
                 c["predictor"].flows["outputs"] = predictor.model_output
                 c["predictor"].initialize = predictor.model_init

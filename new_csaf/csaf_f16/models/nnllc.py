@@ -1,8 +1,8 @@
 import numpy as np
 import os
 
-import f16lib.models.helpers.llc_helper as lh
-from f16lib.models.helpers import fops, llc_nn_helper as nnh
+import csaf_f16.models.helpers.llc_helper as lh
+from csaf_f16.models.helpers import fops, llc_nn_helper as nnh
 
 
 class Model:

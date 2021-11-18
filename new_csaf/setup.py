@@ -17,7 +17,7 @@ setuptools.setup(
         "License :: BSD 3-Clause",
         "Operating System :: OS Independent",
     ],
-    package_dir={"": "./", "f16lib": "f16lib", "csaf_examples": "csaf_examples"},
+    package_dir={"": "./", "csaf_f16": "csaf_f16", "csaf_examples": "csaf_examples"},
     install_requires = [
         'numpy>=1.20.0',
         'numba>=0.54.0',

@@ -1,8 +1,8 @@
 import pytest
 import csaf
-import f16lib.systems as f16s
-import f16lib.components as f16c
-import f16lib.acas as f16acas
+import csaf_f16.systems as f16s
+import csaf_f16.components as f16c
+import csaf_f16.acas as f16acas
 import numpy as np
 
 

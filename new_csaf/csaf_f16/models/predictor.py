@@ -1,4 +1,4 @@
-from f16lib.predictor import CollisionPredictor
+from csaf_f16.predictor import CollisionPredictor
 
 
 def model_output(model, time_t, state_switch, input_autopilot):

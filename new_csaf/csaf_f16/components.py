@@ -1,17 +1,17 @@
-import f16lib.models.f16 as f16
-import f16lib.models.llc as llc
-import f16lib.models.autopilot as auto
-import f16lib.models.autoairspeed as autoair
-import f16lib.models.autoaltitude as autoalt
-import f16lib.models.autowaypoint as awaypoint
-import f16lib.models.switch as switch
-import f16lib.models.autoacas as acas
-import f16lib.models.monitor_ap as monitor
-import f16lib.models.acas_switch as aswitch
-import f16lib.models.dummy_predictor as predictor
-import f16lib.models.nnllc as nnllc
+import csaf_f16.models.f16 as f16
+import csaf_f16.models.llc as llc
+import csaf_f16.models.autopilot as auto
+import csaf_f16.models.autoairspeed as autoair
+import csaf_f16.models.autoaltitude as autoalt
+import csaf_f16.models.autowaypoint as awaypoint
+import csaf_f16.models.switch as switch
+import csaf_f16.models.autoacas as acas
+import csaf_f16.models.monitor_ap as monitor
+import csaf_f16.models.acas_switch as aswitch
+import csaf_f16.models.dummy_predictor as predictor
+import csaf_f16.models.nnllc as nnllc
 
-from f16lib.messages import *
+from csaf_f16.messages import *
 from csaf import ContinuousComponent, DiscreteComponent
 import typing
 

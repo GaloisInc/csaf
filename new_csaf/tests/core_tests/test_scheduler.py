@@ -1,5 +1,5 @@
 from csaf.core.scheduler import Scheduler
-from f16lib.components import F16PlantComponent, F16GcasComponent
+from csaf_f16.components import F16PlantComponent, F16GcasComponent
 
 
 def test_scheduler():

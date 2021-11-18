@@ -2,8 +2,8 @@
 F16 Simple GCAS Tests
 """
 import pytest
-import f16lib.systems as f16s
-import f16lib.components as f16c
+import csaf_f16.systems as f16s
+import csaf_f16.components as f16c
 
 
 @pytest.fixture
