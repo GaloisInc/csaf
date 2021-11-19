@@ -26,6 +26,9 @@ setuptools.setup(
         'GPyOpt>=1.2.6',
         'tqdm>=4.62.2'
     ],
+    # TODO: remove this
+    package_data={'csaf_f16': ['csaf_f16/models/*.onnx', 'csaf_f16/models/np/*.npz']},
+    include_package_data=True,
     packages=setuptools.find_packages(where="./"),
     python_requires=">=3.9",
 )
