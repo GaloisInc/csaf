@@ -137,7 +137,7 @@ def plot_shield(trajs):
     plot_component(ax[3][1], trajs, "llc", "outputs", 3, "throttle ()")
 
     ax[0][2].set_title("Autopilots")
-    plot_component(ax[0][2], trajs, "monitor_ap", "outputs", 0, "autopilot selected ()", do_schedule=True)
+    plot_component(ax[0][2], trajs, "monitor", "outputs", 0, "autopilot selected ()", do_schedule=True)
     plot_component(ax[1][2], trajs, "autopilot", "fdas", 0, "GCAS State ()", do_schedule=True)
     ax[1][2].set_title("GCAS Finite Discrete State")
     ax[2][2].axis('off')

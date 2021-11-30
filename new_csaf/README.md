@@ -23,7 +23,7 @@ CSAF is a framework to minimize the effort required to evaluate, implement, and 
 Controllers, subsystems and plants are implemented as a collection of components.
 Below is an example of a topology graph of F16 system with GCAS autopilot.
 
-![f16_with_gcas](docs/img/f16_gcas_plot.png)
+![f16_components](docs/img/f16_component_topology.png)
 
 ## Quick Start
 
@@ -32,16 +32,6 @@ Below is an example of a topology graph of F16 system with GCAS autopilot.
 CSAF runs inside a [Docker container](https://www.docker.com/), and in order to use CSAF, you first need to [install docker](https://docs.docker.com/engine/install/). CSAF has been tested on Linux (Ubuntu 18.04 and 20.04) and OS X, but should run on any nix-like system that runs docker. CSAF can be also run natively on your host machine, but this option is recommended only for the developers and isn't officially supported.
 
 ![csaf_quickstart](docs/img/csaf_quickstart.png)
-
-### Running CSAF
-
-## Tests
-
-CSAF unit and integration tests use the pytest framework. After installing the [mypy plugin](https://pypi.org/project/pytest-mypy/),
-static tests can be added by adding the switch
-```python
-pytest --mypy -s tests
-```
 
 ## Examples
 CSAF currently contains a number of examples, including the F-16 shown below. These examples are packaged into component
@@ -54,6 +44,8 @@ To run a F16 system simulation, run
 ```
 $ python -m csaf_f16 --time-max 30.0 --system F16Simple  
 ```
+
+![f16_components](docs/img/f16_gcas_plot.png)
 
 The library CLI options are
 ```
@@ -85,8 +77,13 @@ To start CSAF in the notebook mode, go to the `notebooks` folder and run
 jupyter notebook
 ```
 
-## Goal configuration
+## Tests
 
+CSAF unit and integration tests use the pytest framework. After installing the [mypy plugin](https://pypi.org/project/pytest-mypy/),
+static tests can be added by adding the switch
+```python
+pytest --mypy -s tests
+```
 
 ## Development
 `CONTRIBUTING.md` contains CSAF development guidelines, please familiarize yourself with the guidelines before opening a 
