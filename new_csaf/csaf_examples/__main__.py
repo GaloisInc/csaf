@@ -5,7 +5,7 @@ import numpy as np
 
 
 if __name__ == '__main__':
-    descr = f"CSAF F16 Systems Viewer"
+    descr = f"CSAF Examples Systems Viewer"
     # chaser initial states (pos + vel)
     sat_states = [[10, -10, -2.0, 2.1],
                 [10, -7, 0.7, 0.0],
@@ -23,5 +23,5 @@ if __name__ == '__main__':
     DubinsRejoin = generate_dubins_system(j_states)
     plotters = {CanSat.__class__: plot_sats, DubinsRejoin.__class__: plot_aircrafts}
     example_systems = ([CanSat, DubinsRejoin])
-    capp = CsafApp("F16 Components", description=descr, systems=example_systems, plotters=plotters)
+    capp = CsafApp("CSAF Examples", description=descr, systems=example_systems, plotters=plotters)
     capp.main()
