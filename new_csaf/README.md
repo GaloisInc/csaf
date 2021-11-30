@@ -27,11 +27,42 @@ Below is an example of a topology graph of F16 system with GCAS autopilot.
 
 ## Quick Start
 
-### Installation 
-
-CSAF runs inside a [Docker container](https://www.docker.com/), and in order to use CSAF, you first need to [install docker](https://docs.docker.com/engine/install/). CSAF has been tested on Linux (Ubuntu 18.04 and 20.04) and OS X, but should run on any nix-like system that runs docker. CSAF can be also run natively on your host machine, but this option is recommended only for the developers and isn't officially supported.
+### Installation
 
 ![csaf_quickstart](docs/img/csaf_quickstart.png)
+
+#### Native
+
+Clone the repo, and install via `pip`,
+```bash
+pip install csaf
+```
+
+To install additional dependencies needed for the examples, go to the repo root and run
+```bash
+pip install -r requirements.txt
+```
+
+#### Docker
+
+CSAF runs inside a [Docker container](https://www.docker.com/), and in order to use CSAF, you 
+first need to [install docker](https://docs.docker.com/engine/install/). CSAF has been tested on Linux 
+(Ubuntu 18.04 and 20.04) and OS X, but should run on any nix-like system that runs docker. 
+
+At the repo root, build the docker image
+```bash
+docker build -t csaf .
+```
+
+Now you can run an example
+```bash
+docker run -v $PWD:/out csaf python -m csaf_f16 --output-dir /out
+```
+
+Alternatively, a jupyter instance can be launched
+```bash
+docker run -p 8888:8888 csaf jupyter notebook --allow-root
+```
 
 ## Examples
 CSAF currently contains a number of examples, including the F-16 shown below. These examples are packaged into component
