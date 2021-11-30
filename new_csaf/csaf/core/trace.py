@@ -68,7 +68,7 @@ class Trace(collections.abc.Sequence):
             raise TypeError('Expected int or str.')
 
     def __len__(self):
-        return len(self.data._asdict[self.names[0]])
+        return len(self.data._asdict()[self.names[0]])
 
     def save(self, filename):
         raise NotImplementedError
