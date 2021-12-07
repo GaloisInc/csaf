@@ -4,6 +4,14 @@ from csaf.core.trace import TimeTrace
 import typing
 
 
+class FiniteSet(tuple):
+    pass
+
+
+class IntervalSet(tuple):
+    pass
+
+
 class Scenario(CsafBase):
     """
     CSAF Scenario
@@ -98,9 +106,17 @@ class FixedSimGoal(SimGoal):
 
 
 class BOptFalsifyGoal(SimGoal):
+    import GPy  # type: ignore
+    import numpy as np
+
     max_iter = 500
     max_time = 120.0
     tolerance = 5.0
+    kernel = GPy.kern.StdPeriodic(4,  # dimension
+                                 ARD1=True, ARD2=True,
+                                 variance=1E-2,
+                                 period=[1E10, 1E10, 2 * np.pi, 1E8],
+                                 lengthscale=[200.0, 200.0, 0.06, 4.0])
 
     constraints: typing.Sequence[typing.Dict] = tuple()
 
@@ -117,7 +133,10 @@ class BOptFalsifyGoal(SimGoal):
         import GPyOpt  # type: ignore
 
         def to_gpy_space(bounds):
-            return [{'name': f'x{idx}', 'type': 'continuous', 'domain': b} for idx, b in enumerate(bounds)]
+            print([isinstance(b, FiniteSet) for b in bounds])
+            return [{'name': f'x{idx}', 'type':
+                'discrete' if isinstance(b, FiniteSet) else 'continuous',
+                     'domain': b} for idx, b in enumerate(bounds)]
 
         # get feasible region from initial states and constraints
         feasible_region = GPyOpt.Design_space(space=to_gpy_space(self.scenario_type.bounds),
@@ -140,14 +159,9 @@ class BOptFalsifyGoal(SimGoal):
         # we know that the relative heading angle is periodic, so we can set and fix it
         # we know that the lengthscales and periods will be different along each natural axis, so we turn on ARD
         # we know prior variance is low, so we can set low as well
-        k = GPy.kern.StdPeriodic(4,  # dimension
-                                 ARD1=True, ARD2=True,
-                                 variance=1E-2,
-                                 period=[1E10, 1E10, 2 * np.pi, 1E8],
-                                 lengthscale=[200.0, 200.0, 0.06, 4.0])
+        k = self.kernel
         k.period.fix()
         k.lengthscale.fix()
-        # k.variance.fix()
 
         # get GPModel from the covariance (kernel)
         model = GPyOpt.models.GPModel(exact_feval=True, optimize_restarts=0, verbose=False, kernel=k)

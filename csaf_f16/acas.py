@@ -128,8 +128,12 @@ def generate_acas_scenario(
     return _AcasScenario
 
 
-def generate_acas_goal(scen_type: typing.Type[Scenario]) -> typing.Type[BOptFalsifyGoal]:
+def generate_acas_goal(scen_type: typing.Type[Scenario],
+                       gpkernel=None,
+                       gpconstraints=None) -> typing.Type[BOptFalsifyGoal]:
     class _AcasFalsifyGoal(BOptFalsifyGoal):
+        kernel = BOptFalsifyGoal.kernel if gpkernel is None else gpkernel
+
         scenario_type = scen_type
 
         terminating_conditions_all = collision_condition
@@ -142,7 +146,7 @@ def generate_acas_goal(scen_type: typing.Type[Scenario]) -> typing.Type[BOptFals
             # keep intruder "pointed at" ownship, plus/minus 90 degrees
             # TODO: this doesn't look at all quadrants - debug?
             # {'name': 'constr_2', 'constraint': 'np.abs((np.pi + x[:, 2]) - np.arctan2(x[:, 1], x[:, 0])) - np.pi/2'}
-        ]
+        ] if gpconstraints is None else gpconstraints
 
         @staticmethod
         def property(ctraces) -> bool:
@@ -151,6 +155,7 @@ def generate_acas_goal(scen_type: typing.Type[Scenario]) -> typing.Type[BOptFals
         def objective_function_single(self, conf: typing.Sequence) -> float:
             """obj: configuration space -> real number"""
             # run simulation
+            print(conf)
             sys = self.scenario_type().generate_system(conf)
             trajs, _p = sys.simulate_tspan((0.0, 30.0), return_passed=True)
             assert isinstance(trajs, dict)
@@ -215,7 +220,7 @@ class AcasScenarioViewer:
         self.ownship_heading = np.array(trajs["plant"].states)[:, 5]
         self.intruder_heading = np.array(trajs["intruder_plant"].states)[:, 5]
 
-    def summary_plot(self):
+    def summary_plot(self, bounds=((-10000, 10000), (0, 20000))):
         fig, ax = plt.subplots(figsize=(10.0, 10.0))
         plt.figure(figsize=(10.0, 10.0))
 
@@ -242,6 +247,8 @@ class AcasScenarioViewer:
         ax.grid()
         ax.legend()
         ax.axis('equal')
+        ax.set_xlim(*bounds[0])
+        ax.set_ylim(*bounds[1])
         plt.tight_layout()
         return fig, ax
 
@@ -259,11 +266,12 @@ class AcasScenarioViewer:
                        s=200,
                        label='Intruder Waypoints')
 
-        ax.scatter(*np.array(self.scenario.own_waypoints)[:, :2].T,  # type: ignore
-                   marker='x',
-                   c='k',
-                   s=200,
-                   label='Own Waypoints')
+        if len(self.scenario.own_waypoints) > 0:
+            ax.scatter(*np.array(self.scenario.own_waypoints)[:, :2].T,  # type: ignore
+                       marker='x',
+                       c='k',
+                       s=200,
+                       label='Own Waypoints')
 
     def compute_bounds(self):
         pos = np.vstack(

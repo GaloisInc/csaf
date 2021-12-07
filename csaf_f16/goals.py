@@ -1,6 +1,9 @@
 """
 F16Lib Scenario Goals
 """
+import typing
+
+import csaf
 import csaf_f16.acas as f16a
 from csaf.test.scenario import FixedSimGoal
 import numpy as np
