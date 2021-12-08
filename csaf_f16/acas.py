@@ -275,11 +275,11 @@ class AcasScenarioViewer:
 
     def compute_bounds(self):
         pos = np.vstack(
-            (self.own_pos[:-1],
-             self.intruder_pos[:-1],
+            (self.own_pos[:-1, :2],
+             self.intruder_pos[:-1, :2],
              # np.array(self.scenario.waypoints)[:, :-1],
              # np.array(self.scenario.own_waypoints)[:, :-1],
-             self.scenario.balloon_pos)
+             self.scenario.balloon_pos[:2])
         )
 
         xmin, xmax = min(pos[:, 0]), max(pos[:, 0])
