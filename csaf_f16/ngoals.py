@@ -30,7 +30,7 @@ class AcasAirportScenario(Scenario):
     bounds = [FiniteSet((15E3, 35E3)),
               FiniteSet((800.0, 1000.0)),
               IntervalSet((-1E4, 1E4)),
-              IntervalSet((-100.0, 100.0)),
+              IntervalSet((-100.0, 100.0)), # this is low as I keep getting simulation errors
               IntervalSet((-np.pi, np.pi))]
 
     def __init__(self):
@@ -87,9 +87,9 @@ class AcasHeadOnScenario(Scenario):
 
 
     bounds = [FiniteSet((15E3, 35E3)),
-              FiniteSet((800.0, 1000.0)),
+              FiniteSet((600.0, 1000.0)),
               IntervalSet((-1E4, 1E4)),
-              IntervalSet((-100.0, 100.0)),
+              IntervalSet((-400.0, 400.0)),
               IntervalSet((-np.pi, np.pi))]
 
 
@@ -102,7 +102,7 @@ class AcasHeadOnScenario(Scenario):
 
     def generate_system(self, conf: typing.Sequence) -> System:
         # create an initial waypoint for the intruder
-        iwaypoints = [(*(0.0, conf[2]), conf[0]), ] + list([(*w[:2], conf[0]) for w in self.intruder_waypoints])
+        iwaypoints = [(*(0.0, conf[2]), conf[0]),]
         owaypoints = [(0.0, 1E5, conf[0])]
 
         # copy the states over so we can modify them
@@ -146,9 +146,9 @@ class AcasRejoinScenario(Scenario):
     system_type = f16a.F16AcasIntruderBalloon
 
     bounds = [FiniteSet((15E3, 35E3)),
-              FiniteSet((800.0, 1000.0)),
-              IntervalSet((5000.0, 1E4)),
-              IntervalSet((-100.0, 100.0)),
+              FiniteSet((600.0, 1000.0)),
+              IntervalSet((6000.0, 1E4)),
+              IntervalSet((-400.0, 400.0)),
               IntervalSet((-np.pi, np.pi))]
 
     def __init__(self):
@@ -199,18 +199,23 @@ class AcasRejoinScenario(Scenario):
 
 
 import GPy
-kernel = GPy.kern.StdPeriodic(5,  # dimension
+# this might be a bad choice as the kernel is mutable -- we should pass a way to create the kernel
+# so that each cobnsumer of it gets a fresh copy
+kernel = [GPy.kern.StdPeriodic(5,  # dimension
                               ARD1=True, ARD2=True,
                               variance=1E-2,
                               period=[1E10, 1E10, 1E8, 1E8, 2 * np.pi],
-                              lengthscale=[200.0, 20.0, 200.0, 20.0, 0.05])
+                              lengthscale=[200.0, 20.0, 200.0, 20.0, 0.05]) for _ in range(3)]
 constraints = [
             # keep intruder initial position at least 7000 ft away
-            {'name': 'constr_1', 'constraint': '-(np.abs(x[:, 2]) - 7000)'},
+            {'name': 'min_distance_constr', 'constraint': '-(np.abs(x[:, 2]) - 7000)'},
+            # keep the simulation in a stable plave (min airspeed of intruder)
+            {'name': 'min_speed_constr', 'constraint': '-(x[:, 1] + x[:, 3] - 600)'},
+            {'name': 'max_speed_constr', 'constraint': '(x[:, 1] + x[:, 3] - 1100)'}
         ]
 
-AcasAirportGoal = generate_acas_goal(AcasAirportScenario, gpkernel=kernel, gpconstraints=constraints)
+AcasAirportGoal = generate_acas_goal(AcasAirportScenario, gpkernel=kernel[0], gpconstraints=constraints)
 
-AcasHeadOnGoal = generate_acas_goal(AcasHeadOnScenario, gpkernel=kernel, gpconstraints=constraints)
+AcasHeadOnGoal = generate_acas_goal(AcasHeadOnScenario, gpkernel=kernel[1], gpconstraints=constraints)
 
-AcasRejoin = generate_acas_goal(AcasRejoinScenario, gpkernel=kernel, gpconstraints=constraints)
+AcasRejoin = generate_acas_goal(AcasRejoinScenario, gpkernel=kernel[2], gpconstraints=constraints)

@@ -266,7 +266,7 @@ class AcasXuAutopilot():
 
         # ensure angles in range -pi, pi
         theta = wrap_to_pi(theta)
-        assert -pi <= theta <= pi
+        assert -pi <= theta <= pi, ('theta ', theta, dy, dx)
 
         psi = wrap_to_pi(psi)
         assert -pi <= psi <= pi
