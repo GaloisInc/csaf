@@ -1,2 +1,0 @@
-recursive-include csaf_f16/models/trained_models/ *.npz
-recursive-include csaf_f16/models/trained_models/ *.onnx
