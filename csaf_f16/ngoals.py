@@ -11,6 +11,7 @@ from csaf.test.scenario import FiniteSet, IntervalSet
 import csaf
 from csaf import System, Scenario
 import csaf_f16.acas as f16a
+import csaf_f16.goals as goals
 
 
 
@@ -85,13 +86,11 @@ class AcasHeadOnScenario(Scenario):
 
     system_type = f16a.F16AcasIntruderBalloon
 
-
     bounds = [FiniteSet((15E3, 35E3)),
-              FiniteSet((600.0, 1000.0)),
-              IntervalSet((-1E4, 1E4)),
-              IntervalSet((-400.0, 400.0)),
+              FiniteSet((800.0, 1000.0)),
+              IntervalSet((-5E4, 5E4)),
+              IntervalSet((-100.0, 100.0)),
               IntervalSet((-np.pi, np.pi))]
-
 
     def __init__(self):
         # this is necessary for the viewer
@@ -206,16 +205,59 @@ kernel = [GPy.kern.StdPeriodic(5,  # dimension
                               variance=1E-2,
                               period=[1E10, 1E10, 1E8, 1E8, 2 * np.pi],
                               lengthscale=[200.0, 20.0, 200.0, 20.0, 0.05]) for _ in range(3)]
+
 constraints = [
             # keep intruder initial position at least 7000 ft away
             {'name': 'min_distance_constr', 'constraint': '-(np.abs(x[:, 2]) - 7000)'},
-            # keep the simulation in a stable plave (min airspeed of intruder)
+            # keep the simulation in a stable place (min airspeed of intruder)
             {'name': 'min_speed_constr', 'constraint': '-(x[:, 1] + x[:, 3] - 600)'},
             {'name': 'max_speed_constr', 'constraint': '(x[:, 1] + x[:, 3] - 1100)'}
         ]
 
+
+constraints_head_on = [
+    # keep intruder initial position at least 25000 ft away for head on
+    {'name': 'min_distance_constr_head', 'constraint': '-(np.abs(x[:, 2]) - 25000)'},
+    # keep the simulation in a stable place (min airspeed of intruder)
+    {'name': 'min_speed_constr_head', 'constraint': '-(x[:, 1] + x[:, 3] - 600)'},
+    {'name': 'max_speed_constr_head', 'constraint': '(x[:, 1] + x[:, 3] - 1100)'}
+]
+
 AcasAirportGoal = generate_acas_goal(AcasAirportScenario, gpkernel=kernel[0], gpconstraints=constraints)
 
-AcasHeadOnGoal = generate_acas_goal(AcasHeadOnScenario, gpkernel=kernel[1], gpconstraints=constraints)
+AcasHeadOnGoal = generate_acas_goal(AcasHeadOnScenario, gpkernel=kernel[1], gpconstraints=constraints_head_on)
 
 AcasRejoin = generate_acas_goal(AcasRejoinScenario, gpkernel=kernel[2], gpconstraints=constraints)
+
+
+class AcasAirportCollideGoal(goals.FixedSimAcasGoal):
+    """cases where we know collisions occur"""
+    scenario_type = AcasAirportScenario
+
+    should_fail = True
+
+    fixed_configurations = [
+      [1.50000000e+04, 1.00000000e+03, 9.30046815e+03, 8.18465372e+01, 3.90928291e-01]
+    ]
+
+
+class AcasHeadOnCollideGoal(goals.FixedSimAcasGoal):
+    """cases where we know collisions occur"""
+    scenario_type = AcasHeadOnScenario
+
+    should_fail = True
+
+    fixed_configurations = [
+        [ 3.50000000e+04,  1.00000000e+03,  9.48834570e+03, -9.83917878e+01, -3.04485247e+00]
+    ]
+
+
+class AcasRejoinCollideGoal(goals.FixedSimAcasGoal):
+    """cases where we know collisions occur"""
+    scenario_type = AcasHeadOnScenario
+
+    should_fail = True
+
+    fixed_configurations = [
+       [ 3.50000000e+04,  6.00000000e+02,  8.18286563e+03,  3.24231409e+02, -4.44085274e-01]
+    ]
