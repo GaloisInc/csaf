@@ -17,7 +17,7 @@ setuptools.setup(
         "License :: BSD 3-Clause",
         "Operating System :: OS Independent",
     ],
-    package_dir={"": "./", "csaf_f16": "csaf_f16", "csaf_examples": "csaf_examples"},
+    package_dir={"": ".", "csaf_f16": "csaf_f16", "csaf_examples": "csaf_examples"},
     install_requires = [
         'numpy>=1.20.0',
         'numba>=0.54.0',
@@ -26,9 +26,8 @@ setuptools.setup(
         'GPyOpt>=1.2.6',
         'tqdm>=4.62.2'
     ],
-    # TODO: remove this
-    package_data={'csaf_f16': ['csaf_f16/models/*.onnx', 'csaf_f16/models/np/*.npz']},
     include_package_data=True,
-    packages=setuptools.find_packages(where="./"),
+    package_data={'csaf_f16': ['./csaf_f16/models/trained_models/*.onnx', './csaf_f16/models/trained_models/np/*.npz']},
+    packages=setuptools.find_packages(where="."),
     python_requires=">=3.9",
 )
