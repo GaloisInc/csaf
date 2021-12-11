@@ -90,7 +90,7 @@ class FlightGearBase(ABC):
 
     FG_FT_IN_M = 3.2808
     # Networking variables
-    DEFAULT_FG_IP = "192.168.40.219"#"127.0.0.1"
+    DEFAULT_FG_IP = "127.0.0.1"
 
     DEFAULT_DELTA_T = 0.5
 

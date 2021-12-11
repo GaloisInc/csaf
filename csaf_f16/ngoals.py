@@ -254,7 +254,7 @@ class AcasHeadOnCollideGoal(goals.FixedSimAcasGoal):
 
 class AcasRejoinCollideGoal(goals.FixedSimAcasGoal):
     """cases where we know collisions occur"""
-    scenario_type = AcasHeadOnScenario
+    scenario_type = AcasRejoinScenario
 
     should_fail = True
 
