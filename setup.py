@@ -26,11 +26,12 @@ setuptools.setup(
         'GPyOpt>=1.2.6',
         'tqdm>=4.62.2',
         'onnxruntime>=1.7.0',
-        'pydot>=1.4.1'
+        'pydot>=1.4.1',
+        'svgpath2mpl>=1.0.0'
     ],
     # TODO: remove this
-    package_data={'csaf_f16': ['./csaf_f16/models/trained_models/*.onnx', './csaf_f16/models/trained_models/np/*.npz']},
     include_package_data=True,
+    package_data={'csaf_f16': ['models/trained_models/*.onnx', 'models/trained_models/np/*.npz']},
     packages=setuptools.find_packages(where="."),
     python_requires=">=3.9",
 )
