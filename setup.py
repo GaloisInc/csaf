@@ -24,7 +24,9 @@ setuptools.setup(
         'matplotlib>=3.4.3',
         'scipy>=1.7.1',
         'GPyOpt>=1.2.6',
-        'tqdm>=4.62.2'
+        'tqdm>=4.62.2',
+        'onnxruntime>=1.7.0',
+        'pydot>=1.4.1'
     ],
     # TODO: remove this
     package_data={'csaf_f16': ['./csaf_f16/models/trained_models/*.onnx', './csaf_f16/models/trained_models/np/*.npz']},

@@ -180,3 +180,6 @@ generated-notebooks-config.yml
 
 # Examples output (generated files)
 examples/*/output/
+
+# MacOS Things
+# .DS_Store
