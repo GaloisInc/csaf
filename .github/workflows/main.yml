@@ -25,17 +25,17 @@ jobs:
       - uses: syphar/restore-virtualenv@v1
         id: cache-virtualenv
         with:
-          requirement_files: ./new_csaf/requirements.txt
+          requirement_files: ./requirements.txt
       
       - uses: syphar/restore-pip-download-cache@v1
         if: steps.cache-virtualenv.outputs.cache-hit != 'true'
 
         # the package installation will only be executed when the
         # requirements-files have changed.
-      - run: pip install -r new_csaf/requirements.txt
+      - run: pip install -r requirements.txt
         if: steps.cache-virtualenv.outputs.cache-hit != 'true'
 
-      - run: cd new_csaf && PYTHONPATH=$PWD pytest --mypy -s tests
+      - run: PYTHONPATH=$PWD pytest --mypy -s tests
 
   #     - name: F16 simple test
   #       run: ./run-csaf.sh -e f16-simple -n
@@ -132,14 +132,14 @@ jobs:
   #     - uses: syphar/restore-virtualenv@v1
   #       id: cache-virtualenv
   #       with:
-  #         requirement_files: ./new_csaf/requirements.txt
+  #         requirement_files: ./requirements.txt
       
   #     - uses: syphar/restore-pip-download-cache@v1
   #       if: steps.cache-virtualenv.outputs.cache-hit != 'true'
 
   #       # the package installation will only be executed when the
   #       # requirements-files have changed.
-  #     - run: pip install -r new_csaf/requirements.txt
+  #     - run: pip install -r requirements.txt
   #       if: steps.cache-virtualenv.outputs.cache-hit != 'true'
 
   #     - name: f16-job-config 0 3
@@ -169,14 +169,14 @@ jobs:
       - uses: syphar/restore-virtualenv@v1
         id: cache-virtualenv
         with:
-          requirement_files: ./new_csaf/requirements.txt
+          requirement_files: ./requirements.txt
       
       - uses: syphar/restore-pip-download-cache@v1
         if: steps.cache-virtualenv.outputs.cache-hit != 'true'
 
         # the package installation will only be executed when the
         # requirements-files have changed.
-      - run: pip install -r new_csaf/requirements.txt
+      - run: pip install -r requirements.txt
         if: steps.cache-virtualenv.outputs.cache-hit != 'true'
 
       - name: Build notebook tests

@@ -1,15 +1,12 @@
-FROM ubuntu:18.04
+# CSAF Docker Image
 
-ARG DEBIAN_FRONTEND=noninteractive
+# set base image (host OS)
+FROM python:3.9
 
-COPY dependencies.sh /tmp/deps.sh
-RUN /tmp/deps.sh
+# install dependencies
+COPY requirements.txt .
+RUN pip install -r requirements.txt
 
-COPY requirements.txt /tmp/requirements.txt
-RUN pip3 install -r /tmp/requirements.txt --use-feature=2020-resolver
-
-RUN adduser --quiet --disabled-password qtuser
-
-WORKDIR /
-
-ENV PYTHONPATH /app
+# install csaf + examples
+COPY . csaf/
+RUN pip install csaf/

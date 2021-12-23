@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
-FILES=`find .  -wholename "./new_csaf/notebooks/*.ipynb" ! -name '*checkpoint*'`
-export PYTHONPATH=${PYTHONPATH}:${PWD}/new_csaf/
+FILES=`find .  -wholename "./notebooks/*.ipynb" ! -name '*checkpoint*'`
+export PYTHONPATH=${PYTHONPATH}:${PWD}/
 echo "PYTHONPATH=${PYTHONPATH}"
 for NOTEBOOK in $FILES
 do
