@@ -4,17 +4,17 @@ with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="csaf",
+    name="csaf-controls",
     version="0.2",
-    author=["Ethan Lew", "Michal Podhradsky", "Aditya Zutshi"],
-    author_email=["ethanlew16@gmail.com", "mpodhradsky@galois.com", "aditya.zutshi@galois.com"],
+    author="Ethan Lew, Michal Podhradsky, Aditya Zutshi",
+    author_email="ethanlew16@gmail.com, mpodhradsky@galois.com, aditya.zutshi@galois.com",
     description="Control Systems Analysis Framework",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/GaloisInc/csaf",
     classifiers=[
         "Programming Language :: Python :: 3",
-        "License :: BSD 3-Clause",
+        "License :: OSI Approved :: BSD License",
         "Operating System :: OS Independent",
     ],
     package_dir={"": ".", "csaf_f16": "csaf_f16", "csaf_examples": "csaf_examples"},

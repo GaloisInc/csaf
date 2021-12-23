@@ -35,7 +35,7 @@ Below is an example of a topology graph of F16 system with GCAS autopilot.
 
 Clone the repo, and install via `pip`,
 ```bash
-pip install csaf
+pip install csaf-controls
 ```
 
 To install additional dependencies needed for the examples, go to the repo root and run
