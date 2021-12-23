@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name="csaf",
-    version="0.0.1",
+    version="0.2",
     author=["Ethan Lew", "Michal Podhradsky", "Aditya Zutshi"],
     author_email=["ethanlew16@gmail.com", "mpodhradsky@galois.com", "aditya.zutshi@galois.com"],
     description="Control Systems Analysis Framework",
