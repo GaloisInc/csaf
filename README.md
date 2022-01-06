@@ -127,3 +127,7 @@ examples is licensed under [BSD license](LICENSE.txt). The [f16 examples](csaf_f
 
 ## Acknowledgment
 This material is based upon work supported by the DARPA Assured Autonomy program under the United States Air Force under Contract No. FA8750-19-C-0092. Any opinions, findings and conclusions or recommendations expressed in this material are those of the author(s) and do not necessarily reflect the views of DARPA or the United States Air Force.
+
+## Distribution
+"Distribution Statement "A" (Approved for Public Release, Distribution Unlimited)”
+"© 2021 Galois, Inc."
