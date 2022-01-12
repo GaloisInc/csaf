@@ -10,6 +10,7 @@ import csaf_f16.models.monitor_ap as monitor
 import csaf_f16.models.acas_switch as aswitch
 import csaf_f16.models.dummy_predictor as predictor
 import csaf_f16.models.nnllc as nnllc
+import csaf_f16.models.ofcllc as ofcllc
 
 from csaf_f16.messages import *
 from csaf import ContinuousComponent, DiscreteComponent
@@ -46,7 +47,7 @@ f16_xequil = [502.0,
 
 class F16PlantComponent(ContinuousComponent):
     name = "F16 Plant Model"
-    sampling_frequency = 30.0
+    sampling_frequency = 100.0
     default_parameters = {
         "s": 300.0,
         "b": 30.0,
@@ -94,7 +95,7 @@ class F16PlantComponent(ContinuousComponent):
 
 class F16LlcComponent(ContinuousComponent):
     name = "F16 Low Level Controller"
-    sampling_frequency = 30.0
+    sampling_frequency = 100
     default_parameters = {
         "lqr_name": "lqr_original",
         "throttle_max": 1,
@@ -136,10 +137,19 @@ class F16NNLlcComponent(F16LlcComponent):
     }
     initialize = nnllc.model_init
 
+class F16OFCLlcComponent(F16LlcComponent):
+    name = "F16 On The Fly Control: Low Level Controller"
+    sampling_frequency = 100.0
+    flows = {
+        "outputs": ofcllc.model_output,
+        "states": ofcllc.model_state_update
+    }
+    initialize = ofcllc.model_init
+
 
 class F16AutopilotComponent(DiscreteComponent):
     name = ""
-    sampling_frequency = 10.0
+    sampling_frequency = 100.0
     inputs = (
         ("inputs_pstates", F16PlantStateMessage),
         ("inputs_poutputs", F16PlantOutputMessage),

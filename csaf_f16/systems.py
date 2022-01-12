@@ -22,6 +22,24 @@ class F16Simple(System):
 
     priority: typing.Optional[typing.Sequence[str]] = None
 
+class F16OFCDemo(System):
+    components = {
+        "plant": f16c.F16PlantComponent,
+        "llc": f16c.F16OFCLlcComponent,
+        "autopilot": f16c.F16GcasComponent
+    }
+
+    connections = {
+        ("llc", "inputs_pstates"): ("plant", "states"),
+        ("llc", "inputs_poutputs"): ("plant", "outputs"),
+        ("llc", "inputs_coutputs"): ("autopilot", "outputs"),
+        ("plant", "inputs"): ("llc", "outputs"),
+        ("autopilot", "inputs_poutputs"): ("plant", "outputs"),
+        ("autopilot", "inputs_pstates"): ("plant", "states")
+    }
+
+    priority: typing.Optional[typing.Sequence[str]] = None
+
 
 class F16AirspeedSimple(F16Simple):
     components = {

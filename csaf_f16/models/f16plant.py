@@ -6,10 +6,10 @@ taken from https://github.com/stanleybak/AeroBenchVVPython
 """
 
 import numpy as np
-import helpers.f16plant_helper as ph
-from helpers.variables import State, Ctrlinput, Output, state_vector
-from helpers.stevens_dyn import stevens_f16
-from helpers.morelli_dyn import morelli_f16
+import csaf_f16.models.helpers.f16plant_helper as ph
+from csaf_f16.models.helpers.variables import State, Ctrlinput, Output, state_vector
+from csaf_f16.models.helpers.stevens_dyn import stevens_f16
+from csaf_f16.models.helpers.morelli_dyn import morelli_f16
 
 
 def model_output(model, time_t, state_f16, input_controller):
@@ -19,12 +19,40 @@ def model_output(model, time_t, state_f16, input_controller):
 def model_state_update(model, time_t, state_f16, input_controller):
     return subf16df(model, time_t, state_f16, input_controller)[0]
 
+default_parameters = {
+    "s": 300.0,
+    "b": 30.0,
+    "cbar": 11.32,
+    "rm": 1.57e-3,
+    "xcgref": 0.35,
+    "xcg": 0.35,
+    "he": 160.0,
+    "c1": -0.770,
+    "c2": 0.02755,
+    "c3": 1.055e-4,
+    "c4": 1.642e-6,
+    "c5": 0.9604,
+    "c6": 1.759e-2,
+    "c7": 1.792e-5,
+    "c8": -0.7336,
+    "c9": 1.587e-5,
+    "rtod": 57.29578,
+    "g": 32.17,
+    "xcg_mult": 1,
+    "cxt_mult": 1,
+    "cyt_mult": 1,
+    "czt_mult": 1,
+    "clt_mult": 1,
+    "cmt_mult": 1,
+    "cnt_mult": 1,
+    "model": "morelli"
+}
 
-def subf16df(model, t, x, u, adjust_cy=True):
+def subf16df(t, x, u, adjust_cy=True):
     ''' Calculate state space differential '''
     # if len(f) != 4+4:
     #    raise E.SystemDimensionError("forcing vector must have 4 values")
-    parameters = model.parameters
+    parameters = default_parameters
 
     thtlc, el, ail, rdr = u[0:4]
     s, b, cbar, rm, xcgref, xcg, he, c1, c2, c3, c4, c5, c6, c7, c8, c9, rtod, g = \
