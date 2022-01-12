@@ -17,7 +17,7 @@ setuptools.setup(
         "License :: OSI Approved :: BSD License",
         "Operating System :: OS Independent",
     ],
-    package_dir={"": ".", "csaf_f16": "csaf_f16", "csaf_examples": "csaf_examples"},
+    package_dir={"": ".", "csaf_f16": "csaf_f16", "csaf_examples": "csaf_examples", "DaTaReachControl" : "DaTaReachControl"},
     install_requires = [
         'numpy>=1.20.0',
         'numba>=0.54.0',
