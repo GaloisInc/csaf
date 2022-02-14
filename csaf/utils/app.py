@@ -3,6 +3,7 @@ Utilities to add simple app functionality to libraries using CSAF components
 """
 from typing import Sequence, Optional, Type, NamedTuple, Dict, Callable
 from csaf.utils import view_block_diagram, open_image
+import abc
 import matplotlib.pyplot as plt
 import numpy as np
 import pathlib
@@ -10,7 +11,44 @@ import argparse
 import csaf
 
 
-class CsafApp:
+class CsafApp(abc.ABC):
+    @abc.abstractmethod
+    def parse_args(self) -> argparse.Namespace:
+        pass
+
+    @abc.abstractmethod
+    def main(self) -> None:
+        pass
+
+    @property
+    def app_name(self) -> str:
+        return "CSAF App"
+
+
+class ScenarioCsafApp(CsafApp):
+    def __init__(self, scenario: Type[csaf.Scenario]):
+        self._scenario_type = scenario
+
+    def parse_args(self) -> argparse.Namespace:
+        """
+        tool to parse cli args
+        TODO: refine this and generate a more meaningful description
+        """
+        ap = argparse.ArgumentParser(description=f"{self.app_name}")
+        ap.add_argument('-o', '--output-fname', type=str, default="./scenario.out", help="Output Filename")
+        ap.add_argument('-t', '--time-max', type=float, default=10.0, help="Timespan to Simulate")
+        ap.add_argument('-i', '--input-fname', type=str, default="./scenario.json", help="Input Filename")
+        return ap.parse_args()
+
+    def main(self) -> None:
+        pass
+
+    @property
+    def app_name(self) -> str:
+        return f"{self._scenario_type.__name__} Scenario App"
+
+
+class SystemCsafApp(CsafApp):
     """
     for libraries that create CSAF components, create an app layer that allows for CLI access for
 
@@ -36,7 +74,7 @@ class CsafApp:
         self.systems = systems if systems is not None else []
         self.system_names = [si.__class__.__name__ for si in self.systems]
         self.messages = messages if messages is not None else []
-        self.app_name = app_name
+        self._app_name = app_name
         self.description = description
         self.plotters = plotters
 
@@ -112,3 +150,7 @@ class CsafApp:
         # for now, the only implemented feature is to simulate and plot the system
         self.simulate_app(args)
         print("Finished!")
+
+    @property
+    def app_name(self) -> str:
+        return self._app_name

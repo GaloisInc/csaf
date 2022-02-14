@@ -1,4 +1,4 @@
-from csaf.utils.app import CsafApp
+from csaf.utils.app import SystemCsafApp
 from csaf_examples.rejoin import generate_dubins_system, plot_aircrafts
 from csaf_examples.cansat import generate_cansat_system, plot_sats
 import numpy as np
@@ -23,5 +23,5 @@ if __name__ == '__main__':
     DubinsRejoin = generate_dubins_system(j_states)
     plotters = {CanSat.__class__: plot_sats, DubinsRejoin.__class__: plot_aircrafts}
     example_systems = ([CanSat, DubinsRejoin])
-    capp = CsafApp("CSAF Examples", description=descr, systems=example_systems, plotters=plotters)
+    capp = SystemCsafApp("CSAF Examples", description=descr, systems=example_systems, plotters=plotters)
     capp.main()
