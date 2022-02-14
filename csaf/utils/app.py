@@ -1,6 +1,9 @@
 """
 Utilities to add simple app functionality to libraries using CSAF components
 """
+import json
+import os.path
+import typing
 from typing import Sequence, Optional, Type, NamedTuple, Dict, Callable
 from csaf.utils import view_block_diagram, open_image
 import abc
@@ -40,8 +43,35 @@ class ScenarioCsafApp(CsafApp):
         ap.add_argument('-i', '--input-fname', type=str, default="./scenario.json", help="Input Filename")
         return ap.parse_args()
 
+    def collect_conf(self, in_fname: str) -> Sequence[typing.Any]:
+        """given scenario config file in_fname, collect the scenario input vector"""
+        assert os.path.isfile(in_fname), f"{in_fname} must be a file!"
+        with open(in_fname, "r") as f:
+            conf = json.load(f)
+        assert isinstance(conf, list)
+        # TODO: check list size
+        return conf
+
+    def dump_output(self, out_fname: str, traces: typing.Dict[str, csaf.TimeTrace]) -> None:
+        """given a scenario simulation output file out_fname, write the output"""
+        if os.path.exists(out_fname):
+            print(f"Warning! {out_fname} exists!")
+        print(traces)
+
     def main(self) -> None:
-        pass
+        print(f"Start {self.app_name}")
+        ap = self.parse_args()
+        print("Collecting Configuration...")
+        conf = self.collect_conf(ap.input_fname)
+        print("Generating System...")
+        tspan = (0.0, ap.time_max)
+        scenario = self._scenario_type()
+        system  = scenario.generate_system(conf)
+        print("Simulating System...")
+        ret: typing.Dict[str, csaf.TimeTrace] = system.simulate_tspan(tspan, show_status=True)
+        print("Writing Output...")
+        self.dump_output(ap.output_fname, ret)
+        print("Finished!")
 
     @property
     def app_name(self) -> str:
