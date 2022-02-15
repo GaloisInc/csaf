@@ -54,9 +54,16 @@ class ScenarioCsafApp(CsafApp):
 
     def dump_output(self, out_fname: str, traces: typing.Dict[str, csaf.TimeTrace]) -> None:
         """given a scenario simulation output file out_fname, write the output"""
+        # TODO: obviously change this to a serialized format
+        import pickle
+        out_obj = {}
         if os.path.exists(out_fname):
             print(f"Warning! {out_fname} exists!")
-        print(traces)
+        for n, v in traces.items():
+            dat = {vi : getattr(v, vi) for vi in v.NT._fields}
+            out_obj[n] = dat
+        with open(out_fname, "wb") as fp:
+            pickle.dump(out_obj, fp)
 
     def main(self) -> None:
         print(f"Start {self.app_name}")
