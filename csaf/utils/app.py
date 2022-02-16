@@ -37,8 +37,11 @@ class ScenarioCsafApp(CsafApp):
         tool to parse cli args
         TODO: refine this and generate a more meaningful description
         """
-        ap = argparse.ArgumentParser(description=f"{self.app_name}")
-        ap.add_argument('-o', '--output-fname', type=str, default="./scenario.out", help="Output Filename")
+        descr = f"""Input Format: {[f'{k}:{v}' for k, v in self._scenario_type.configuration_space.__annotations__.items()]}.
+        Output Fields: {list(self._scenario_type.system_type.components.keys())}.
+        """
+        ap = argparse.ArgumentParser(description=f"{self.app_name} (Scenario App). " + f"{descr}")
+        ap.add_argument('-o', '--output-fname', type=str, default="./traces.out", help="Output Filename")
         ap.add_argument('-t', '--time-max', type=float, default=10.0, help="Timespan to Simulate")
         ap.add_argument('-i', '--input-fname', type=str, default="./scenario.json", help="Input Filename")
         return ap.parse_args()
@@ -56,27 +59,28 @@ class ScenarioCsafApp(CsafApp):
         """given a scenario simulation output file out_fname, write the output"""
         # TODO: obviously change this to a serialized format
         import pickle
+        import json
         out_obj = {}
         if os.path.exists(out_fname):
             print(f"Warning! {out_fname} exists!")
         for n, v in traces.items():
-            dat = {vi : getattr(v, vi) for vi in v.NT._fields}
+            dat = {vi : np.array(getattr(v, vi)).tolist() for vi in v.NT._fields}
             out_obj[n] = dat
-        with open(out_fname, "wb") as fp:
-            pickle.dump(out_obj, fp)
+        with open(out_fname, "w") as fp:
+            json.dump(out_obj, fp, indent=2)
 
     def main(self) -> None:
         print(f"Start {self.app_name}")
         ap = self.parse_args()
-        print("Collecting Configuration...")
+        print(f"Collecting Configuration '{ap.input_fname}'...")
         conf = self.collect_conf(ap.input_fname)
-        print("Generating System...")
+        print(f"Generating System '{self._scenario_type.__name__}'...")
         tspan = (0.0, ap.time_max)
         scenario = self._scenario_type()
         system  = scenario.generate_system(conf)
-        print("Simulating System...")
+        print(f"Simulating System '{system.__class__.__name__}'...")
         ret: typing.Dict[str, csaf.TimeTrace] = system.simulate_tspan(tspan, show_status=True)
-        print("Writing Output...")
+        print(f"Writing Output '{ap.output_fname}'...")
         self.dump_output(ap.output_fname, ret)
         print("Finished!")
 
