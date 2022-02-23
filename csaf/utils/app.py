@@ -11,16 +11,20 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pathlib
 import argparse
+import sys
 import csaf
 
 
 class CsafApp(abc.ABC):
+    """base class for CSAF cli utility classes"""
     @abc.abstractmethod
     def parse_args(self) -> argparse.Namespace:
+        """method to collect user input"""
         pass
 
     @abc.abstractmethod
     def main(self) -> None:
+        """main app method"""
         pass
 
     @property
@@ -29,6 +33,21 @@ class CsafApp(abc.ABC):
 
 
 class ScenarioCsafApp(CsafApp):
+    """
+    Creates a CLI tool to configure and simulate CSAF scenarios
+
+    planned usage:
+
+        #__main__.py
+        if __name__ == "__main__":
+            ca = ScenarioCsafApp(MyScenarioType)
+            ca.main()
+    """
+
+    @staticmethod
+    def step_done():
+        print("DONE")
+
     def __init__(self, scenario: Type[csaf.Scenario]):
         self._scenario_type = scenario
 
@@ -49,20 +68,27 @@ class ScenarioCsafApp(CsafApp):
     def collect_conf(self, in_fname: str) -> Sequence[typing.Any]:
         """given scenario config file in_fname, collect the scenario input vector"""
         assert os.path.isfile(in_fname), f"{in_fname} must be a file!"
+        fields = self._scenario_type.configuration_space._fields
         with open(in_fname, "r") as f:
             conf = json.load(f)
-        assert isinstance(conf, list)
-        # TODO: check list size
-        return conf
+        if isinstance(conf, list):
+            assert len(fields) == len(conf), f"JSON Input mismatches configuration length " \
+                                             f"(Expected {len(fields)}, received {len(conf)})"
+            return conf
+        elif isinstance(conf, dict):
+            req = set(fields) - set(conf.keys())
+            if len(req) > 0:
+                raise ValueError(f"JSON Input is missing field(s) {req}")
+            return [conf[fv] for fv in fields]
+        else:
+            raise ValueError("JSON Input needs to be a list or dictionary!")
 
     def dump_output(self, out_fname: str, traces: typing.Dict[str, csaf.TimeTrace]) -> None:
         """given a scenario simulation output file out_fname, write the output"""
-        # TODO: obviously change this to a serialized format
-        import pickle
         import json
         out_obj = {}
         if os.path.exists(out_fname):
-            print(f"Warning! {out_fname} exists!")
+            print(f"\n\tWarning: {out_fname} exists!")
         for n, v in traces.items():
             dat = {vi : np.array(getattr(v, vi)).tolist() for vi in v.NT._fields}
             out_obj[n] = dat
@@ -72,16 +98,20 @@ class ScenarioCsafApp(CsafApp):
     def main(self) -> None:
         print(f"Start {self.app_name}")
         ap = self.parse_args()
-        print(f"Collecting Configuration '{ap.input_fname}'...")
+        print(f"Collecting Configuration '{ap.input_fname}'...", end='')
         conf = self.collect_conf(ap.input_fname)
-        print(f"Generating System '{self._scenario_type.__name__}'...")
+        self.step_done()
+        print(f"Generating System '{self._scenario_type.__name__}'...", end='')
         tspan = (0.0, ap.time_max)
         scenario = self._scenario_type()
         system  = scenario.generate_system(conf)
-        print(f"Simulating System '{system.__class__.__name__}'...")
+        self.step_done()
+        print(f"Simulating System '{system.__class__.__name__}'...", end='')
         ret: typing.Dict[str, csaf.TimeTrace] = system.simulate_tspan(tspan, show_status=True)
-        print(f"Writing Output '{ap.output_fname}'...")
+        self.step_done()
+        print(f"Writing Output '{ap.output_fname}'...", end='')
         self.dump_output(ap.output_fname, ret)
+        self.step_done()
         print("Finished!")
 
     @property
@@ -101,7 +131,7 @@ class SystemCsafApp(CsafApp):
 
         #__main__.py
         if __name__ == "__main__":
-            ca = CsafApp("My Component Library", my_components, my_systems, my_messages)
+            ca = SystemCsafApp("My Component Library", my_components, my_systems, my_messages)
             ca.main()
     """
     def __init__(self,
