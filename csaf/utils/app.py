@@ -60,7 +60,7 @@ class ScenarioCsafApp(CsafApp):
         Output Fields: {list(self._scenario_type.system_type.components.keys())}.
         """
         ap = argparse.ArgumentParser(description=f"{self.app_name} (Scenario App). " + f"{descr}")
-        ap.add_argument('-o', '--output-fname', type=str, default="./traces.out", help="Output Filename")
+        ap.add_argument('-o', '--output-fname', type=str, default="./traces.json", help="Output Filename")
         ap.add_argument('-t', '--time-max', type=float, default=10.0, help="Timespan to Simulate")
         ap.add_argument('-i', '--input-fname', type=str, default="./scenario.json", help="Input Filename")
         return ap.parse_args()
