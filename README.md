@@ -108,6 +108,39 @@ To start CSAF in the notebook mode, go to the `notebooks` folder and run
 jupyter notebook
 ```
 
+## CLI Apps
+
+CSAF has functionality to wrap CLI functionality around core CSAF concepts, like systems and scenarios. For
+example, after creating a scenario type `AcasSimpleScenario`, one can create an app by adding
+```python
+from csaf_f16.goals import AcasSimpleScenario
+from csaf.utils.app import ScenarioCsafApp
+
+
+if __name__ == '__main__':
+    app = ScenarioCsafApp(AcasSimpleScenario)
+    app.main()
+```
+
+Passing in the file
+```json
+// scenario.json
+{
+  "rel_pos_x" : 5000,
+  "rel_pos_y" : 5000,
+  "rel_angle" : 0.5,
+  "rel_speed" : 200
+}
+```
+with
+```bash
+python scenario_app.py -i scenario.json -t 200.0
+```
+creates `traces.json` file with simulation results. Also, docker can be used, such as,
+```bash
+docker run -v $PWD:/out csaf python /out/scenario_app.py -i /out/scenario_list.json -o /out/docker_traces.json
+```
+
 ## Tests
 
 CSAF unit and integration tests use the pytest framework. After installing the [mypy plugin](https://pypi.org/project/pytest-mypy/),
