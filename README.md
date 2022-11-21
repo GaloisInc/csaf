@@ -122,9 +122,8 @@ if __name__ == '__main__':
     app.main()
 ```
 
-Passing in the file
+Passing in the `scenario.json` file
 ```json
-// scenario.json
 {
   "rel_pos_x" : 5000,
   "rel_pos_y" : 5000,
